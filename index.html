@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VQuail System Control Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --border-radius: 12px;
+            --box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Login Page */
+        .login-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .login-container:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            margin-right: 15px;
+        }
+
+        .logo h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        .login-form h2 {
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* Main Dashboard */
+        .dashboard {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px 30px;
+            margin-bottom: 25px;
+        }
+
+        .header-info h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .header-info p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+        }
+
+        /* Sensor Data Card */
+        .sensor-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .sensor-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .sensor-value {
+            font-size: 2.8rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .temp-value {
+            color: #e74c3c;
+        }
+
+        .hum-value {
+            color: #3498db;
+        }
+
+        .sensor-label {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .sensor-status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .status-ok {
+            background-color: rgba(39, 174, 96, 0.15);
+            color: var(--success-color);
+        }
+
+        .status-warning {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: var(--warning-color);
+        }
+
+        .status-danger {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+        }
+
+        /* Control Card */
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .control-title {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--success-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-control {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-on {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-off {
+            background-color: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-on.active {
+            background-color: var(--success-color);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-off.active {
+            background-color: var(--danger-color);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+        }
+
+        .mode-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .mode-auto {
+            background-color: rgba(52, 152, 219, 0.15);
+            color: var(--secondary-color);
+        }
+
+        .mode-manual {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: var(--warning-color);
+        }
+
+        /* Stage Info Card */
+        .stage-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stage-item {
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+            background-color: #f8f9fa;
+        }
+
+        .stage-item.active {
+            border-left-color: var(--success-color);
+            background-color: rgba(39, 174, 96, 0.08);
+        }
+
+        .stage-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #444;
+        }
+
+        .stage-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        /* Alarm Card */
+        .alarm-item {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-bottom: 15px;
+            border-left: 4px solid #ddd;
+        }
+
+        .alarm-item.critical {
+            border-left-color: var(--danger-color);
+            background-color: rgba(231, 76, 60, 0.08);
+        }
+
+        .alarm-item.warning {
+            border-left-color: var(--warning-color);
+            background-color: rgba(243, 156, 18, 0.08);
+        }
+
+        .alarm-message {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .alarm-time {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .no-alarms {
+            text-align: center;
+            padding: 30px 0;
+            color: #777;
+        }
+
+        /* System Info Card */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #444;
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 15px 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background-color: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .header-stats {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .footer {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .sensor-data {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Page -->
+        <div class="login-container" id="loginPage">
+            <div class="logo">
+                <i class="fas fa-dove"></i>
+                <h1>VQuail Control System</h1>
+            </div>
+            <div class="login-form">
+                <h2>System Login</h2>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password">
+                </div>
+                <button class="btn" id="loginBtn">Login</button>
+                <div class="error-message" id="loginError">
+                    Invalid username or password. Please try again.
+                </div>
+                <div class="footer-note">
+                    <p>Default credentials: vquail / 12345</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-info">
+                    <h1>VQuail System Control Panel</h1>
+                    <p>Version: VQUAIL_V2.3 | Last updated: <span id="lastUpdate">Just now</span></p>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="uptimeStat">0</div>
+                        <div class="stat-label">Uptime (s)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="ageStat">0</div>
+                        <div class="stat-label">Age (days)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stageStat">1</div>
+                        <div class="stat-label">Stage</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Sensor Data Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Environmental Data</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                    </div>
+                    <div class="sensor-data">
+                        <div class="sensor-item">
+                            <div class="sensor-label">Temperature</div>
+                            <div class="sensor-value temp-value" id="tempValue">--.-</div>
+                            <div class="sensor-status status-ok" id="tempStatus">Normal</div>
+                        </div>
+                        <div class="sensor-item">
+                            <div class="sensor-label">Humidity</div>
+                            <div class="sensor-value hum-value" id="humValue">--.-</div>
+                            <div class="sensor-status status-ok" id="humStatus">Normal</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Ideal Range: <span id="idealTempRange">35-37°C</span></span>
+                            <span>Current: <span id="currentTemp">--.-°C</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="tempProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Device Control</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <div class="control-header">
+                            <div class="control-title">Fan Control</div>
+                            <div class="mode-indicator" id="fanMode">Auto</div>
+                        </div>
+                        <div class="control-buttons">
+                            <button class="btn-control btn-on" id="fanOnBtn">ON</button>
+                            <button class="btn-control btn-off" id="fanOffBtn">OFF</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <div class="control-header">
+                            <div class="control-title">Heat Lamp Control</div>
+                            <div class="mode-indicator" id="heatMode">Auto</div>
+                        </div>
+                        <div class="control-buttons">
+                            <button class="btn-control btn-on" id="heatOnBtn">ON</button>
+                            <button class="btn-control btn-off" id="heatOffBtn">OFF</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <div class="control-header">
+                            <div class="control-title">System Mode</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                                <span id="modeDescription">System is in automatic mode. Devices will be controlled based on environmental conditions.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage Info Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Life Stage Information</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                    </div>
+                    <div class="stage-info">
+                        <div class="stage-item" id="stage1">
+                            <div class="stage-name">Brooding Week 1</div>
+                            <div class="stage-details">
+                                <span>Age: 0-7 days</span>
+                                <span>Temp: 35-37°C</span>
+                            </div>
+                        </div>
+                        <div class="stage-item" id="stage2">
+                            <div class="stage-name">Brooding Week 2</div>
+                            <div class="stage-details">
+                                <span>Age: 8-14 days</span>
+                                <span>Temp: 32-35°C</span>
+                            </div>
+                        </div>
+                        <div class="stage-item" id="stage3">
+                            <div class="stage-name">Grower Phase</div>
+                            <div class="stage-details">
+                                <span>Age: 15-42 days</span>
+                                <span>Temp: 24-28°C</span>
+                            </div>
+                        </div>
+                        <div class="stage-item" id="stage4">
+                            <div class="stage-name">Adult Layer</div>
+                            <div class="stage-details">
+                                <span>Age: 43+ days</span>
+                                <span>Temp: 20-24°C</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Stage Progress: <span id="currentStageName">Brooding Week 1</span></span>
+                            <span><span id="currentAge">0</span> days</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="stageProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alarm & System Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">System Status</h2>
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                    </div>
+                    
+                    <div id="alarmContainer">
+                        <!-- Alarms will be displayed here -->
+                        <div class="no-alarms" id="noAlarms">
+                            <i class="fas fa-check-circle" style="font-size: 2rem; color: #27ae60; margin-bottom: 10px;"></i>
+                            <p>No active alarms. All systems are operating normally.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">WiFi Status</div>
+                            <div class="info-value" id="wifiStatus">Connected</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">MQTT Status</div>
+                            <div class="info-value" id="mqttStatus">Connected</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">SD Card</div>
+                            <div class="info-value" id="sdStatus">Ready</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Sensor Read</div>
+                            <div class="info-value" id="lastSensorRead">--:--:--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div>
+                    <p>VQuail Poultry Management System | <span id="currentTime">--:--:--</span></p>
+                </div>
+                <div>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Login functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginPage = document.getElementById('loginPage');
+            const dashboard = document.getElementById('dashboard');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const loginError = document.getElementById('loginError');
+            
+            // Check if already logged in
+            if(localStorage.getItem('vquail_loggedin') === 'true') {
+                loginPage.style.display = 'none';
+                dashboard.style.display = 'block';
+                updateDashboard();
+            }
+            
+            // Login button event
+            loginBtn.addEventListener('click', function() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Default credentials: vquail / 12345
+                if(username === 'vquail' && password === '12345') {
+                    loginError.style.display = 'none';
+                    localStorage.setItem('vquail_loggedin', 'true');
+                    loginPage.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    updateDashboard();
+                } else {
+                    loginError.style.display = 'block';
+                }
+            });
+            
+            // Allow login on Enter key
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') {
+                    loginBtn.click();
+                }
+            });
+            
+            // Logout button event
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('vquail_loggedin');
+                dashboard.style.display = 'none';
+                loginPage.style.display = 'block';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                loginError.style.display = 'none';
+            });
+            
+            // Control buttons functionality
+            setupControlButtons();
+            
+            // Update time every second
+            setInterval(updateTime, 1000);
+            updateTime();
+            
+            // Simulate data updates (in a real implementation, this would fetch from your ESP32)
+            setInterval(updateDashboard, 5000);
+        });
+        
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('currentTime').textContent = timeString;
+            document.getElementById('lastUpdate').textContent = timeString;
+        }
+        
+        function updateDashboard() {
+            // Simulate data from ESP32 (replace with actual API calls)
+            const simulatedData = {
+                temp: (Math.random() * 5 + 32).toFixed(1), // 32-37°C
+                hum: (Math.random() * 20 + 50).toFixed(1), // 50-70%
+                fan: Math.random() > 0.5,
+                heat: Math.random() > 0.7,
+                auto: document.getElementById('autoToggle').checked,
+                stage: 1, // Current stage
+                age: Math.floor(Math.random() * 10), // 0-9 days
+                uptime: Math.floor(Math.random() * 10000), // Simulated uptime
+                wifi: true,
+                mqtt: true,
+                sd: true,
+                alarm: false,
+                alarmMessage: ""
+            };
+            
+            // Update temperature display
+            document.getElementById('tempValue').textContent = simulatedData.temp;
+            document.getElementById('currentTemp').textContent = simulatedData.temp + '°C';
+            
+            // Update humidity display
+            document.getElementById('humValue').textContent = simulatedData.hum;
+            
+            // Update uptime and age
+            document.getElementById('uptimeStat').textContent = simulatedData.uptime;
+            document.getElementById('ageStat').textContent = simulatedData.age;
+            document.getElementById('stageStat').textContent = simulatedData.stage;
+            
+            // Update current age in stage info
+            document.getElementById('currentAge').textContent = simulatedData.age;
+            
+            // Update sensor status indicators
+            updateSensorStatus(simulatedData.temp, simulatedData.hum, simulatedData.stage);
+            
+            // Update device controls
+            updateDeviceControls(simulatedData.fan, simulatedData.heat, simulatedData.auto);
+            
+            // Update stage visualization
+            updateStageVisualization(simulatedData.stage, simulatedData.age);
+            
+            // Update system status indicators
+            updateSystemStatus(simulatedData.wifi, simulatedData.mqtt, simulatedData.sd);
+            
+            // Update last sensor read time
+            document.getElementById('lastSensorRead').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            // Update progress bar for temperature
+            updateTemperatureProgress(simulatedData.temp, simulatedData.stage);
+        }
+        
+        function updateSensorStatus(temp, hum, stage) {
+            const tempStatus = document.getElementById('tempStatus');
+            const humStatus = document.getElementById('humStatus');
+            
+            // Temperature status based on stage
+            let tempStatusText = "Normal";
+            let tempStatusClass = "status-ok";
+            
+            if(stage === 1) { // Brooding Week 1
+                if(temp < 34) {
+                    tempStatusText = "Too Low";
+                    tempStatusClass = "status-danger";
+                } else if(temp > 38) {
+                    tempStatusText = "Too High";
+                    tempStatusClass = "status-danger";
+                }
+            } else if(stage === 2) { // Brooding Week 2
+                if(temp < 31) {
+                    tempStatusText = "Too Low";
+                    tempStatusClass = "status-danger";
+                } else if(temp > 36) {
+                    tempStatusText = "Too High";
+                    tempStatusClass = "status-danger";
+                }
+            }
+            
+            // Humidity status
+            let humStatusText = "Normal";
+            let humStatusClass = "status-ok";
+            
+            if(hum < 50) {
+                humStatusText = "Low";
+                humStatusClass = "status-warning";
+            } else if(hum > 75) {
+                humStatusText = "High";
+                humStatusClass = "status-warning";
+            }
+            
+            tempStatus.textContent = tempStatusText;
+            tempStatus.className = "sensor-status " + tempStatusClass;
+            
+            humStatus.textContent = humStatusText;
+            humStatus.className = "sensor-status " + humStatusClass;
+        }
+        
+        function updateDeviceControls(fanState, heatState, autoMode) {
+            // Update fan buttons
+            const fanOnBtn = document.getElementById('fanOnBtn');
+            const fanOffBtn = document.getElementById('fanOffBtn');
+            const fanMode = document.getElementById('fanMode');
+            
+            fanOnBtn.classList.toggle('active', fanState);
+            fanOffBtn.classList.toggle('active', !fanState);
+            
+            // Update heat buttons
+            const heatOnBtn = document.getElementById('heatOnBtn');
+            const heatOffBtn = document.getElementById('heatOffBtn');
+            const heatMode = document.getElementById('heatMode');
+            
+            heatOnBtn.classList.toggle('active', heatState);
+            heatOffBtn.classList.toggle('active', !heatState);
+            
+            // Update mode indicators
+            if(autoMode) {
+                fanMode.textContent = "Auto";
+                fanMode.className = "mode-indicator mode-auto";
+                heatMode.textContent = "Auto";
+                heatMode.className = "mode-indicator mode-auto";
+                document.getElementById('modeDescription').textContent = 
+                    "System is in automatic mode. Devices will be controlled based on environmental conditions.";
+            } else {
+                fanMode.textContent = "Manual";
+                fanMode.className = "mode-indicator mode-manual";
+                heatMode.textContent = "Manual";
+                heatMode.className = "mode-indicator mode-manual";
+                document.getElementById('modeDescription').textContent = 
+                    "System is in manual mode. Devices are controlled by user input.";
+            }
+        }
+        
+        function updateStageVisualization(stage, age) {
+            // Reset all stages
+            for(let i = 1; i <= 4; i++) {
+                const stageElement = document.getElementById('stage' + i);
+                stageElement.classList.remove('active');
+            }
+            
+            // Highlight current stage
+            const currentStageElement = document.getElementById('stage' + stage);
+            if(currentStageElement) {
+                currentStageElement.classList.add('active');
+            }
+            
+            // Update stage name
+            const stageNames = [
+                "Brooding Week 1",
+                "Brooding Week 2", 
+                "Grower Phase",
+                "Adult Layer"
+            ];
+            
+            if(stage >= 1 && stage <= 4) {
+                document.getElementById('currentStageName').textContent = stageNames[stage-1];
+            }
+            
+            // Update stage progress bar
+            let progressPercent = 0;
+            if(stage === 1) progressPercent = Math.min((age / 7) * 100, 100);
+            else if(stage === 2) progressPercent = Math.min(((age-7) / 7) * 100, 100);
+            else if(stage === 3) progressPercent = Math.min(((age-14) / 28) * 100, 100);
+            else if(stage === 4) progressPercent = 100;
+            
+            document.getElementById('stageProgress').style.width = progressPercent + '%';
+            
+            // Update ideal temperature range based on stage
+            const tempRanges = ["35-37°C", "32-35°C", "24-28°C", "20-24°C"];
+            if(stage >= 1 && stage <= 4) {
+                document.getElementById('idealTempRange').textContent = tempRanges[stage-1];
+            }
+        }
+        
+        function updateSystemStatus(wifi, mqtt, sd) {
+            document.getElementById('wifiStatus').textContent = wifi ? "Connected" : "Disconnected";
+            document.getElementById('mqttStatus').textContent = mqtt ? "Connected" : "Disconnected";
+            document.getElementById('sdStatus').textContent = sd ? "Ready" : "Not Ready";
+            
+            // Add color coding
+            if(!wifi) document.getElementById('wifiStatus').style.color = "#e74c3c";
+            if(!mqtt) document.getElementById('mqttStatus').style.color = "#e74c3c";
+            if(!sd) document.getElementById('sdStatus').style.color = "#e74c3c";
+        }
+        
+        function updateTemperatureProgress(temp, stage) {
+            // Calculate how far the temperature is within the ideal range
+            let minTemp, maxTemp;
+            
+            if(stage === 1) { minTemp = 35; maxTemp = 37; }
+            else if(stage === 2) { minTemp = 32; maxTemp = 35; }
+            else if(stage === 3) { minTemp = 24; maxTemp = 28; }
+            else if(stage === 4) { minTemp = 20; maxTemp = 24; }
+            
+            const range = maxTemp - minTemp;
+            const position = parseFloat(temp) - minTemp;
+            let percent = (position / range) * 100;
+            
+            // Clamp between 0 and 100
+            percent = Math.max(0, Math.min(100, percent));
+            
+            document.getElementById('tempProgress').style.width = percent + '%';
+            
+            // Change color based on position in range
+            const progressFill = document.getElementById('tempProgress');
+            if(percent < 20 || percent > 80) {
+                progressFill.style.backgroundColor = "#e74c3c"; // Red for extreme values
+            } else if(percent < 30 || percent > 70) {
+                progressFill.style.backgroundColor = "#f39c12"; // Orange for borderline values
+            } else {
+                progressFill.style.backgroundColor = "#27ae60"; // Green for ideal values
+            }
+        }
+        
+        function setupControlButtons() {
+            // Fan control buttons
+            document.getElementById('fanOnBtn').addEventListener('click', function() {
+                // In a real implementation, this would send a command to the ESP32
+                console.log("Fan turned ON");
+                this.classList.add('active');
+                document.getElementById('fanOffBtn').classList.remove('active');
+                document.getElementById('fanMode').textContent = "Manual";
+                document.getElementById('fanMode').className = "mode-indicator mode-manual";
+                
+                // Send command to ESP32 (example using fetch)
+                // fetch('/api/control', {
+                //     method: 'POST',
+                //     body: JSON.stringify({fan: true}),
+                //     headers: {'Content-Type': 'application/json'}
+                // });
+            });
+            
+            document.getElementById('fanOffBtn').addEventListener('click', function() {
+                // In a real implementation, this would send a command to the ESP32
+                console.log("Fan turned OFF");
+                this.classList.add('active');
+                document.getElementById('fanOnBtn').classList.remove('active');
+                document.getElementById('fanMode').textContent = "Manual";
+                document.getElementById('fanMode').className = "mode-indicator mode-manual";
+                
+                // Send command to ESP32 (example using fetch)
+                // fetch('/api/control', {
+                //     method: 'POST',
+                //     body: JSON.stringify({fan: false}),
+                //     headers: {'Content-Type': 'application/json'}
+                // });
+            });
+            
+            // Heat lamp control buttons
+            document.getElementById('heatOnBtn').addEventListener('click', function() {
+                // In a real implementation, this would send a command to the ESP32
+                console.log("Heat lamp turned ON");
+                this.classList.add('active');
+                document.getElementById('heatOffBtn').classList.remove('active');
+                document.getElementById('heatMode').textContent = "Manual";
+                document.getElementById('heatMode').className = "mode-indicator mode-manual";
+                
+                // Send command to ESP32 (example using fetch)
+                // fetch('/api/control', {
+                //     method: 'POST',
+                //     body: JSON.stringify({heat: true}),
+                //     headers: {'Content-Type': 'application/json'}
+                // });
+            });
+            
+            document.getElementById('heatOffBtn').addEventListener('click', function() {
+                // In a real implementation, this would send a command to the ESP32
+                console.log("Heat lamp turned OFF");
+                this.classList.add('active');
+                document.getElementById('heatOnBtn').classList.remove('active');
+                document.getElementById('heatMode').textContent = "Manual";
+                document.getElementById('heatMode').className = "mode-indicator mode-manual";
+                
+                // Send command to ESP32 (example using fetch)
+                // fetch('/api/control', {
+                //     method: 'POST',
+                //     body: JSON.stringify({heat: false}),
+                //     headers: {'Content-Type': 'application/json'}
+                // });
+            });
+            
+            // Auto mode toggle
+            document.getElementById('autoToggle').addEventListener('change', function() {
+                const isAuto = this.checked;
+                console.log("Auto mode: " + (isAuto ? "ON" : "OFF"));
+                
+                // In a real implementation, this would send a command to the ESP32
+                // fetch('/api/control', {
+                //     method: 'POST',
+                //     body: JSON.stringify({auto: isAuto}),
+                //     headers: {'Content-Type': 'application/json'}
+                // });
+            });
+        }
+    </script>
+</body>
+</html>
