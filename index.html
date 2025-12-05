@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -50,7 +51,7 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             margin: 0 auto;
             padding: 40px 30px;
             text-align: center;
@@ -142,10 +143,49 @@
             display: none;
         }
 
+        .mqtt-settings {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .mqtt-settings h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
         .footer-note {
             margin-top: 20px;
             font-size: 0.9rem;
             color: #777;
+        }
+
+        /* MQTT Connection Status */
+        .mqtt-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+        }
+
+        .mqtt-connected {
+            background-color: rgba(39, 174, 96, 0.15);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .mqtt-disconnected {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+            border: 1px solid rgba(231, 76, 60, 0.3);
         }
 
         /* Main Dashboard */
@@ -606,6 +646,11 @@
     </style>
 </head>
 <body>
+    <!-- MQTT Connection Status Indicator -->
+    <div class="mqtt-status" id="mqttStatusIndicator">
+        <i class="fas fa-wifi"></i> <span id="mqttStatusText">Connecting...</span>
+    </div>
+
     <div class="container">
         <!-- Login Page -->
         <div class="login-container" id="loginPage">
@@ -617,13 +662,30 @@
                 <h2>System Login</h2>
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" class="form-control" placeholder="Enter username">
+                    <input type="text" id="username" class="form-control" placeholder="Enter username" value="vquail">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter password">
+                    <input type="password" id="password" class="form-control" placeholder="Enter password" value="12345">
                 </div>
-                <button class="btn" id="loginBtn">Login</button>
+                
+                <div class="mqtt-settings">
+                    <h3>MQTT Connection Settings</h3>
+                    <div class="form-group">
+                        <label for="mqttBroker">MQTT Broker</label>
+                        <input type="text" id="mqttBroker" class="form-control" placeholder="broker.mqtt-dashboard.com" value="broker.mqtt-dashboard.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttPort">Port</label>
+                        <input type="number" id="mqttPort" class="form-control" placeholder="1883" value="1883">
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttClientId">Client ID</label>
+                        <input type="text" id="mqttClientId" class="form-control" placeholder="vquail-web-client" value="vquail-web-client">
+                    </div>
+                </div>
+                
+                <button class="btn" id="loginBtn">Login & Connect to MQTT</button>
                 <div class="error-message" id="loginError">
                     Invalid username or password. Please try again.
                 </div>
@@ -639,7 +701,7 @@
             <div class="header">
                 <div class="header-info">
                     <h1>VQuail System Control Panel</h1>
-                    <p>Version: VQUAIL_V2.3 | Last updated: <span id="lastUpdate">Just now</span></p>
+                    <p>Version: VQUAIL_V2.3 | Connected via MQTT | Last update: <span id="lastUpdate">--:--:--</span></p>
                 </div>
                 <div class="header-stats">
                     <div class="stat-item">
@@ -671,12 +733,12 @@
                         <div class="sensor-item">
                             <div class="sensor-label">Temperature</div>
                             <div class="sensor-value temp-value" id="tempValue">--.-</div>
-                            <div class="sensor-status status-ok" id="tempStatus">Normal</div>
+                            <div class="sensor-status status-ok" id="tempStatus">Awaiting data...</div>
                         </div>
                         <div class="sensor-item">
                             <div class="sensor-label">Humidity</div>
                             <div class="sensor-value hum-value" id="humValue">--.-</div>
-                            <div class="sensor-status status-ok" id="humStatus">Normal</div>
+                            <div class="sensor-status status-ok" id="humStatus">Awaiting data...</div>
                         </div>
                     </div>
                     <div class="progress-container">
@@ -702,22 +764,22 @@
                     <div class="control-section">
                         <div class="control-header">
                             <div class="control-title">Fan Control</div>
-                            <div class="mode-indicator" id="fanMode">Auto</div>
+                            <div class="mode-indicator mode-auto" id="fanMode">Auto</div>
                         </div>
                         <div class="control-buttons">
-                            <button class="btn-control btn-on" id="fanOnBtn">ON</button>
-                            <button class="btn-control btn-off" id="fanOffBtn">OFF</button>
+                            <button class="btn-control btn-on" id="fanOnBtn" data-device="fan" data-state="true">ON</button>
+                            <button class="btn-control btn-off active" id="fanOffBtn" data-device="fan" data-state="false">OFF</button>
                         </div>
                     </div>
                     
                     <div class="control-section">
                         <div class="control-header">
                             <div class="control-title">Heat Lamp Control</div>
-                            <div class="mode-indicator" id="heatMode">Auto</div>
+                            <div class="mode-indicator mode-auto" id="heatMode">Auto</div>
                         </div>
                         <div class="control-buttons">
-                            <button class="btn-control btn-on" id="heatOnBtn">ON</button>
-                            <button class="btn-control btn-off" id="heatOffBtn">OFF</button>
+                            <button class="btn-control btn-on" id="heatOnBtn" data-device="heat" data-state="true">ON</button>
+                            <button class="btn-control btn-off active" id="heatOffBtn" data-device="heat" data-state="false">OFF</button>
                         </div>
                     </div>
                     
@@ -746,7 +808,7 @@
                         </div>
                     </div>
                     <div class="stage-info">
-                        <div class="stage-item" id="stage1">
+                        <div class="stage-item active" id="stage1">
                             <div class="stage-name">Brooding Week 1</div>
                             <div class="stage-details">
                                 <span>Age: 0-7 days</span>
@@ -806,19 +868,19 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">WiFi Status</div>
-                            <div class="info-value" id="wifiStatus">Connected</div>
+                            <div class="info-value status-ok" id="wifiStatus">Awaiting data...</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">MQTT Status</div>
-                            <div class="info-value" id="mqttStatus">Connected</div>
+                            <div class="info-value status-ok" id="mqttStatus">Connected</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">SD Card</div>
-                            <div class="info-value" id="sdStatus">Ready</div>
+                            <div class="info-value" id="sdStatus">Awaiting data...</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">Last Sensor Read</div>
-                            <div class="info-value" id="lastSensorRead">--:--:--</div>
+                            <div class="info-label">Last Data Received</div>
+                            <div class="info-value" id="lastDataReceived">--:--:--</div>
                         </div>
                     </div>
                 </div>
@@ -827,7 +889,7 @@
             <!-- Footer -->
             <div class="footer">
                 <div>
-                    <p>VQuail Poultry Management System | <span id="currentTime">--:--:--</span></p>
+                    <p>VQuail Poultry Management System | <span id="currentTime">--:--:--</span> | MQTT Client: <span id="mqttClientIdDisplay">vquail-web-client</span></p>
                 </div>
                 <div>
                     <button class="logout-btn" id="logoutBtn">
@@ -839,6 +901,11 @@
     </div>
 
     <script>
+        // Global MQTT client
+        let mqttClient = null;
+        let lastDataTimestamp = 0;
+        let dataTimeout = null;
+
         // Login functionality
         document.addEventListener('DOMContentLoaded', function() {
             const loginPage = document.getElementById('loginPage');
@@ -851,7 +918,8 @@
             if(localStorage.getItem('vquail_loggedin') === 'true') {
                 loginPage.style.display = 'none';
                 dashboard.style.display = 'block';
-                updateDashboard();
+                loadMQTTSettings();
+                connectToMQTT();
             }
             
             // Login button event
@@ -863,9 +931,11 @@
                 if(username === 'vquail' && password === '12345') {
                     loginError.style.display = 'none';
                     localStorage.setItem('vquail_loggedin', 'true');
+                    saveMQTTSettings();
                     loginPage.style.display = 'none';
                     dashboard.style.display = 'block';
-                    updateDashboard();
+                    loadMQTTSettings();
+                    connectToMQTT();
                 } else {
                     loginError.style.display = 'block';
                 }
@@ -880,12 +950,16 @@
             
             // Logout button event
             logoutBtn.addEventListener('click', function() {
+                if(mqttClient && mqttClient.isConnected()) {
+                    mqttClient.disconnect();
+                }
                 localStorage.removeItem('vquail_loggedin');
                 dashboard.style.display = 'none';
                 loginPage.style.display = 'block';
                 document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
                 loginError.style.display = 'none';
+                updateMQTTStatus(false);
             });
             
             // Control buttons functionality
@@ -895,70 +969,265 @@
             setInterval(updateTime, 1000);
             updateTime();
             
-            // Simulate data updates (in a real implementation, this would fetch from your ESP32)
-            setInterval(updateDashboard, 5000);
+            // Check for data timeout every 10 seconds
+            setInterval(checkDataTimeout, 10000);
         });
         
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            document.getElementById('currentTime').textContent = timeString;
-            document.getElementById('lastUpdate').textContent = timeString;
+        function saveMQTTSettings() {
+            localStorage.setItem('mqtt_broker', document.getElementById('mqttBroker').value);
+            localStorage.setItem('mqtt_port', document.getElementById('mqttPort').value);
+            localStorage.setItem('mqtt_client_id', document.getElementById('mqttClientId').value);
         }
         
-        function updateDashboard() {
-            // Simulate data from ESP32 (replace with actual API calls)
-            const simulatedData = {
-                temp: (Math.random() * 5 + 32).toFixed(1), // 32-37°C
-                hum: (Math.random() * 20 + 50).toFixed(1), // 50-70%
-                fan: Math.random() > 0.5,
-                heat: Math.random() > 0.7,
-                auto: document.getElementById('autoToggle').checked,
-                stage: 1, // Current stage
-                age: Math.floor(Math.random() * 10), // 0-9 days
-                uptime: Math.floor(Math.random() * 10000), // Simulated uptime
-                wifi: true,
-                mqtt: true,
-                sd: true,
-                alarm: false,
-                alarmMessage: ""
+        function loadMQTTSettings() {
+            document.getElementById('mqttBroker').value = localStorage.getItem('mqtt_broker') || 'broker.mqtt-dashboard.com';
+            document.getElementById('mqttPort').value = localStorage.getItem('mqtt_port') || '1883';
+            document.getElementById('mqttClientId').value = localStorage.getItem('mqtt_client_id') || 'vquail-web-' + Math.floor(Math.random() * 10000);
+            document.getElementById('mqttClientIdDisplay').textContent = document.getElementById('mqttClientId').value;
+        }
+        
+        function connectToMQTT() {
+            const broker = document.getElementById('mqttBroker').value;
+            const port = parseInt(document.getElementById('mqttPort').value);
+            const clientId = document.getElementById('mqttClientId').value;
+            
+            updateMQTTStatus(false, 'Connecting...');
+            
+            // Create MQTT client
+            mqttClient = new Paho.MQTT.Client(broker, port, clientId);
+            
+            // Set callback handlers
+            mqttClient.onConnectionLost = onConnectionLost;
+            mqttClient.onMessageArrived = onMessageArrived;
+            
+            // Connect options
+            const options = {
+                onSuccess: onConnect,
+                onFailure: onConnectFail,
+                cleanSession: true,
+                keepAliveInterval: 30,
+                reconnect: true
             };
             
-            // Update temperature display
-            document.getElementById('tempValue').textContent = simulatedData.temp;
-            document.getElementById('currentTemp').textContent = simulatedData.temp + '°C';
+            // Connect the client
+            mqttClient.connect(options);
+        }
+        
+        function onConnect() {
+            console.log("MQTT Connected successfully");
+            updateMQTTStatus(true, 'Connected');
             
-            // Update humidity display
-            document.getElementById('humValue').textContent = simulatedData.hum;
+            // Subscribe to VQuail topics
+            mqttClient.subscribe("vquail/data");
+            mqttClient.subscribe("vquail/device");
+            mqttClient.subscribe("vquail/alarms");
+            mqttClient.subscribe("vquail/status");
             
-            // Update uptime and age
-            document.getElementById('uptimeStat').textContent = simulatedData.uptime;
-            document.getElementById('ageStat').textContent = simulatedData.age;
-            document.getElementById('stageStat').textContent = simulatedData.stage;
+            console.log("Subscribed to topics: vquail/data, vquail/device, vquail/alarms, vquail/status");
+        }
+        
+        function onConnectFail(response) {
+            console.error("MQTT Connection failed: " + response.errorMessage);
+            updateMQTTStatus(false, 'Connection failed');
             
-            // Update current age in stage info
-            document.getElementById('currentAge').textContent = simulatedData.age;
+            // Try to reconnect after 5 seconds
+            setTimeout(connectToMQTT, 5000);
+        }
+        
+        function onConnectionLost(response) {
+            console.error("MQTT Connection lost: " + response.errorMessage);
+            updateMQTTStatus(false, 'Disconnected');
             
-            // Update sensor status indicators
-            updateSensorStatus(simulatedData.temp, simulatedData.hum, simulatedData.stage);
+            // Try to reconnect after 3 seconds
+            setTimeout(connectToMQTT, 3000);
+        }
+        
+        function onMessageArrived(message) {
+            console.log("MQTT Message received: " + message.destinationName);
             
-            // Update device controls
-            updateDeviceControls(simulatedData.fan, simulatedData.heat, simulatedData.auto);
+            // Update last data timestamp
+            lastDataTimestamp = Date.now();
+            document.getElementById('lastDataReceived').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
             
-            // Update stage visualization
-            updateStageVisualization(simulatedData.stage, simulatedData.age);
+            try {
+                const data = JSON.parse(message.payloadString);
+                
+                switch(message.destinationName) {
+                    case "vquail/data":
+                        updateSensorData(data);
+                        break;
+                    case "vquail/device":
+                        updateDeviceStatus(data);
+                        break;
+                    case "vquail/alarms":
+                        updateAlarms(data);
+                        break;
+                    case "vquail/status":
+                        updateSystemStatus(data);
+                        break;
+                }
+            } catch(e) {
+                console.error("Error parsing MQTT message: ", e);
+            }
+        }
+        
+        function updateMQTTStatus(connected, message = '') {
+            const statusElement = document.getElementById('mqttStatusIndicator');
+            const statusText = document.getElementById('mqttStatusText');
+            const dashboardStatus = document.getElementById('mqttStatus');
             
-            // Update system status indicators
-            updateSystemStatus(simulatedData.wifi, simulatedData.mqtt, simulatedData.sd);
+            if(connected) {
+                statusElement.className = 'mqtt-status mqtt-connected';
+                statusElement.style.display = 'block';
+                statusText.textContent = message || 'Connected to MQTT';
+                dashboardStatus.textContent = 'Connected';
+                dashboardStatus.className = 'info-value status-ok';
+            } else {
+                statusElement.className = 'mqtt-status mqtt-disconnected';
+                statusElement.style.display = 'block';
+                statusText.textContent = message || 'Disconnected from MQTT';
+                dashboardStatus.textContent = 'Disconnected';
+                dashboardStatus.className = 'info-value status-danger';
+            }
+        }
+        
+        function updateSensorData(data) {
+            // Update temperature
+            if(data.temp !== undefined) {
+                document.getElementById('tempValue').textContent = data.temp.toFixed(1);
+                document.getElementById('currentTemp').textContent = data.temp.toFixed(1) + '°C';
+                updateSensorStatus(data.temp, data.hum, data.stage);
+                updateTemperatureProgress(data.temp, data.stage || 1);
+            }
             
-            // Update last sensor read time
-            document.getElementById('lastSensorRead').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            // Update humidity
+            if(data.hum !== undefined) {
+                document.getElementById('humValue').textContent = data.hum.toFixed(1);
+                updateSensorStatus(data.temp, data.hum, data.stage);
+            }
             
-            // Update progress bar for temperature
-            updateTemperatureProgress(simulatedData.temp, simulatedData.stage);
+            // Update stage information
+            if(data.stage !== undefined) {
+                document.getElementById('stageStat').textContent = data.stage;
+                if(data.stageName) {
+                    document.getElementById('currentStageName').textContent = data.stage;
+                }
+                updateStageVisualization(data.stage, data.age || 0);
+            }
+            
+            // Update age
+            if(data.age !== undefined) {
+                document.getElementById('ageStat').textContent = data.age;
+                document.getElementById('currentAge').textContent = data.age;
+            }
+            
+            // Update uptime
+            if(data.uptime !== undefined) {
+                document.getElementById('uptimeStat').textContent = data.uptime;
+            }
+            
+            // Update auto mode
+            if(data.auto !== undefined) {
+                document.getElementById('autoToggle').checked = data.auto;
+                updateModeDescription(data.auto);
+            }
+            
+            // Update alarm status
+            if(data.alarm !== undefined && data.alarm) {
+                // Alarm is handled separately via vquail/alarms topic
+            }
+        }
+        
+        function updateDeviceStatus(data) {
+            if(data.device === "fan" || data.device === "fan_lamp") {
+                const isOn = data.state === true || data.state === "true" || data.state === "ON";
+                document.getElementById('fanOnBtn').classList.toggle('active', isOn);
+                document.getElementById('fanOffBtn').classList.toggle('active', !isOn);
+                
+                if(data.manual) {
+                    document.getElementById('fanMode').textContent = "Manual";
+                    document.getElementById('fanMode').className = "mode-indicator mode-manual";
+                }
+            }
+            
+            if(data.device === "heat" || data.device === "heat_lamp") {
+                const isOn = data.state === true || data.state === "true" || data.state === "ON";
+                document.getElementById('heatOnBtn').classList.toggle('active', isOn);
+                document.getElementById('heatOffBtn').classList.toggle('active', !isOn);
+                
+                if(data.manual) {
+                    document.getElementById('heatMode').textContent = "Manual";
+                    document.getElementById('heatMode').className = "mode-indicator mode-manual";
+                }
+            }
+        }
+        
+        function updateAlarms(data) {
+            const alarmContainer = document.getElementById('alarmContainer');
+            const noAlarms = document.getElementById('noAlarms');
+            
+            if(data.type === "clear" || !data.message) {
+                // Clear alarms
+                alarmContainer.innerHTML = '';
+                alarmContainer.appendChild(noAlarms);
+                noAlarms.style.display = 'block';
+                return;
+            }
+            
+            // Hide "no alarms" message
+            noAlarms.style.display = 'none';
+            
+            // Create alarm element
+            const alarmElement = document.createElement('div');
+            alarmElement.className = `alarm-item ${data.type === 'critical' ? 'critical' : 'warning'}`;
+            
+            const alarmMessage = document.createElement('div');
+            alarmMessage.className = 'alarm-message';
+            alarmMessage.textContent = data.message;
+            
+            const alarmTime = document.createElement('div');
+            alarmTime.className = 'alarm-time';
+            alarmTime.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            alarmElement.appendChild(alarmMessage);
+            alarmElement.appendChild(alarmTime);
+            
+            // Add to container (at the beginning)
+            alarmContainer.insertBefore(alarmElement, alarmContainer.firstChild);
+            
+            // Keep only last 5 alarms
+            const alarms = alarmContainer.getElementsByClassName('alarm-item');
+            if(alarms.length > 5) {
+                alarmContainer.removeChild(alarms[alarms.length - 1]);
+            }
+            
+            // Show visual alert for critical alarms
+            if(data.type === 'critical') {
+                document.title = "⚠️ ALARM - VQuail System";
+                setTimeout(() => {
+                    document.title = "VQuail System Control Panel";
+                }, 2000);
+            }
+        }
+        
+        function updateSystemStatus(data) {
+            if(data.wifi !== undefined) {
+                const wifiStatus = document.getElementById('wifiStatus');
+                wifiStatus.textContent = data.wifi ? "Connected" : "Disconnected";
+                wifiStatus.className = `info-value ${data.wifi ? 'status-ok' : 'status-danger'}`;
+            }
+            
+            if(data.sd !== undefined) {
+                const sdStatus = document.getElementById('sdStatus');
+                sdStatus.textContent = data.sd ? "Ready" : "Not Ready";
+                sdStatus.className = `info-value ${data.sd ? 'status-ok' : 'status-danger'}`;
+            }
         }
         
         function updateSensorStatus(temp, hum, stage) {
+            if(temp === undefined || hum === undefined) return;
+            
             const tempStatus = document.getElementById('tempStatus');
             const humStatus = document.getElementById('humStatus');
             
@@ -966,32 +1235,55 @@
             let tempStatusText = "Normal";
             let tempStatusClass = "status-ok";
             
-            if(stage === 1) { // Brooding Week 1
-                if(temp < 34) {
-                    tempStatusText = "Too Low";
-                    tempStatusClass = "status-danger";
-                } else if(temp > 38) {
-                    tempStatusText = "Too High";
-                    tempStatusClass = "status-danger";
-                }
-            } else if(stage === 2) { // Brooding Week 2
-                if(temp < 31) {
-                    tempStatusText = "Too Low";
-                    tempStatusClass = "status-danger";
-                } else if(temp > 36) {
-                    tempStatusText = "Too High";
-                    tempStatusClass = "status-danger";
-                }
+            // Define temperature ranges for each stage
+            const tempRanges = [
+                {min: 35, max: 37}, // Stage 1
+                {min: 32, max: 35}, // Stage 2
+                {min: 24, max: 28}, // Stage 3
+                {min: 20, max: 24}  // Stage 4
+            ];
+            
+            const currentStage = stage || 1;
+            const range = tempRanges[currentStage - 1] || tempRanges[0];
+            
+            if(temp < range.min - 2) {
+                tempStatusText = "Too Low";
+                tempStatusClass = "status-danger";
+            } else if(temp < range.min) {
+                tempStatusText = "Low";
+                tempStatusClass = "status-warning";
+            } else if(temp > range.max + 2) {
+                tempStatusText = "Too High";
+                tempStatusClass = "status-danger";
+            } else if(temp > range.max) {
+                tempStatusText = "High";
+                tempStatusClass = "status-warning";
             }
             
             // Humidity status
             let humStatusText = "Normal";
             let humStatusClass = "status-ok";
             
-            if(hum < 50) {
+            // Define humidity ranges
+            const humRanges = [
+                {min: 60, max: 70}, // Stage 1
+                {min: 60, max: 70}, // Stage 2
+                {min: 55, max: 65}, // Stage 3
+                {min: 50, max: 60}  // Stage 4
+            ];
+            
+            const humRange = humRanges[currentStage - 1] || humRanges[0];
+            
+            if(hum < humRange.min - 5) {
+                humStatusText = "Too Low";
+                humStatusClass = "status-danger";
+            } else if(hum < humRange.min) {
                 humStatusText = "Low";
                 humStatusClass = "status-warning";
-            } else if(hum > 75) {
+            } else if(hum > humRange.max + 5) {
+                humStatusText = "Too High";
+                humStatusClass = "status-danger";
+            } else if(hum > humRange.max) {
                 humStatusText = "High";
                 humStatusClass = "status-warning";
             }
@@ -1001,41 +1293,6 @@
             
             humStatus.textContent = humStatusText;
             humStatus.className = "sensor-status " + humStatusClass;
-        }
-        
-        function updateDeviceControls(fanState, heatState, autoMode) {
-            // Update fan buttons
-            const fanOnBtn = document.getElementById('fanOnBtn');
-            const fanOffBtn = document.getElementById('fanOffBtn');
-            const fanMode = document.getElementById('fanMode');
-            
-            fanOnBtn.classList.toggle('active', fanState);
-            fanOffBtn.classList.toggle('active', !fanState);
-            
-            // Update heat buttons
-            const heatOnBtn = document.getElementById('heatOnBtn');
-            const heatOffBtn = document.getElementById('heatOffBtn');
-            const heatMode = document.getElementById('heatMode');
-            
-            heatOnBtn.classList.toggle('active', heatState);
-            heatOffBtn.classList.toggle('active', !heatState);
-            
-            // Update mode indicators
-            if(autoMode) {
-                fanMode.textContent = "Auto";
-                fanMode.className = "mode-indicator mode-auto";
-                heatMode.textContent = "Auto";
-                heatMode.className = "mode-indicator mode-auto";
-                document.getElementById('modeDescription').textContent = 
-                    "System is in automatic mode. Devices will be controlled based on environmental conditions.";
-            } else {
-                fanMode.textContent = "Manual";
-                fanMode.className = "mode-indicator mode-manual";
-                heatMode.textContent = "Manual";
-                heatMode.className = "mode-indicator mode-manual";
-                document.getElementById('modeDescription').textContent = 
-                    "System is in manual mode. Devices are controlled by user input.";
-            }
         }
         
         function updateStageVisualization(stage, age) {
@@ -1065,10 +1322,14 @@
             
             // Update stage progress bar
             let progressPercent = 0;
-            if(stage === 1) progressPercent = Math.min((age / 7) * 100, 100);
-            else if(stage === 2) progressPercent = Math.min(((age-7) / 7) * 100, 100);
-            else if(stage === 3) progressPercent = Math.min(((age-14) / 28) * 100, 100);
-            else if(stage === 4) progressPercent = 100;
+            const stageDurations = [7, 7, 28, 999]; // Days per stage
+            if(stage >= 1 && stage <= 4) {
+                const stageStartAge = stage === 1 ? 0 : 
+                                     stage === 2 ? 7 : 
+                                     stage === 3 ? 14 : 42;
+                const stageDuration = stageDurations[stage-1];
+                progressPercent = Math.min(((age - stageStartAge) / stageDuration) * 100, 100);
+            }
             
             document.getElementById('stageProgress').style.width = progressPercent + '%';
             
@@ -1079,29 +1340,18 @@
             }
         }
         
-        function updateSystemStatus(wifi, mqtt, sd) {
-            document.getElementById('wifiStatus').textContent = wifi ? "Connected" : "Disconnected";
-            document.getElementById('mqttStatus').textContent = mqtt ? "Connected" : "Disconnected";
-            document.getElementById('sdStatus').textContent = sd ? "Ready" : "Not Ready";
-            
-            // Add color coding
-            if(!wifi) document.getElementById('wifiStatus').style.color = "#e74c3c";
-            if(!mqtt) document.getElementById('mqttStatus').style.color = "#e74c3c";
-            if(!sd) document.getElementById('sdStatus').style.color = "#e74c3c";
-        }
-        
         function updateTemperatureProgress(temp, stage) {
             // Calculate how far the temperature is within the ideal range
-            let minTemp, maxTemp;
+            const tempRanges = [
+                {min: 35, max: 37}, // Stage 1
+                {min: 32, max: 35}, // Stage 2
+                {min: 24, max: 28}, // Stage 3
+                {min: 20, max: 24}  // Stage 4
+            ];
             
-            if(stage === 1) { minTemp = 35; maxTemp = 37; }
-            else if(stage === 2) { minTemp = 32; maxTemp = 35; }
-            else if(stage === 3) { minTemp = 24; maxTemp = 28; }
-            else if(stage === 4) { minTemp = 20; maxTemp = 24; }
-            
-            const range = maxTemp - minTemp;
-            const position = parseFloat(temp) - minTemp;
-            let percent = (position / range) * 100;
+            const range = tempRanges[stage - 1] || tempRanges[0];
+            const position = parseFloat(temp) - range.min;
+            let percent = (position / (range.max - range.min)) * 100;
             
             // Clamp between 0 and 100
             percent = Math.max(0, Math.min(100, percent));
@@ -1119,85 +1369,90 @@
             }
         }
         
+        function updateModeDescription(isAuto) {
+            const description = document.getElementById('modeDescription');
+            if(isAuto) {
+                description.textContent = "System is in automatic mode. Devices will be controlled based on environmental conditions.";
+            } else {
+                description.textContent = "System is in manual mode. Devices are controlled by user input.";
+            }
+        }
+        
+        function checkDataTimeout() {
+            const now = Date.now();
+            const timeout = 60000; // 60 seconds
+            
+            if(lastDataTimestamp > 0 && (now - lastDataTimestamp) > timeout) {
+                // Data is stale
+                document.getElementById('tempStatus').textContent = "No recent data";
+                document.getElementById('tempStatus').className = "sensor-status status-warning";
+                document.getElementById('humStatus').textContent = "No recent data";
+                document.getElementById('humStatus').className = "sensor-status status-warning";
+            }
+        }
+        
         function setupControlButtons() {
-            // Fan control buttons
-            document.getElementById('fanOnBtn').addEventListener('click', function() {
-                // In a real implementation, this would send a command to the ESP32
-                console.log("Fan turned ON");
-                this.classList.add('active');
-                document.getElementById('fanOffBtn').classList.remove('active');
-                document.getElementById('fanMode').textContent = "Manual";
-                document.getElementById('fanMode').className = "mode-indicator mode-manual";
-                
-                // Send command to ESP32 (example using fetch)
-                // fetch('/api/control', {
-                //     method: 'POST',
-                //     body: JSON.stringify({fan: true}),
-                //     headers: {'Content-Type': 'application/json'}
-                // });
-            });
-            
-            document.getElementById('fanOffBtn').addEventListener('click', function() {
-                // In a real implementation, this would send a command to the ESP32
-                console.log("Fan turned OFF");
-                this.classList.add('active');
-                document.getElementById('fanOnBtn').classList.remove('active');
-                document.getElementById('fanMode').textContent = "Manual";
-                document.getElementById('fanMode').className = "mode-indicator mode-manual";
-                
-                // Send command to ESP32 (example using fetch)
-                // fetch('/api/control', {
-                //     method: 'POST',
-                //     body: JSON.stringify({fan: false}),
-                //     headers: {'Content-Type': 'application/json'}
-                // });
-            });
-            
-            // Heat lamp control buttons
-            document.getElementById('heatOnBtn').addEventListener('click', function() {
-                // In a real implementation, this would send a command to the ESP32
-                console.log("Heat lamp turned ON");
-                this.classList.add('active');
-                document.getElementById('heatOffBtn').classList.remove('active');
-                document.getElementById('heatMode').textContent = "Manual";
-                document.getElementById('heatMode').className = "mode-indicator mode-manual";
-                
-                // Send command to ESP32 (example using fetch)
-                // fetch('/api/control', {
-                //     method: 'POST',
-                //     body: JSON.stringify({heat: true}),
-                //     headers: {'Content-Type': 'application/json'}
-                // });
-            });
-            
-            document.getElementById('heatOffBtn').addEventListener('click', function() {
-                // In a real implementation, this would send a command to the ESP32
-                console.log("Heat lamp turned OFF");
-                this.classList.add('active');
-                document.getElementById('heatOnBtn').classList.remove('active');
-                document.getElementById('heatMode').textContent = "Manual";
-                document.getElementById('heatMode').className = "mode-indicator mode-manual";
-                
-                // Send command to ESP32 (example using fetch)
-                // fetch('/api/control', {
-                //     method: 'POST',
-                //     body: JSON.stringify({heat: false}),
-                //     headers: {'Content-Type': 'application/json'}
-                // });
+            // Device control buttons
+            document.querySelectorAll('.btn-control').forEach(button => {
+                button.addEventListener('click', function() {
+                    if(!mqttClient || !mqttClient.isConnected()) {
+                        alert("Not connected to MQTT. Please check connection.");
+                        return;
+                    }
+                    
+                    const device = this.getAttribute('data-device');
+                    const state = this.getAttribute('data-state') === 'true';
+                    
+                    // Update UI immediately
+                    if(device === 'fan') {
+                        document.getElementById('fanOnBtn').classList.toggle('active', state);
+                        document.getElementById('fanOffBtn').classList.toggle('active', !state);
+                        document.getElementById('fanMode').textContent = "Manual";
+                        document.getElementById('fanMode').className = "mode-indicator mode-manual";
+                    } else if(device === 'heat') {
+                        document.getElementById('heatOnBtn').classList.toggle('active', state);
+                        document.getElementById('heatOffBtn').classList.toggle('active', !state);
+                        document.getElementById('heatMode').textContent = "Manual";
+                        document.getElementById('heatMode').className = "mode-indicator mode-manual";
+                    }
+                    
+                    // Send MQTT command
+                    const message = new Paho.MQTT.Message(JSON.stringify({
+                        [device]: state
+                    }));
+                    message.destinationName = "vquail/control/devices";
+                    mqttClient.send(message);
+                    
+                    console.log(`Sent MQTT command: ${device} = ${state}`);
+                });
             });
             
             // Auto mode toggle
             document.getElementById('autoToggle').addEventListener('change', function() {
-                const isAuto = this.checked;
-                console.log("Auto mode: " + (isAuto ? "ON" : "OFF"));
+                if(!mqttClient || !mqttClient.isConnected()) {
+                    alert("Not connected to MQTT. Please check connection.");
+                    this.checked = !this.checked; // Revert change
+                    return;
+                }
                 
-                // In a real implementation, this would send a command to the ESP32
-                // fetch('/api/control', {
-                //     method: 'POST',
-                //     body: JSON.stringify({auto: isAuto}),
-                //     headers: {'Content-Type': 'application/json'}
-                // });
+                const isAuto = this.checked;
+                updateModeDescription(isAuto);
+                
+                // Send MQTT command
+                const message = new Paho.MQTT.Message(JSON.stringify({
+                    auto: isAuto
+                }));
+                message.destinationName = "vquail/control/devices";
+                mqttClient.send(message);
+                
+                console.log(`Sent MQTT command: auto mode = ${isAuto}`);
             });
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            document.getElementById('currentTime').textContent = timeString;
         }
     </script>
 </body>
