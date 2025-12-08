@@ -620,6 +620,8 @@
             }
         }
     </style>
+    <!-- MQTT.js library (more reliable than Paho) -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
     <div class="loading" id="loading">
@@ -818,22 +820,22 @@
                 </div>
                 
                 <div class="control-panel">
-                    <button class="control-btn btn-on" onclick="controlFan(true)">
+                    <button class="control-btn btn-on" onclick="controlDevice('fan', true)">
                         <span>FAN ON</span>
                     </button>
-                    <button class="control-btn btn-off" onclick="controlFan(false)">
+                    <button class="control-btn btn-off" onclick="controlDevice('fan', false)">
                         <span>FAN OFF</span>
                     </button>
-                    <button class="control-btn btn-on" onclick="controlHeat(true)">
+                    <button class="control-btn btn-on" onclick="controlDevice('heat', true)">
                         <span>HEAT ON</span>
                     </button>
-                    <button class="control-btn btn-off" onclick="controlHeat(false)">
+                    <button class="control-btn btn-off" onclick="controlDevice('heat', false)">
                         <span>HEAT OFF</span>
                     </button>
                     <button class="control-btn btn-auto" onclick="toggleAutoMode()">
                         <span id="controlAutoBtn">AUTO MODE</span>
                     </button>
-                    <button class="control-btn btn-auto" onclick="controlDevice('override', false)">
+                    <button class="control-btn btn-auto" onclick="clearOverride()">
                         <span>CLEAR OVERRIDE</span>
                     </button>
                 </div>
@@ -991,15 +993,15 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
     <script>
-        // MQTT Configuration using your HiveMQ details
+        // MQTT Configuration
         const MQTT_CONFIG = {
             host: "514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud",
-            port: 8884, // WebSocket SSL port
+            port: 8884,
             username: "vquail",
             password: "Vquail12345",
-            clientId: "vquail-web-" + Math.random().toString(16).substr(2, 8)
+            clientId: "vquail-web-" + Math.random().toString(16).substr(2, 8),
+            protocol: 'wss'
         };
 
         // Stage configurations matching ESP32 code
@@ -1054,6 +1056,7 @@
         let mqttClient = null;
         let isConnected = false;
         let currentScreen = 0;
+        let reconnectTimer = null;
         
         const systemState = {
             temperature: null,
@@ -1079,7 +1082,8 @@
             uptime: "0s",
             tempOffset: 0,
             humOffset: 0,
-            version: "VQUAIL_S3_TFT_V7_MQTT_WS"
+            version: "VQUAIL_S3_TFT_V7_MQTT_WS",
+            rssi: 0
         };
 
         // DOM Elements
@@ -1138,8 +1142,8 @@
         
         // Settings screen
         const currentAge = document.getElementById('currentAge');
-        const tempOffset = document.getElementById('tempOffset');
-        const humOffset = document.getElementById('humOffset');
+        const tempOffsetDisplay = document.getElementById('tempOffset');
+        const humOffsetDisplay = document.getElementById('humOffset');
         
         // Info screen
         const infoWifi = document.getElementById('infoWifi');
@@ -1166,10 +1170,19 @@
 
         // Initialize the page
         function init() {
+            console.log("Initializing VQuail Dashboard...");
             updateDateTime();
             setInterval(updateDateTime, 1000);
             updateDisplay();
             switchScreen(0);
+            
+            // Try to auto-connect after 2 seconds
+            setTimeout(() => {
+                if (!isConnected) {
+                    console.log("Attempting auto-connect...");
+                    connectMQTT();
+                }
+            }, 2000);
         }
 
         // Update date and time display (Malaysia time UTC+8)
@@ -1319,8 +1332,8 @@
             humMax.textContent = `${stage.humMax}%`;
             
             // Update calibration displays
-            tempOffset.textContent = systemState.tempOffset.toFixed(1) + '°C';
-            humOffset.textContent = systemState.humOffset.toFixed(1) + '%';
+            tempOffsetDisplay.textContent = systemState.tempOffset.toFixed(1) + '°C';
+            humOffsetDisplay.textContent = systemState.humOffset.toFixed(1) + '%';
             
             // Highlight current stage button
             updateStageButtons();
@@ -1437,8 +1450,8 @@
             currentAge.textContent = systemState.age;
             
             // Update calibration values
-            tempOffset.textContent = systemState.tempOffset.toFixed(1) + '°C';
-            humOffset.textContent = systemState.humOffset.toFixed(1) + '%';
+            tempOffsetDisplay.textContent = systemState.tempOffset.toFixed(1) + '°C';
+            humOffsetDisplay.textContent = systemState.humOffset.toFixed(1) + '%';
             
             // Update stage buttons
             updateStageButtons();
@@ -1486,6 +1499,8 @@
             if (systemState.lastUpdate) {
                 lastSensorTime.textContent = systemState.lastUpdate;
             }
+            
+            infoRssi.textContent = systemState.rssi + ' dBm';
         }
 
         // Update stage buttons highlighting
@@ -1516,37 +1531,51 @@
         }
 
         function connectMQTT() {
-            if (isConnected) return;
+            if (isConnected) {
+                console.log("Already connected");
+                return;
+            }
             
             loadingText.textContent = "Connecting to VQuail via MQTT...";
             loading.classList.add('show');
             connectBtn.textContent = "Connecting...";
             connectBtn.classList.add('connecting');
+            connectBtn.disabled = true;
             
-            // Create MQTT client
-            mqttClient = new Paho.MQTT.Client(
-                MQTT_CONFIG.host,
-                Number(MQTT_CONFIG.port),
-                MQTT_CONFIG.clientId
-            );
+            console.log("Connecting to MQTT broker...");
             
-            // Set callback handlers
-            mqttClient.onConnectionLost = onConnectionLost;
-            mqttClient.onMessageArrived = onMessageArrived;
+            // Create connection URL
+            const url = `wss://${MQTT_CONFIG.host}:${MQTT_CONFIG.port}/mqtt`;
+            console.log("Connection URL:", url);
             
-            // Connect options
-            const connectOptions = {
-                userName: MQTT_CONFIG.username,
+            // MQTT connection options
+            const options = {
+                username: MQTT_CONFIG.username,
                 password: MQTT_CONFIG.password,
-                useSSL: true,
-                onSuccess: onConnect,
-                onFailure: onConnectFailure,
-                timeout: 10,
-                keepAliveInterval: 30,
-                cleanSession: true
+                clientId: MQTT_CONFIG.clientId,
+                clean: true,
+                connectTimeout: 10000,
+                reconnectPeriod: 0, // We'll handle reconnection manually
+                protocolVersion: 4, // MQTT v3.1.1
+                keepalive: 60,
+                resubscribe: true
             };
             
-            mqttClient.connect(connectOptions);
+            try {
+                // Connect using MQTT.js
+                mqttClient = mqtt.connect(url, options);
+                
+                // Set up event handlers
+                mqttClient.on('connect', onConnect);
+                mqttClient.on('message', onMessage);
+                mqttClient.on('error', onMQTTError);
+                mqttClient.on('close', onMQTTClose);
+                mqttClient.on('offline', onMQTTOffline);
+                
+            } catch (error) {
+                console.error("Failed to create MQTT client:", error);
+                onConnectFailure(error);
+            }
         }
 
         function onConnect() {
@@ -1554,52 +1583,99 @@
             isConnected = true;
             
             // Subscribe to topics
-            mqttClient.subscribe("vquail/status/#");
-            mqttClient.subscribe("vquail/control/response");
-            mqttClient.subscribe("vquail/alerts");
+            mqttClient.subscribe('vquail/status/#', { qos: 0 }, (err) => {
+                if (err) {
+                    console.error("Failed to subscribe to vquail/status/#:", err);
+                } else {
+                    console.log("Subscribed to vquail/status/#");
+                }
+            });
+            
+            mqttClient.subscribe('vquail/alerts', { qos: 0 }, (err) => {
+                if (err) {
+                    console.error("Failed to subscribe to vquail/alerts:", err);
+                } else {
+                    console.log("Subscribed to vquail/alerts");
+                }
+            });
             
             // Update UI
             loading.classList.remove('show');
             connectBtn.textContent = "Disconnect";
             connectBtn.classList.remove('connecting');
+            connectBtn.disabled = false;
+            
+            // Clear any reconnect timer
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
             
             // Request current status
-            publishStatus();
+            setTimeout(() => {
+                publishStatus();
+            }, 1000);
             
             // Show success message
             addMqttMessage("Connected to VQuail system");
             updateDisplay();
         }
 
-        function onConnectFailure(response) {
-            console.error("MQTT Connection failed:", response);
+        function onConnectFailure(error) {
+            console.error("MQTT Connection failed:", error);
             loading.classList.remove('show');
             connectBtn.textContent = "Connect to VQuail";
             connectBtn.classList.remove('connecting');
+            connectBtn.disabled = false;
             
-            addMqttMessage("Connection failed: " + response.errorMessage);
-            alert("Failed to connect to VQuail. Please check:\n1. Internet connection\n2. MQTT credentials\n3. HiveMQ Cloud status");
+            const errorMsg = error.message || error.toString();
+            addMqttMessage("Connection failed: " + errorMsg);
+            
+            // Schedule reconnection
+            if (!reconnectTimer) {
+                reconnectTimer = setTimeout(() => {
+                    console.log("Attempting reconnection...");
+                    connectMQTT();
+                }, 5000);
+            }
         }
 
-        function onConnectionLost(responseObject) {
-            console.warn("MQTT Connection lost:", responseObject);
+        function onMQTTError(error) {
+            console.error("MQTT Error:", error);
+            addMqttMessage("Error: " + (error.message || error.toString()));
+        }
+
+        function onMQTTClose() {
+            console.warn("MQTT Connection closed");
             isConnected = false;
             connectBtn.textContent = "Connect to VQuail";
             connectBtn.classList.remove('connecting');
+            connectBtn.disabled = false;
             
-            if (responseObject.errorCode !== 0) {
-                addMqttMessage("Connection lost: " + responseObject.errorMessage);
+            addMqttMessage("Connection closed");
+            updateDisplay();
+            
+            // Schedule reconnection
+            if (!reconnectTimer) {
+                reconnectTimer = setTimeout(() => {
+                    console.log("Attempting reconnection after close...");
+                    connectMQTT();
+                }, 3000);
             }
-            
+        }
+
+        function onMQTTOffline() {
+            console.warn("MQTT Client offline");
+            isConnected = false;
+            addMqttMessage("Connection offline");
             updateDisplay();
         }
 
-        function onMessageArrived(message) {
-            console.log("MQTT Message:", message.destinationName, message.payloadString);
+        function onMessage(topic, message) {
+            console.log("MQTT Message received:", topic, message.toString());
             
             try {
-                const data = JSON.parse(message.payloadString);
-                const topic = message.destinationName;
+                const data = JSON.parse(message.toString());
                 
                 addMqttMessage(`Update from ${topic}`);
                 
@@ -1617,6 +1693,8 @@
         }
 
         function updateSystemState(data) {
+            console.log("Updating system state:", data);
+            
             // Update basic sensor data
             if (data.temp !== undefined) systemState.temperature = parseFloat(data.temp);
             if (data.hum !== undefined) systemState.humidity = parseFloat(data.hum);
@@ -1642,12 +1720,13 @@
             if (data.hum_offset !== undefined) systemState.humOffset = parseFloat(data.hum_offset);
             if (data.last_control_source !== undefined) systemState.lastControlSource = data.last_control_source;
             if (data.version !== undefined) systemState.version = data.version;
+            if (data.rssi !== undefined) systemState.rssi = parseInt(data.rssi);
             
             // Update stage
             if (data.stage) {
                 const stageName = data.stage;
-                if (stageName.includes("Brood W1")) systemState.stage = 0;
-                else if (stageName.includes("Brood W2")) systemState.stage = 1;
+                if (stageName.includes("Brood W1") || stageName.includes("Brood1")) systemState.stage = 0;
+                else if (stageName.includes("Brood W2") || stageName.includes("Brood2")) systemState.stage = 1;
                 else if (stageName.includes("Grower")) systemState.stage = 2;
                 else if (stageName.includes("Adult")) systemState.stage = 3;
             }
@@ -1671,35 +1750,44 @@
 
         // Control Functions
         function controlDevice(device, state) {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
             
-            const message = {};
+            const message = {
+                source: "web",
+                timestamp: Date.now()
+            };
+            
             if (device === 'fan') {
                 message.fan = state;
             } else if (device === 'heat') {
                 message.heat = state;
-            } else if (device === 'override') {
-                message.override = state;
             }
-            message.source = "web";
             
             publishMessage("vquail/control", message);
             addMqttMessage(`Control: ${device} ${state ? 'ON' : 'OFF'}`);
         }
 
-        function controlFan(state) {
-            controlDevice('fan', state);
-        }
-
-        function controlHeat(state) {
-            controlDevice('heat', state);
+        function clearOverride() {
+            if (!isConnected || !mqttClient) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            const message = {
+                override: false,
+                source: "web",
+                timestamp: Date.now()
+            };
+            
+            publishMessage("vquail/control", message);
+            addMqttMessage("Clearing override");
         }
 
         function toggleAutoMode() {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
@@ -1707,7 +1795,8 @@
             const newMode = !systemState.autoMode;
             const message = {
                 auto: newMode,
-                source: "web"
+                source: "web",
+                timestamp: Date.now()
             };
             
             publishMessage("vquail/control", message);
@@ -1715,12 +1804,15 @@
         }
 
         function quickAction(action) {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
             
-            const message = { source: "web" };
+            const message = { 
+                source: "web",
+                timestamp: Date.now()
+            };
             
             switch(action) {
                 case 'bothOn':
@@ -1741,7 +1833,7 @@
         }
 
         function setStage(stageIndex) {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
@@ -1749,7 +1841,8 @@
             const message = {
                 stage: stageIndex,
                 age: STAGES[stageIndex].minAge,
-                source: "web"
+                source: "web",
+                timestamp: Date.now()
             };
             
             publishMessage("vquail/control/settings", message);
@@ -1757,7 +1850,7 @@
         }
 
         function adjustAge(change) {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
@@ -1768,28 +1861,34 @@
             if (newAge >= stage.minAge && newAge <= stage.maxAge) {
                 const message = {
                     age: newAge,
-                    source: "web"
+                    source: "web",
+                    timestamp: Date.now()
                 };
                 
                 publishMessage("vquail/control/settings", message);
                 addMqttMessage(`Adjust age: ${change > 0 ? '+' : ''}${change} days`);
+            } else {
+                alert(`Age must be between ${stage.minAge} and ${stage.maxAge} days for ${stage.name} stage`);
             }
         }
 
         function adjustCalibration(type, change) {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
             
             const message = {
-                source: "web"
+                source: "web",
+                timestamp: Date.now()
             };
             
             if (type === 'temp') {
-                message.temp_offset = systemState.tempOffset + change;
+                const newOffset = (systemState.tempOffset || 0) + change;
+                message.temp_offset = parseFloat(newOffset.toFixed(1));
             } else if (type === 'hum') {
-                message.hum_offset = systemState.humOffset + change;
+                const newOffset = (systemState.humOffset || 0) + change;
+                message.hum_offset = parseFloat(newOffset.toFixed(1));
             }
             
             publishMessage("vquail/control/calibration", message);
@@ -1797,14 +1896,15 @@
         }
 
         function saveSettings() {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
             
             const message = {
                 save: true,
-                source: "web"
+                source: "web",
+                timestamp: Date.now()
             };
             
             publishMessage("vquail/control/settings", message);
@@ -1812,7 +1912,7 @@
         }
 
         function sendReboot() {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
@@ -1820,7 +1920,8 @@
             if (confirm("Are you sure you want to reboot the VQuail system?")) {
                 const message = {
                     reboot: true,
-                    source: "web"
+                    source: "web",
+                    timestamp: Date.now()
                 };
                 
                 publishMessage("vquail/control", message);
@@ -1829,7 +1930,7 @@
         }
 
         function resetSettings() {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
@@ -1837,7 +1938,8 @@
             if (confirm("Reset all settings to default values?")) {
                 const message = {
                     reset: true,
-                    source: "web"
+                    source: "web",
+                    timestamp: Date.now()
                 };
                 
                 publishMessage("vquail/control/settings", message);
@@ -1846,14 +1948,15 @@
         }
 
         function publishStatus() {
-            if (!isConnected) {
+            if (!isConnected || !mqttClient) {
                 alert("Please connect to VQuail first");
                 return;
             }
             
             const message = {
                 request: "status",
-                source: "web"
+                source: "web",
+                timestamp: Date.now()
             };
             
             publishMessage("vquail/control", message);
@@ -1863,18 +1966,33 @@
         function publishMessage(topic, message) {
             if (!mqttClient || !isConnected) {
                 console.error("MQTT not connected");
+                alert("Not connected to VQuail. Please connect first.");
                 return;
             }
             
-            const msg = new Paho.MQTT.Message(JSON.stringify(message));
-            msg.destinationName = topic;
-            msg.qos = 0;
-            mqttClient.send(msg);
+            try {
+                const payload = JSON.stringify(message);
+                console.log("Publishing to", topic, ":", payload);
+                
+                mqttClient.publish(topic, payload, { qos: 0 }, (err) => {
+                    if (err) {
+                        console.error("Failed to publish message:", err);
+                        addMqttMessage("Failed to send command");
+                    } else {
+                        console.log("Message published successfully");
+                    }
+                });
+            } catch (error) {
+                console.error("Error publishing message:", error);
+                addMqttMessage("Error sending command");
+            }
         }
 
         function disconnectMQTT() {
             if (mqttClient && isConnected) {
-                mqttClient.disconnect();
+                console.log("Disconnecting from MQTT...");
+                mqttClient.end();
+                mqttClient = null;
                 isConnected = false;
                 connectBtn.textContent = "Connect to VQuail";
                 addMqttMessage("Disconnected from VQuail");
@@ -1895,6 +2013,9 @@
             }
             
             mqttMessages.textContent = currentMessages.join('\n');
+            
+            // Auto-scroll to bottom
+            mqttMessages.scrollTop = mqttMessages.scrollHeight;
         }
 
         // Request notification permission
@@ -1904,6 +2025,19 @@
 
         // Initialize on page load
         window.onload = init;
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && !isConnected) {
+                // Page became visible and we're not connected, try to reconnect
+                setTimeout(() => {
+                    if (!isConnected) {
+                        console.log("Page visible, attempting to reconnect...");
+                        connectMQTT();
+                    }
+                }, 1000);
+            }
+        });
     </script>
 </body>
 </html>
