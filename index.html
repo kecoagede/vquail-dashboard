@@ -6,15 +6,21 @@
     <title>VQuail Control Dashboard</title>
     <style>
         :root {
-            --primary: #07FF;
+            --primary: #06a5ff;
             --success: #07E0;
-            --warning: #FD20;
-            --danger: #F800;
-            --info: #7D7C;
-            --bg-dark: #0841;
-            --card-bg: #18C3;
-            --text: #FFFF;
-            --text-dim: #8C51;
+            --warning: #ffaa00;
+            --danger: #ff4444;
+            --info: #4a90e2;
+            --bg-dark: #0a291a;
+            --card-bg: #1a3a2a;
+            --text: #e0e0e0;
+            --text-dim: #8a9a8b;
+            
+            /* Stage Colors */
+            --brood1: #F9A6;
+            --brood2: #FD20;
+            --grower: #2F6B;
+            --adult: #4AFF;
         }
         
         * {
@@ -26,7 +32,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0a291a 0%, #083142 100%);
-            color: #e0e0e0;
+            color: var(--text);
             min-height: 100vh;
             padding: 20px;
         }
@@ -55,6 +61,7 @@
             font-size: 1.1rem;
         }
         
+        /* Status Bar */
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -81,7 +88,6 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #666;
         }
         
         .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
@@ -94,6 +100,29 @@
             color: var(--primary);
         }
         
+        /* Alarm Banner */
+        .alarm-banner {
+            background: linear-gradient(90deg, var(--danger), #ff4444);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            display: none;
+        }
+        
+        .alarm-banner.show {
+            display: flex;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .alarm-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* Dashboard Grid */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -101,6 +130,7 @@
             margin-bottom: 30px;
         }
         
+        /* Card Styles */
         .card {
             background: rgba(24, 195, 195, 0.15);
             border-radius: 15px;
@@ -129,6 +159,7 @@
             font-weight: 600;
         }
         
+        /* Sensor Cards */
         .sensor-card .value {
             font-size: 3rem;
             font-weight: bold;
@@ -155,6 +186,7 @@
         .status-text.online { color: var(--success); }
         .status-text.offline { color: var(--danger); }
         
+        /* Range Indicator */
         .range-indicator {
             margin-top: 15px;
         }
@@ -191,6 +223,7 @@
             color: var(--text-dim);
         }
         
+        /* Control Panel */
         .control-panel {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -248,6 +281,47 @@
             box-shadow: 0 4px 8px rgba(6, 119, 255, 0.3);
         }
         
+        /* Navigation */
+        .navigation {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .nav-btn {
+            padding: 15px 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .nav-btn.active {
+            background: var(--bg-dark);
+            color: var(--primary);
+        }
+        
+        .nav-btn .icon {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        /* Mode Indicator */
         .mode-indicator {
             display: inline-block;
             width: 10px;
@@ -259,6 +333,7 @@
         .mode-auto { background: var(--success); box-shadow: 0 0 8px var(--success); }
         .mode-manual { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
         
+        /* Stage Indicator */
         .stage-indicator {
             display: flex;
             align-items: center;
@@ -296,30 +371,7 @@
             color: var(--primary);
         }
         
-        .alarm-banner {
-            background: linear-gradient(90deg, var(--danger), #ff4444);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
-            align-items: center;
-            gap: 15px;
-            animation: slideIn 0.5s ease;
-        }
-        
-        .alarm-banner.show {
-            display: flex;
-        }
-        
-        .alarm-icon {
-            font-size: 1.5rem;
-        }
-        
-        .alarm-message {
-            flex: 1;
-        }
-        
+        /* Settings Panel */
         .settings-panel {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -376,6 +428,7 @@
             width: 100%;
         }
         
+        /* Connection Panel */
         .connection-panel {
             margin-top: 30px;
             text-align: center;
@@ -409,23 +462,77 @@
             animation: pulse 1.5s infinite;
         }
         
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        /* Screen Containers */
+        .screen {
+            display: none;
         }
         
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .screen.active {
+            display: block;
         }
         
+        /* Home Screen */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .sensor-mini-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .sensor-mini-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        /* Info Screen */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .quick-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quick-btn:hover {
+            background: #0677ff;
+        }
+        
+        /* Footer */
         .footer {
             text-align: center;
             margin-top: 40px;
@@ -435,6 +542,7 @@
             font-size: 0.9rem;
         }
         
+        /* Loading Overlay */
         .loading {
             display: none;
             position: fixed;
@@ -463,11 +571,30 @@
             margin-bottom: 20px;
         }
         
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
+        /* Responsive */
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
@@ -487,19 +614,23 @@
                 flex-wrap: wrap;
                 justify-content: center;
             }
+            
+            .sensor-grid, .info-grid, .quick-actions {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="loading" id="loading">
         <div class="spinner"></div>
-        <div id="loading-text">Connecting to MQTT...</div>
+        <div id="loading-text">Connecting to VQuail...</div>
     </div>
 
     <div class="container">
         <div class="header">
             <h1>VQuail Control Dashboard</h1>
-            <div class="subtitle">Real-time monitoring and control for your quail farm system</div>
+            <div class="subtitle">Remote Monitoring & Control System</div>
         </div>
 
         <div class="alarm-banner" id="alarmBanner">
@@ -523,147 +654,333 @@
                 </div>
                 <div class="status-indicator">
                     <div class="status-dot" id="ntpStatus"></div>
-                    <span>Time Sync</span>
+                    <span>NTP</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="sdStatus"></div>
+                    <span>SD Card</span>
                 </div>
             </div>
             <div class="current-time" id="currentTime">--:--:--</div>
         </div>
 
-        <div class="dashboard">
-            <div class="card sensor-card">
-                <div class="card-header">
-                    <div class="card-title">Temperature</div>
-                    <div class="status-text" id="tempStatus">--</div>
+        <!-- Screens -->
+        <div class="screen active" id="homeScreen">
+            <div class="dashboard">
+                <!-- Sensor Cards -->
+                <div class="card sensor-card">
+                    <div class="card-header">
+                        <div class="card-title">Temperature</div>
+                        <div class="status-text" id="tempStatus">--</div>
+                    </div>
+                    <div class="value temp-value" id="temperature">--°C</div>
+                    <div class="range-indicator">
+                        <div class="range-bar">
+                            <div class="range-fill" id="tempRangeFill"></div>
+                            <div class="current-marker" id="tempMarker"></div>
+                        </div>
+                        <div class="range-labels">
+                            <span id="tempMin">Min</span>
+                            <span id="tempMax">Max</span>
+                        </div>
+                    </div>
+                    <div class="stage-info">
+                        <div class="stage-item">
+                            <div class="stage-label">Current Stage</div>
+                            <div class="stage-value" id="currentStage">--</div>
+                        </div>
+                        <div class="stage-item">
+                            <div class="stage-label">Target Range</div>
+                            <div class="stage-value" id="targetTemp">--°C</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="value temp-value" id="temperature">--</div>
-                <div class="range-indicator">
-                    <div class="range-bar">
-                        <div class="range-fill" id="tempRangeFill"></div>
-                        <div class="current-marker" id="tempMarker"></div>
+
+                <div class="card sensor-card">
+                    <div class="card-header">
+                        <div class="card-title">Humidity</div>
+                        <div class="status-text" id="humStatus">--</div>
                     </div>
-                    <div class="range-labels">
-                        <span id="tempMin">Min</span>
-                        <span id="tempMax">Max</span>
+                    <div class="value hum-value" id="humidity">--%</div>
+                    <div class="range-indicator">
+                        <div class="range-bar">
+                            <div class="range-fill" id="humRangeFill"></div>
+                            <div class="current-marker" id="humMarker"></div>
+                        </div>
+                        <div class="range-labels">
+                            <span id="humMin">Min</span>
+                            <span id="humMax">Max</span>
+                        </div>
+                    </div>
+                    <div class="stage-info">
+                        <div class="stage-item">
+                            <div class="stage-label">Age</div>
+                            <div class="stage-value" id="ageDays">-- days</div>
+                        </div>
+                        <div class="stage-item">
+                            <div class="stage-label">Target Range</div>
+                            <div class="stage-value" id="targetHum">--%</div>
+                        </div>
                     </div>
                 </div>
-                <div class="stage-info">
-                    <div class="stage-item">
-                        <div class="stage-label">Stage</div>
-                        <div class="stage-value" id="currentStage">--</div>
+
+                <!-- Device Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Device Status</div>
+                        <div>
+                            <span class="mode-indicator" id="modeIndicator"></span>
+                            <span id="modeText">AUTO</span>
+                        </div>
                     </div>
-                    <div class="stage-item">
-                        <div class="stage-label">Target</div>
-                        <div class="stage-value" id="targetTemp">--</div>
+                    
+                    <div class="sensor-grid">
+                        <div class="sensor-mini-card">
+                            <div class="stage-label">Fan</div>
+                            <div class="sensor-mini-value" id="fanState">OFF</div>
+                            <div class="stage-label">Status</div>
+                        </div>
+                        <div class="sensor-mini-card">
+                            <div class="stage-label">Heat Lamp</div>
+                            <div class="sensor-mini-value" id="heatState">OFF</div>
+                            <div class="stage-label">Status</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stage-indicator">
+                        <div class="stage-color" id="stageColor"></div>
+                        <span id="stageName">Stage: --</span>
+                    </div>
+                    
+                    <div class="status-text" style="margin-top: 15px;">
+                        Last update: <span id="lastUpdate">--:--:--</span>
+                    </div>
+                </div>
+
+                <!-- Quick Control -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Quick Control</div>
+                    </div>
+                    
+                    <div class="control-panel">
+                        <button class="control-btn btn-on" id="fanOnBtn" onclick="controlDevice('fan', true)">
+                            <span>FAN ON</span>
+                        </button>
+                        <button class="control-btn btn-off" id="fanOffBtn" onclick="controlDevice('fan', false)">
+                            <span>FAN OFF</span>
+                        </button>
+                        <button class="control-btn btn-on" id="heatOnBtn" onclick="controlDevice('heat', true)">
+                            <span>HEAT ON</span>
+                        </button>
+                        <button class="control-btn btn-off" id="heatOffBtn" onclick="controlDevice('heat', false)">
+                            <span>HEAT OFF</span>
+                        </button>
+                        <button class="control-btn btn-auto" id="autoModeBtn" onclick="toggleAutoMode()">
+                            <span id="autoBtnText">AUTO MODE</span>
+                        </button>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="quickAction('bothOn')">
+                            <span style="font-size: 1.5rem;">*</span>
+                            <span>BOTH ON</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAction('bothOff')">
+                            <span style="font-size: 1.5rem;">O</span>
+                            <span>BOTH OFF</span>
+                        </button>
+                        <button class="quick-btn" onclick="publishStatus()">
+                            <span style="font-size: 1.5rem;">↻</span>
+                            <span>REFRESH</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAction('publish')">
+                            <span style="font-size: 1.5rem;">↑</span>
+                            <span>PUBLISH</span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="card sensor-card">
-                <div class="card-header">
-                    <div class="card-title">Humidity</div>
-                    <div class="status-text" id="humStatus">--</div>
-                </div>
-                <div class="value hum-value" id="humidity">--</div>
-                <div class="range-indicator">
-                    <div class="range-bar">
-                        <div class="range-fill" id="humRangeFill"></div>
-                        <div class="current-marker" id="humMarker"></div>
-                    </div>
-                    <div class="range-labels">
-                        <span id="humMin">Min</span>
-                        <span id="humMax">Max</span>
-                    </div>
-                </div>
-                <div class="stage-info">
-                    <div class="stage-item">
-                        <div class="stage-label">Age</div>
-                        <div class="stage-value" id="ageDays">-- days</div>
-                    </div>
-                    <div class="stage-item">
-                        <div class="stage-label">Target</div>
-                        <div class="stage-value" id="targetHum">--</div>
-                    </div>
-                </div>
-            </div>
-
+        <!-- Control Screen -->
+        <div class="screen" id="controlScreen">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Device Control</div>
-                    <div class="mode-indicator" id="modeIndicator"></div>
-                    <span id="modeText">--</span>
+                    <div class="card-title">Advanced Control Panel</div>
                 </div>
                 
-                <div class="stage-indicator">
-                    <div class="stage-color" id="stageColor"></div>
-                    <span id="stageName">Stage: --</span>
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Temp: <span id="controlTemp" style="color: var(--danger);">--°C</span></span>
+                        <span>Hum: <span id="controlHum" style="color: var(--info);">--%</span></span>
+                    </div>
                 </div>
                 
                 <div class="control-panel">
-                    <button class="control-btn btn-on" id="fanOnBtn" onclick="controlFan(true)">
+                    <button class="control-btn btn-on" onclick="controlFan(true)">
                         <span>FAN ON</span>
                     </button>
-                    <button class="control-btn btn-off" id="fanOffBtn" onclick="controlFan(false)">
+                    <button class="control-btn btn-off" onclick="controlFan(false)">
                         <span>FAN OFF</span>
                     </button>
-                    <button class="control-btn btn-on" id="heatOnBtn" onclick="controlHeat(true)">
+                    <button class="control-btn btn-on" onclick="controlHeat(true)">
                         <span>HEAT ON</span>
                     </button>
-                    <button class="control-btn btn-off" id="heatOffBtn" onclick="controlHeat(false)">
+                    <button class="control-btn btn-off" onclick="controlHeat(false)">
                         <span>HEAT OFF</span>
                     </button>
-                    <button class="control-btn btn-auto" id="autoModeBtn" onclick="toggleAutoMode()">
-                        <span id="autoBtnText">AUTO MODE</span>
+                    <button class="control-btn btn-auto" onclick="toggleAutoMode()">
+                        <span id="controlAutoBtn">AUTO MODE</span>
+                    </button>
+                    <button class="control-btn btn-auto" onclick="controlDevice('override', false)">
+                        <span>CLEAR OVERRIDE</span>
                     </button>
                 </div>
                 
-                <div class="status-text" style="margin-top: 15px;">
-                    Last update: <span id="lastUpdate">--:--:--</span>
+                <div style="text-align: center; margin-top: 20px;">
+                    <div class="stage-label">Control Source:</div>
+                    <div class="stage-value" id="controlSource">--</div>
                 </div>
             </div>
+        </div>
 
+        <!-- Settings Screen -->
+        <div class="screen" id="settingsScreen">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">System Status</div>
+                    <div class="card-title">System Settings</div>
                 </div>
                 
                 <div class="settings-panel">
                     <div class="setting-group">
-                        <div class="stage-item">
-                            <div class="stage-label">Fan Status</div>
-                            <div class="stage-value" id="fanState">OFF</div>
-                        </div>
-                        <div class="stage-item">
-                            <div class="stage-label">Heat Status</div>
-                            <div class="stage-value" id="heatState">OFF</div>
+                        <div class="setting-label">Life Stage:</div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn-small" onclick="setStage(0)" id="stageBtn0">Brood1</button>
+                            <button class="btn-small" onclick="setStage(1)" id="stageBtn1">Brood2</button>
+                            <button class="btn-small" onclick="setStage(2)" id="stageBtn2">Grower</button>
+                            <button class="btn-small" onclick="setStage(3)" id="stageBtn3">Adult</button>
                         </div>
                     </div>
                     
                     <div class="setting-group">
-                        <div class="stage-item">
-                            <div class="stage-label">Uptime</div>
-                            <div class="stage-value" id="uptime">--</div>
+                        <div class="setting-label">Age (days):</div>
+                        <div>
+                            <button class="btn-small btn-dec" onclick="adjustAge(-1)">-</button>
+                            <span class="setting-value" id="currentAge">0</span>
+                            <button class="btn-small btn-inc" onclick="adjustAge(1)">+</button>
                         </div>
-                        <div class="stage-item">
-                            <div class="stage-label">Date</div>
-                            <div class="stage-value" id="currentDate">--</div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-label">Temperature Calibration:</div>
+                        <div>
+                            <button class="btn-small btn-dec" onclick="adjustCalibration('temp', -0.5)">-0.5</button>
+                            <span class="setting-value" id="tempOffset">0.0°C</span>
+                            <button class="btn-small btn-inc" onclick="adjustCalibration('temp', 0.5)">+0.5</button>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-label">Humidity Calibration:</div>
+                        <div>
+                            <button class="btn-small btn-dec" onclick="adjustCalibration('hum', -0.5)">-0.5</button>
+                            <span class="setting-value" id="humOffset">0.0%</span>
+                            <button class="btn-small btn-inc" onclick="adjustCalibration('hum', 0.5)">+0.5</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn-save" onclick="saveSettings()">SAVE SETTINGS</button>
+                    <button class="btn-save" style="background: var(--warning); margin-top: 10px;" onclick="sendReboot()">REBOOT SYSTEM</button>
+                    <button class="btn-save" style="background: var(--danger); margin-top: 10px;" onclick="resetSettings()">RESET TO DEFAULT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Screen -->
+        <div class="screen" id="infoScreen">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">System Information</div>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="stage-label">Network Status</div>
+                        <div style="margin-top: 10px;">
+                            <div>WiFi: <span id="infoWifi">--</span></div>
+                            <div>MQTT: <span id="infoMqtt">--</span></div>
+                            <div>NTP: <span id="infoNtp">--</span></div>
+                            <div>Signal: <span id="infoRssi">-- dBm</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="stage-label">System Status</div>
+                        <div style="margin-top: 10px;">
+                            <div>Sensor: <span id="infoSensor">--</span></div>
+                            <div>SD Card: <span id="infoSD">--</span></div>
+                            <div>Uptime: <span id="infoUptime">--</span></div>
+                            <div>Version: <span id="infoVersion">VQUAIL_S3_TFT_V7</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="stage-label">Current Stage</div>
+                        <div style="margin-top: 10px;">
+                            <div>Stage: <span id="infoStage">--</span></div>
+                            <div>Age: <span id="infoAge">-- days</span></div>
+                            <div>Temp Range: <span id="infoTempRange">--</span></div>
+                            <div>Hum Range: <span id="infoHumRange">--</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="stage-label">Device States</div>
+                        <div style="margin-top: 10px;">
+                            <div>Fan: <span id="infoFan">--</span></div>
+                            <div>Heat: <span id="infoHeat">--</span></div>
+                            <div>Mode: <span id="infoMode">--</span></div>
+                            <div>Override: <span id="infoOverride">--</span></div>
                         </div>
                     </div>
                 </div>
                 
                 <div style="margin-top: 20px; text-align: center;">
-                    <button class="control-btn btn-auto" onclick="publishStatus()" style="width: 100%;">
-                        <span>🔄 REFRESH STATUS</span>
-                    </button>
+                    <div class="stage-label">Last Sensor Reading</div>
+                    <div class="stage-value" id="lastSensorTime">--:--:--</div>
                 </div>
             </div>
         </div>
 
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn active" onclick="switchScreen(0)">
+                <div class="icon">H</div>
+                <div>Home</div>
+            </button>
+            <button class="nav-btn" onclick="switchScreen(1)">
+                <div class="icon">C</div>
+                <div>Control</div>
+            </button>
+            <button class="nav-btn" onclick="switchScreen(2)">
+                <div class="icon">S</div>
+                <div>Settings</div>
+            </button>
+            <button class="nav-btn" onclick="switchScreen(3)">
+                <div class="icon">I</div>
+                <div>Info</div>
+            </button>
+        </div>
+
         <div class="connection-panel">
             <div class="mqtt-status">
-                <div style="margin-bottom: 10px;">MQTT Connection Status: <span id="mqttConnectionStatus">Disconnected</span></div>
-                <div id="mqttMessages">No messages yet</div>
+                <div style="margin-bottom: 10px;">MQTT: <span id="mqttConnectionStatus">Disconnected</span></div>
+                <div id="mqttMessages">Ready to connect</div>
             </div>
-            <button class="connect-btn" id="connectBtn" onclick="connectMQTT()">
+            <button class="connect-btn" id="connectBtn" onclick="toggleMQTT()">
                 Connect to VQuail
             </button>
         </div>
@@ -676,7 +993,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
     <script>
-        // MQTT Configuration
+        // MQTT Configuration using your HiveMQ details
         const MQTT_CONFIG = {
             host: "514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud",
             port: 8884, // WebSocket SSL port
@@ -685,9 +1002,9 @@
             clientId: "vquail-web-" + Math.random().toString(16).substr(2, 8)
         };
 
-        // Stage configurations (must match ESP32 code)
-        const STAGES = {
-            BROODING_WEEK1: {
+        // Stage configurations matching ESP32 code
+        const STAGES = [
+            {
                 name: "Brood W1",
                 minAge: 0,
                 maxAge: 7,
@@ -695,9 +1012,10 @@
                 tempMax: 37.0,
                 humMin: 60.0,
                 humMax: 70.0,
-                color: "#F9A6"
+                color: "#F9A6",
+                needsHeat: true
             },
-            BROODING_WEEK2: {
+            {
                 name: "Brood W2",
                 minAge: 8,
                 maxAge: 14,
@@ -705,9 +1023,10 @@
                 tempMax: 35.0,
                 humMin: 60.0,
                 humMax: 70.0,
-                color: "#FD20"
+                color: "#FD20",
+                needsHeat: true
             },
-            GROWER_WEEK3_6: {
+            {
                 name: "Grower",
                 minAge: 15,
                 maxAge: 42,
@@ -715,9 +1034,10 @@
                 tempMax: 28.0,
                 humMin: 55.0,
                 humMax: 65.0,
-                color: "#2F6B"
+                color: "#2F6B",
+                needsHeat: false
             },
-            ADULT_LAYER: {
+            {
                 name: "Adult",
                 minAge: 43,
                 maxAge: 999,
@@ -725,67 +1045,84 @@
                 tempMax: 24.0,
                 humMin: 50.0,
                 humMax: 60.0,
-                color: "#4AFF"
+                color: "#4AFF",
+                needsHeat: false
             }
-        };
+        ];
 
         // Global state
         let mqttClient = null;
         let isConnected = false;
-        let systemState = {
+        let currentScreen = 0;
+        
+        const systemState = {
             temperature: null,
             humidity: null,
+            smoothTemp: null,
+            smoothHum: null,
             fan: false,
             heat: false,
             autoMode: true,
-            stage: STAGES.BROODING_WEEK1,
+            override: false,
+            lastControlSource: "system",
+            stage: 0,
             age: 0,
             sensorOnline: false,
             alarm: "",
+            alarmCritical: false,
             lastUpdate: null,
             wifi: false,
             mqtt: false,
             ntp: false,
-            uptime: "0s"
+            ntpInitialized: false,
+            sdReady: false,
+            uptime: "0s",
+            tempOffset: 0,
+            humOffset: 0,
+            version: "VQUAIL_S3_TFT_V7_MQTT_WS"
         };
 
         // DOM Elements
         const loading = document.getElementById('loading');
         const loadingText = document.getElementById('loading-text');
         const connectBtn = document.getElementById('connectBtn');
-        const mqttStatus = document.getElementById('mqttStatus');
-        const sensorStatus = document.getElementById('sensorStatus');
-        const wifiStatus = document.getElementById('wifiStatus');
-        const ntpStatus = document.getElementById('ntpStatus');
+        
+        // Status indicators
+        const mqttStatusDot = document.getElementById('mqttStatus');
+        const sensorStatusDot = document.getElementById('sensorStatus');
+        const wifiStatusDot = document.getElementById('wifiStatus');
+        const ntpStatusDot = document.getElementById('ntpStatus');
+        const sdStatusDot = document.getElementById('sdStatus');
         const currentTime = document.getElementById('currentTime');
+        
+        // Alarm banner
         const alarmBanner = document.getElementById('alarmBanner');
         const alarmMessage = document.getElementById('alarmMessage');
         
-        // Sensor display elements
+        // Home screen elements
         const temperature = document.getElementById('temperature');
         const humidity = document.getElementById('humidity');
         const tempStatus = document.getElementById('tempStatus');
         const humStatus = document.getElementById('humStatus');
-        const tempRangeFill = document.getElementById('tempRangeFill');
-        const humRangeFill = document.getElementById('humRangeFill');
         const tempMarker = document.getElementById('tempMarker');
         const humMarker = document.getElementById('humMarker');
         const tempMin = document.getElementById('tempMin');
         const tempMax = document.getElementById('tempMax');
         const humMin = document.getElementById('humMin');
         const humMax = document.getElementById('humMax');
-        
-        // Stage display elements
         const currentStage = document.getElementById('currentStage');
         const targetTemp = document.getElementById('targetTemp');
         const targetHum = document.getElementById('targetHum');
         const ageDays = document.getElementById('ageDays');
         const stageColor = document.getElementById('stageColor');
         const stageName = document.getElementById('stageName');
-        
-        // Control elements
         const modeIndicator = document.getElementById('modeIndicator');
         const modeText = document.getElementById('modeText');
+        const fanState = document.getElementById('fanState');
+        const heatState = document.getElementById('heatState');
+        const lastUpdate = document.getElementById('lastUpdate');
+        
+        // Control buttons
         const fanOnBtn = document.getElementById('fanOnBtn');
         const fanOffBtn = document.getElementById('fanOffBtn');
         const heatOnBtn = document.getElementById('heatOnBtn');
@@ -793,14 +1130,37 @@
         const autoModeBtn = document.getElementById('autoModeBtn');
         const autoBtnText = document.getElementById('autoBtnText');
         
-        // Status elements
-        const fanState = document.getElementById('fanState');
-        const heatState = document.getElementById('heatState');
-        const uptime = document.getElementById('uptime');
-        const currentDate = document.getElementById('currentDate');
-        const lastUpdate = document.getElementById('lastUpdate');
+        // Control screen
+        const controlTemp = document.getElementById('controlTemp');
+        const controlHum = document.getElementById('controlHum');
+        const controlAutoBtn = document.getElementById('controlAutoBtn');
+        const controlSource = document.getElementById('controlSource');
         
-        // Connection status
+        // Settings screen
+        const currentAge = document.getElementById('currentAge');
+        const tempOffset = document.getElementById('tempOffset');
+        const humOffset = document.getElementById('humOffset');
+        
+        // Info screen
+        const infoWifi = document.getElementById('infoWifi');
+        const infoMqtt = document.getElementById('infoMqtt');
+        const infoNtp = document.getElementById('infoNtp');
+        const infoRssi = document.getElementById('infoRssi');
+        const infoSensor = document.getElementById('infoSensor');
+        const infoSD = document.getElementById('infoSD');
+        const infoUptime = document.getElementById('infoUptime');
+        const infoVersion = document.getElementById('infoVersion');
+        const infoStage = document.getElementById('infoStage');
+        const infoAge = document.getElementById('infoAge');
+        const infoTempRange = document.getElementById('infoTempRange');
+        const infoHumRange = document.getElementById('infoHumRange');
+        const infoFan = document.getElementById('infoFan');
+        const infoHeat = document.getElementById('infoHeat');
+        const infoMode = document.getElementById('infoMode');
+        const infoOverride = document.getElementById('infoOverride');
+        const lastSensorTime = document.getElementById('lastSensorTime');
+        
+        // MQTT status
         const mqttConnectionStatus = document.getElementById('mqttConnectionStatus');
         const mqttMessages = document.getElementById('mqttMessages');
 
@@ -809,57 +1169,103 @@
             updateDateTime();
             setInterval(updateDateTime, 1000);
             updateDisplay();
+            switchScreen(0);
         }
 
-        // Update date and time display
+        // Update date and time display (Malaysia time UTC+8)
         function updateDateTime() {
             const now = new Date();
-            const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // UTC+8
+            const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
             
             const timeStr = malaysiaTime.toISOString().substr(11, 8);
             const dateStr = malaysiaTime.toISOString().substr(0, 10);
             
             currentTime.textContent = timeStr;
-            currentDate.textContent = dateStr;
+            
+            if (systemState.lastUpdate) {
+                lastUpdate.textContent = systemState.lastUpdate;
+            }
+        }
+
+        // Switch between screens
+        function switchScreen(screen) {
+            currentScreen = screen;
+            
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected screen
+            const screens = ['homeScreen', 'controlScreen', 'settingsScreen', 'infoScreen'];
+            document.getElementById(screens[screen]).classList.add('active');
+            
+            // Activate corresponding nav button
+            document.querySelectorAll('.nav-btn')[screen].classList.add('active');
+            
+            // Update screen content
+            updateScreenContent(screen);
+        }
+
+        // Update screen content
+        function updateScreenContent(screen) {
+            switch(screen) {
+                case 0: // Home
+                    updateHomeScreen();
+                    break;
+                case 1: // Control
+                    updateControlScreen();
+                    break;
+                case 2: // Settings
+                    updateSettingsScreen();
+                    break;
+                case 3: // Info
+                    updateInfoScreen();
+                    break;
+            }
         }
 
         // Update all displays with current state
         function updateDisplay() {
             // Update sensor values
             if (systemState.temperature !== null) {
-                temperature.textContent = systemState.temperature.toFixed(1);
-                temperature.innerHTML = `${systemState.temperature.toFixed(1)}<span class="unit">°C</span>`;
+                temperature.textContent = systemState.temperature.toFixed(1) + '°C';
+                controlTemp.textContent = systemState.temperature.toFixed(1) + '°C';
                 
                 // Update temperature range indicator
-                updateRangeIndicator('temp', systemState.temperature, systemState.stage.tempMin, systemState.stage.tempMax);
+                updateRangeIndicator('temp', systemState.temperature, 
+                    STAGES[systemState.stage].tempMin, STAGES[systemState.stage].tempMax);
             }
             
             if (systemState.humidity !== null) {
-                humidity.textContent = systemState.humidity.toFixed(1);
-                humidity.innerHTML = `${systemState.humidity.toFixed(1)}<span class="unit">%</span>`;
+                humidity.textContent = systemState.humidity.toFixed(1) + '%';
+                controlHum.textContent = systemState.humidity.toFixed(1) + '%';
                 
                 // Update humidity range indicator
-                updateRangeIndicator('hum', systemState.humidity, systemState.stage.humMin, systemState.stage.humMax);
+                updateRangeIndicator('hum', systemState.humidity, 
+                    STAGES[systemState.stage].humMin, STAGES[systemState.stage].humMax);
             }
             
             // Update status indicators
             updateStatusIndicators();
             
             // Update stage info
-            currentStage.textContent = systemState.stage.name;
-            stageName.textContent = `Stage: ${systemState.stage.name}`;
-            targetTemp.textContent = `${systemState.stage.tempMin}~${systemState.stage.tempMax}°C`;
-            targetHum.textContent = `${systemState.stage.humMin}~${systemState.stage.humMax}%`;
+            const stage = STAGES[systemState.stage];
+            currentStage.textContent = stage.name;
+            stageName.textContent = `Stage: ${stage.name}`;
+            targetTemp.textContent = `${stage.tempMin}-${stage.tempMax}°C`;
+            targetHum.textContent = `${stage.humMin}-${stage.humMax}%`;
             ageDays.textContent = `${systemState.age} days`;
+            currentAge.textContent = systemState.age;
             
             // Update stage color
-            stageColor.style.backgroundColor = systemState.stage.color;
+            stageColor.style.backgroundColor = stage.color;
             
             // Update mode indicator
-            if (systemState.autoMode) {
+            if (systemState.autoMode && !systemState.override) {
                 modeIndicator.className = 'mode-indicator mode-auto';
                 modeText.textContent = 'AUTO';
                 autoBtnText.textContent = 'SWITCH TO MANUAL';
+                controlAutoBtn.textContent = 'SWITCH TO MANUAL';
                 
                 // In auto mode, disable manual controls
                 fanOnBtn.disabled = true;
@@ -870,6 +1276,7 @@
                 modeIndicator.className = 'mode-indicator mode-manual';
                 modeText.textContent = 'MANUAL';
                 autoBtnText.textContent = 'SWITCH TO AUTO';
+                controlAutoBtn.textContent = 'SWITCH TO AUTO';
                 
                 // In manual mode, enable controls
                 fanOnBtn.disabled = false;
@@ -880,46 +1287,61 @@
             
             // Update device states
             fanState.textContent = systemState.fan ? 'ON' : 'OFF';
+            fanState.style.color = systemState.fan ? 'var(--success)' : 'var(--text-dim)';
+            
             heatState.textContent = systemState.heat ? 'ON' : 'OFF';
+            heatState.style.color = systemState.heat ? 'var(--success)' : 'var(--text-dim)';
             
             // Update button states
-            fanOnBtn.disabled = systemState.fan || systemState.autoMode;
-            fanOffBtn.disabled = !systemState.fan || systemState.autoMode;
-            heatOnBtn.disabled = systemState.heat || systemState.autoMode;
-            heatOffBtn.disabled = !systemState.heat || systemState.autoMode;
+            fanOnBtn.disabled = systemState.fan || (systemState.autoMode && !systemState.override);
+            fanOffBtn.disabled = !systemState.fan || (systemState.autoMode && !systemState.override);
+            heatOnBtn.disabled = systemState.heat || (systemState.autoMode && !systemState.override);
+            heatOffBtn.disabled = !systemState.heat || (systemState.autoMode && !systemState.override);
             
-            // Update uptime
-            uptime.textContent = systemState.uptime;
-            
-            // Update last update time
-            if (systemState.lastUpdate) {
-                lastUpdate.textContent = systemState.lastUpdate;
-            }
+            // Update control source
+            controlSource.textContent = systemState.lastControlSource;
             
             // Update alarm banner
             if (systemState.alarm && systemState.alarm !== "") {
                 alarmMessage.textContent = systemState.alarm;
                 alarmBanner.classList.add('show');
+                alarmBanner.style.background = systemState.alarmCritical ? 
+                    'linear-gradient(90deg, var(--danger), #ff4444)' : 
+                    'linear-gradient(90deg, var(--warning), #ffaa00)';
             } else {
                 alarmBanner.classList.remove('show');
             }
             
             // Update range labels
-            tempMin.textContent = `${systemState.stage.tempMin}°C`;
-            tempMax.textContent = `${systemState.stage.tempMax}°C`;
-            humMin.textContent = `${systemState.stage.humMin}%`;
-            humMax.textContent = `${systemState.stage.humMax}%`;
+            tempMin.textContent = `${stage.tempMin}°C`;
+            tempMax.textContent = `${stage.tempMax}°C`;
+            humMin.textContent = `${stage.humMin}%`;
+            humMax.textContent = `${stage.humMax}%`;
+            
+            // Update calibration displays
+            tempOffset.textContent = systemState.tempOffset.toFixed(1) + '°C';
+            humOffset.textContent = systemState.humOffset.toFixed(1) + '%';
+            
+            // Highlight current stage button
+            updateStageButtons();
         }
 
         // Update range indicators
         function updateRangeIndicator(type, value, min, max) {
             const range = max - min;
-            const normalizedValue = Math.max(0, Math.min(100, ((value - min) / range) * 100));
+            let normalizedValue = 0;
+            
+            if (range > 0) {
+                normalizedValue = Math.max(0, Math.min(100, ((value - min) / range) * 100));
+            }
             
             if (type === 'temp') {
                 tempMarker.style.left = `${normalizedValue}%`;
                 // Update status color based on temperature
-                if (value < min) {
+                if (value < min - 5) {
+                    tempStatus.textContent = 'EXTREME COLD';
+                    tempStatus.className = 'status-text offline';
+                } else if (value < min) {
                     tempStatus.textContent = 'LOW';
                     tempStatus.className = 'status-text offline';
                 } else if (value > max) {
@@ -949,45 +1371,154 @@
         function updateStatusIndicators() {
             // MQTT status
             if (isConnected) {
-                mqttStatus.className = 'status-dot online';
+                mqttStatusDot.className = 'status-dot online';
                 mqttConnectionStatus.textContent = 'Connected';
-                mqttConnectionStatus.style.color = '#07E0';
+                mqttConnectionStatus.style.color = 'var(--success)';
             } else {
-                mqttStatus.className = 'status-dot offline';
+                mqttStatusDot.className = 'status-dot offline';
                 mqttConnectionStatus.textContent = 'Disconnected';
-                mqttConnectionStatus.style.color = '#F800';
+                mqttConnectionStatus.style.color = 'var(--danger)';
             }
             
             // Sensor status
             if (systemState.sensorOnline) {
-                sensorStatus.className = 'status-dot online';
+                sensorStatusDot.className = 'status-dot online';
             } else {
-                sensorStatus.className = 'status-dot offline';
+                sensorStatusDot.className = 'status-dot offline';
             }
             
             // WiFi status
             if (systemState.wifi) {
-                wifiStatus.className = 'status-dot online';
+                wifiStatusDot.className = 'status-dot online';
             } else {
-                wifiStatus.className = 'status-dot offline';
+                wifiStatusDot.className = 'status-dot offline';
             }
             
             // NTP status
-            if (systemState.ntp) {
-                ntpStatus.className = 'status-dot online';
+            if (systemState.ntp && systemState.ntpInitialized) {
+                ntpStatusDot.className = 'status-dot online';
             } else {
-                ntpStatus.className = 'status-dot offline';
+                ntpStatusDot.className = 'status-dot offline';
+            }
+            
+            // SD Card status
+            if (systemState.sdReady) {
+                sdStatusDot.className = 'status-dot online';
+            } else {
+                sdStatusDot.className = 'status-dot offline';
             }
         }
 
-        // Connect to MQTT broker
-        function connectMQTT() {
-            if (isConnected) {
-                disconnectMQTT();
-                return;
+        // Update home screen
+        function updateHomeScreen() {
+            // Already handled by updateDisplay()
+        }
+
+        // Update control screen
+        function updateControlScreen() {
+            // Update sensor readings
+            if (systemState.temperature !== null) {
+                controlTemp.textContent = systemState.temperature.toFixed(1) + '°C';
+            }
+            if (systemState.humidity !== null) {
+                controlHum.textContent = systemState.humidity.toFixed(1) + '%';
             }
             
-            loadingText.textContent = "Connecting to MQTT...";
+            // Update control source
+            controlSource.textContent = systemState.lastControlSource;
+            
+            // Update auto mode button text
+            controlAutoBtn.textContent = systemState.autoMode ? 'SWITCH TO MANUAL' : 'SWITCH TO AUTO';
+        }
+
+        // Update settings screen
+        function updateSettingsScreen() {
+            // Update current age
+            currentAge.textContent = systemState.age;
+            
+            // Update calibration values
+            tempOffset.textContent = systemState.tempOffset.toFixed(1) + '°C';
+            humOffset.textContent = systemState.humOffset.toFixed(1) + '%';
+            
+            // Update stage buttons
+            updateStageButtons();
+        }
+
+        // Update info screen
+        function updateInfoScreen() {
+            const stage = STAGES[systemState.stage];
+            
+            infoWifi.textContent = systemState.wifi ? 'Connected' : 'Disconnected';
+            infoWifi.style.color = systemState.wifi ? 'var(--success)' : 'var(--danger)';
+            
+            infoMqtt.textContent = systemState.mqtt ? 'Connected' : 'Disconnected';
+            infoMqtt.style.color = systemState.mqtt ? 'var(--success)' : 'var(--danger)';
+            
+            infoNtp.textContent = systemState.ntp ? 'Synchronized' : 'Not synced';
+            infoNtp.style.color = systemState.ntp ? 'var(--success)' : 'var(--danger)';
+            
+            infoSensor.textContent = systemState.sensorOnline ? 'Online' : 'Offline';
+            infoSensor.style.color = systemState.sensorOnline ? 'var(--success)' : 'var(--danger)';
+            
+            infoSD.textContent = systemState.sdReady ? 'Available' : 'Not found';
+            infoSD.style.color = systemState.sdReady ? 'var(--success)' : 'var(--danger)';
+            
+            infoUptime.textContent = systemState.uptime;
+            infoVersion.textContent = systemState.version;
+            
+            infoStage.textContent = stage.name;
+            infoAge.textContent = systemState.age + ' days';
+            infoTempRange.textContent = stage.tempMin + '-' + stage.tempMax + '°C';
+            infoHumRange.textContent = stage.humMin + '-' + stage.humMax + '%';
+            
+            infoFan.textContent = systemState.fan ? 'ON' : 'OFF';
+            infoFan.style.color = systemState.fan ? 'var(--success)' : 'var(--text-dim)';
+            
+            infoHeat.textContent = systemState.heat ? 'ON' : 'OFF';
+            infoHeat.style.color = systemState.heat ? 'var(--success)' : 'var(--text-dim)';
+            
+            infoMode.textContent = systemState.autoMode ? 'AUTO' : 'MANUAL';
+            infoMode.style.color = systemState.autoMode ? 'var(--success)' : 'var(--warning)';
+            
+            infoOverride.textContent = systemState.override ? 'YES' : 'NO';
+            infoOverride.style.color = systemState.override ? 'var(--warning)' : 'var(--text-dim)';
+            
+            if (systemState.lastUpdate) {
+                lastSensorTime.textContent = systemState.lastUpdate;
+            }
+        }
+
+        // Update stage buttons highlighting
+        function updateStageButtons() {
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById(`stageBtn${i}`);
+                if (btn) {
+                    if (i === systemState.stage) {
+                        btn.style.background = STAGES[i].color;
+                        btn.style.color = 'white';
+                        btn.style.border = '2px solid white';
+                    } else {
+                        btn.style.background = 'var(--card-bg)';
+                        btn.style.color = 'var(--text)';
+                        btn.style.border = '1px solid rgba(255,255,255,0.1)';
+                    }
+                }
+            }
+        }
+
+        // MQTT Connection Functions
+        function toggleMQTT() {
+            if (isConnected) {
+                disconnectMQTT();
+            } else {
+                connectMQTT();
+            }
+        }
+
+        function connectMQTT() {
+            if (isConnected) return;
+            
+            loadingText.textContent = "Connecting to VQuail via MQTT...";
             loading.classList.add('show');
             connectBtn.textContent = "Connecting...";
             connectBtn.classList.add('connecting');
@@ -1003,7 +1534,7 @@
             mqttClient.onConnectionLost = onConnectionLost;
             mqttClient.onMessageArrived = onMessageArrived;
             
-            // Connect the client
+            // Connect options
             const connectOptions = {
                 userName: MQTT_CONFIG.username,
                 password: MQTT_CONFIG.password,
@@ -1018,14 +1549,14 @@
             mqttClient.connect(connectOptions);
         }
 
-        // MQTT connection success callback
         function onConnect() {
-            console.log("MQTT Connected successfully");
+            console.log("MQTT Connected successfully to VQuail");
             isConnected = true;
             
             // Subscribe to topics
             mqttClient.subscribe("vquail/status/#");
             mqttClient.subscribe("vquail/control/response");
+            mqttClient.subscribe("vquail/alerts");
             
             // Update UI
             loading.classList.remove('show');
@@ -1037,9 +1568,9 @@
             
             // Show success message
             addMqttMessage("Connected to VQuail system");
+            updateDisplay();
         }
 
-        // MQTT connection failure callback
         function onConnectFailure(response) {
             console.error("MQTT Connection failed:", response);
             loading.classList.remove('show');
@@ -1047,10 +1578,9 @@
             connectBtn.classList.remove('connecting');
             
             addMqttMessage("Connection failed: " + response.errorMessage);
-            alert("Failed to connect to MQTT broker. Please check your connection.");
+            alert("Failed to connect to VQuail. Please check:\n1. Internet connection\n2. MQTT credentials\n3. HiveMQ Cloud status");
         }
 
-        // MQTT connection lost callback
         function onConnectionLost(responseObject) {
             console.warn("MQTT Connection lost:", responseObject);
             isConnected = false;
@@ -1064,19 +1594,21 @@
             updateDisplay();
         }
 
-        // MQTT message received callback
         function onMessageArrived(message) {
-            console.log("MQTT Message received:", message.destinationName, message.payloadString);
+            console.log("MQTT Message:", message.destinationName, message.payloadString);
             
             try {
                 const data = JSON.parse(message.payloadString);
                 const topic = message.destinationName;
                 
-                addMqttMessage(`Received update from ${topic}`);
+                addMqttMessage(`Update from ${topic}`);
                 
                 if (topic.startsWith("vquail/status/")) {
                     updateSystemState(data);
                     updateDisplay();
+                    updateScreenContent(currentScreen);
+                } else if (topic === "vquail/alerts") {
+                    handleAlert(data);
                 }
             } catch (error) {
                 console.error("Error parsing MQTT message:", error);
@@ -1084,77 +1616,91 @@
             }
         }
 
-        // Update system state from MQTT data
         function updateSystemState(data) {
             // Update basic sensor data
             if (data.temp !== undefined) systemState.temperature = parseFloat(data.temp);
             if (data.hum !== undefined) systemState.humidity = parseFloat(data.hum);
+            if (data.smooth_temp !== undefined) systemState.smoothTemp = parseFloat(data.smooth_temp);
+            if (data.smooth_hum !== undefined) systemState.smoothHum = parseFloat(data.smooth_hum);
             if (data.fan !== undefined) systemState.fan = Boolean(data.fan);
             if (data.heat !== undefined) systemState.heat = Boolean(data.heat);
             if (data.auto !== undefined) systemState.autoMode = Boolean(data.auto);
+            if (data.override !== undefined) systemState.override = Boolean(data.override);
             if (data.age !== undefined) systemState.age = parseInt(data.age);
             if (data.sensor_online !== undefined) systemState.sensorOnline = Boolean(data.sensor_online);
             if (data.alarm !== undefined) systemState.alarm = data.alarm;
+            if (data.alarm_critical !== undefined) systemState.alarmCritical = Boolean(data.alarm_critical);
             if (data.wifi !== undefined) systemState.wifi = Boolean(data.wifi);
             if (data.mqtt !== undefined) systemState.mqtt = Boolean(data.mqtt);
             if (data.ntp !== undefined) systemState.ntp = Boolean(data.ntp);
+            if (data.ntp_initialized !== undefined) systemState.ntpInitialized = Boolean(data.ntp_initialized);
+            if (data.sd_ready !== undefined) systemState.sdReady = Boolean(data.sd_ready);
             if (data.uptime !== undefined) systemState.uptime = data.uptime + "s";
             if (data.time !== undefined) systemState.lastUpdate = data.time;
+            if (data.date !== undefined) {} // Date is handled separately
+            if (data.temp_offset !== undefined) systemState.tempOffset = parseFloat(data.temp_offset);
+            if (data.hum_offset !== undefined) systemState.humOffset = parseFloat(data.hum_offset);
+            if (data.last_control_source !== undefined) systemState.lastControlSource = data.last_control_source;
+            if (data.version !== undefined) systemState.version = data.version;
             
             // Update stage
             if (data.stage) {
                 const stageName = data.stage;
-                switch(stageName) {
-                    case "Brood W1":
-                        systemState.stage = STAGES.BROODING_WEEK1;
-                        break;
-                    case "Brood W2":
-                        systemState.stage = STAGES.BROODING_WEEK2;
-                        break;
-                    case "Grower":
-                        systemState.stage = STAGES.GROWER_WEEK3_6;
-                        break;
-                    case "Adult":
-                        systemState.stage = STAGES.ADULT_LAYER;
-                        break;
+                if (stageName.includes("Brood W1")) systemState.stage = 0;
+                else if (stageName.includes("Brood W2")) systemState.stage = 1;
+                else if (stageName.includes("Grower")) systemState.stage = 2;
+                else if (stageName.includes("Adult")) systemState.stage = 3;
+            }
+        }
+
+        function handleAlert(data) {
+            if (data.message) {
+                systemState.alarm = data.message;
+                systemState.alarmCritical = data.critical || false;
+                updateDisplay();
+                
+                // Show notification
+                if (Notification.permission === "granted") {
+                    new Notification("VQuail Alert", {
+                        body: data.message,
+                        icon: data.critical ? "⚠️" : "ℹ️"
+                    });
                 }
             }
         }
 
-        // Control functions
-        function controlFan(state) {
+        // Control Functions
+        function controlDevice(device, state) {
             if (!isConnected) {
-                alert("Please connect to MQTT first");
+                alert("Please connect to VQuail first");
                 return;
             }
             
-            const message = {
-                fan: state,
-                source: "web"
-            };
+            const message = {};
+            if (device === 'fan') {
+                message.fan = state;
+            } else if (device === 'heat') {
+                message.heat = state;
+            } else if (device === 'override') {
+                message.override = state;
+            }
+            message.source = "web";
             
             publishMessage("vquail/control", message);
-            addMqttMessage(`Sending: Fan ${state ? "ON" : "OFF"}`);
+            addMqttMessage(`Control: ${device} ${state ? 'ON' : 'OFF'}`);
+        }
+
+        function controlFan(state) {
+            controlDevice('fan', state);
         }
 
         function controlHeat(state) {
-            if (!isConnected) {
-                alert("Please connect to MQTT first");
-                return;
-            }
-            
-            const message = {
-                heat: state,
-                source: "web"
-            };
-            
-            publishMessage("vquail/control", message);
-            addMqttMessage(`Sending: Heat ${state ? "ON" : "OFF"}`);
+            controlDevice('heat', state);
         }
 
         function toggleAutoMode() {
             if (!isConnected) {
-                alert("Please connect to MQTT first");
+                alert("Please connect to VQuail first");
                 return;
             }
             
@@ -1165,12 +1711,143 @@
             };
             
             publishMessage("vquail/control", message);
-            addMqttMessage(`Sending: ${newMode ? "AUTO" : "MANUAL"} mode`);
+            addMqttMessage(`Mode: ${newMode ? 'AUTO' : 'MANUAL'}`);
+        }
+
+        function quickAction(action) {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            const message = { source: "web" };
+            
+            switch(action) {
+                case 'bothOn':
+                    message.fan = true;
+                    message.heat = true;
+                    break;
+                case 'bothOff':
+                    message.fan = false;
+                    message.heat = false;
+                    break;
+                case 'publish':
+                    publishStatus();
+                    return;
+            }
+            
+            publishMessage("vquail/control", message);
+            addMqttMessage(`Quick action: ${action}`);
+        }
+
+        function setStage(stageIndex) {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            const message = {
+                stage: stageIndex,
+                age: STAGES[stageIndex].minAge,
+                source: "web"
+            };
+            
+            publishMessage("vquail/control/settings", message);
+            addMqttMessage(`Set stage: ${STAGES[stageIndex].name}`);
+        }
+
+        function adjustAge(change) {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            const newAge = systemState.age + change;
+            const stage = STAGES[systemState.stage];
+            
+            if (newAge >= stage.minAge && newAge <= stage.maxAge) {
+                const message = {
+                    age: newAge,
+                    source: "web"
+                };
+                
+                publishMessage("vquail/control/settings", message);
+                addMqttMessage(`Adjust age: ${change > 0 ? '+' : ''}${change} days`);
+            }
+        }
+
+        function adjustCalibration(type, change) {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            const message = {
+                source: "web"
+            };
+            
+            if (type === 'temp') {
+                message.temp_offset = systemState.tempOffset + change;
+            } else if (type === 'hum') {
+                message.hum_offset = systemState.humOffset + change;
+            }
+            
+            publishMessage("vquail/control/calibration", message);
+            addMqttMessage(`Calibrate ${type}: ${change > 0 ? '+' : ''}${change}`);
+        }
+
+        function saveSettings() {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            const message = {
+                save: true,
+                source: "web"
+            };
+            
+            publishMessage("vquail/control/settings", message);
+            addMqttMessage("Saving settings...");
+        }
+
+        function sendReboot() {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            if (confirm("Are you sure you want to reboot the VQuail system?")) {
+                const message = {
+                    reboot: true,
+                    source: "web"
+                };
+                
+                publishMessage("vquail/control", message);
+                addMqttMessage("Rebooting system...");
+            }
+        }
+
+        function resetSettings() {
+            if (!isConnected) {
+                alert("Please connect to VQuail first");
+                return;
+            }
+            
+            if (confirm("Reset all settings to default values?")) {
+                const message = {
+                    reset: true,
+                    source: "web"
+                };
+                
+                publishMessage("vquail/control/settings", message);
+                addMqttMessage("Resetting to defaults...");
+            }
         }
 
         function publishStatus() {
             if (!isConnected) {
-                alert("Please connect to MQTT first");
+                alert("Please connect to VQuail first");
                 return;
             }
             
@@ -1183,7 +1860,6 @@
             addMqttMessage("Requesting system status...");
         }
 
-        // Publish message to MQTT
         function publishMessage(topic, message) {
             if (!mqttClient || !isConnected) {
                 console.error("MQTT not connected");
@@ -1196,30 +1872,34 @@
             mqttClient.send(msg);
         }
 
-        // Disconnect from MQTT
         function disconnectMQTT() {
             if (mqttClient && isConnected) {
                 mqttClient.disconnect();
                 isConnected = false;
                 connectBtn.textContent = "Connect to VQuail";
-                addMqttMessage("Disconnected from MQTT");
+                addMqttMessage("Disconnected from VQuail");
                 updateDisplay();
             }
         }
 
-        // Add message to MQTT log
         function addMqttMessage(text) {
             const now = new Date();
             const timeStr = now.toISOString().substr(11, 8);
             const message = `[${timeStr}] ${text}`;
             
-            mqttMessages.textContent = message;
-            
-            // Keep last few messages
-            const messages = mqttMessages.textContent.split('\n');
-            if (messages.length > 3) {
-                mqttMessages.textContent = messages.slice(-3).join('\n');
+            // Keep only last 3 messages
+            const currentMessages = mqttMessages.textContent.split('\n');
+            currentMessages.push(message);
+            if (currentMessages.length > 3) {
+                currentMessages.shift();
             }
+            
+            mqttMessages.textContent = currentMessages.join('\n');
+        }
+
+        // Request notification permission
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
         }
 
         // Initialize on page load
