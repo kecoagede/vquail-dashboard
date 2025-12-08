@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VQuail - Remote Monitoring System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -663,9 +664,35 @@
         .hidden {
             display: none !important;
         }
+        
+        .mqtt-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .mqtt-connected {
+            background: var(--success);
+            color: white;
+        }
+        
+        .mqtt-disconnected {
+            background: var(--danger);
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <!-- MQTT Status Indicator -->
+    <div id="mqttStatusIndicator" class="mqtt-status mqtt-disconnected">
+        <i class="fas fa-satellite-dish"></i> MQTT: Disconnected
+    </div>
+    
     <!-- Login Screen -->
     <div class="container">
         <div id="loginScreen" class="login-container">
@@ -686,6 +713,12 @@
                     <input type="password" id="password" class="form-control" placeholder="Enter password" required>
                 </div>
                 
+                <div class="form-group">
+                    <label for="espIp"><i class="fas fa-microchip"></i> ESP32 IP Address (Optional)</label>
+                    <input type="text" id="espIp" class="form-control" placeholder="192.168.1.100" value="">
+                    <small style="color: var(--gray); font-size: 0.8rem;">Leave empty if using MQTT only</small>
+                </div>
+                
                 <button type="submit" class="btn" id="loginBtn">
                     <span id="loginText">Login</span>
                     <span id="loginSpinner" class="spinner hidden"></span>
@@ -698,6 +731,7 @@
             
             <div style="margin-top: 30px; color: var(--gray); font-size: 0.9rem;">
                 <p><i class="fas fa-info-circle"></i> Default credentials: vquail / Vquail12345</p>
+                <p style="margin-top: 10px;"><i class="fas fa-satellite-dish"></i> Using MQTT WebSocket connection</p>
             </div>
         </div>
         
@@ -707,7 +741,7 @@
             <div class="header">
                 <div class="header-left">
                     <h2><i class="fas fa-dove"></i> VQuail Dashboard</h2>
-                    <p>Remote monitoring and control system for quail farming</p>
+                    <p>Remote monitoring via MQTT WebSocket</p>
                 </div>
                 
                 <div class="header-right">
@@ -726,24 +760,24 @@
             <div class="content">
                 <!-- Status Indicators -->
                 <div class="status-indicators">
-                    <div class="status-item" id="wifiStatus">
-                        <div class="status-dot"></div>
-                        <span>WiFi: <span id="wifiStatusText">Connecting...</span></span>
-                    </div>
-                    
-                    <div class="status-item" id="mqttStatus">
+                    <div class="status-item" id="mqttConnectionStatus">
                         <div class="status-dot"></div>
                         <span>MQTT: <span id="mqttStatusText">Connecting...</span></span>
                     </div>
                     
                     <div class="status-item" id="sensorStatus">
                         <div class="status-dot"></div>
-                        <span>Sensor: <span id="sensorStatusText">Connecting...</span></span>
+                        <span>Sensor: <span id="sensorStatusText">Waiting...</span></span>
                     </div>
                     
-                    <div class="status-item" id="ntpStatus">
+                    <div class="status-item" id="controlStatus">
                         <div class="status-dot"></div>
-                        <span>Time Sync: <span id="ntpStatusText">Connecting...</span></span>
+                        <span>Control: <span id="controlStatusText">Ready</span></span>
+                    </div>
+                    
+                    <div class="status-item" id="apiStatus">
+                        <div class="status-dot"></div>
+                        <span>API Key: <span id="apiStatusText">--</span></span>
                     </div>
                 </div>
                 
@@ -767,9 +801,9 @@
                             <span id="tempValue">--</span>
                             <span class="sensor-unit">°C</span>
                         </div>
-                        <div class="sensor-status normal" id="tempStatus">NORMAL</div>
+                        <div class="sensor-status normal" id="tempStatus">WAITING</div>
                         <div class="range-display" style="margin-top: 15px; font-size: 0.9rem; color: var(--gray);">
-                            Range: <span id="tempRange">--°C to --°C</span>
+                            Stage Range: <span id="tempRange">--°C to --°C</span>
                         </div>
                     </div>
                     
@@ -785,9 +819,9 @@
                             <span id="humValue">--</span>
                             <span class="sensor-unit">%</span>
                         </div>
-                        <div class="sensor-status normal" id="humStatus">NORMAL</div>
+                        <div class="sensor-status normal" id="humStatus">WAITING</div>
                         <div class="range-display" style="margin-top: 15px; font-size: 0.9rem; color: var(--gray);">
-                            Range: <span id="humRange">--% to --%</span>
+                            Stage Range: <span id="humRange">--% to --%</span>
                         </div>
                     </div>
                     
@@ -888,16 +922,16 @@
                             <div class="info-value" id="uptimeValue">--</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">API Status</div>
-                            <div class="info-value" id="apiStatus">Connecting...</div>
-                        </div>
-                        <div class="info-item">
                             <div class="info-label">Last Update</div>
                             <div class="info-value" id="lastUpdate">--</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">ESP32 Board</div>
                             <div class="info-value">ESP32-S3</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Connection</div>
+                            <div class="info-value" id="connectionType">MQTT WebSocket</div>
                         </div>
                     </div>
                 </div>
@@ -916,7 +950,7 @@
                         </button>
                         <button class="action-btn publish" id="publishBtn">
                             <i class="fas fa-paper-plane"></i>
-                            <span>Publish Data</span>
+                            <span>Force Update</span>
                         </button>
                         <button class="action-btn reboot" id="rebootBtn">
                             <i class="fas fa-redo"></i>
@@ -928,31 +962,60 @@
             
             <!-- Footer -->
             <div class="footer">
-                <p>VQuail Monitoring System v6.0 | ESP32-S3 | Malaysia Time (UTC+8)</p>
+                <p>VQuail Monitoring System v7.0 | ESP32-S3 | Malaysia Time (UTC+8)</p>
                 <p style="margin-top: 5px; font-size: 0.8rem;">
-                    <i class="fas fa-shield-alt"></i> Secured Connection | 
+                    <i class="fas fa-shield-alt"></i> Secured MQTT Connection | 
                     <i class="fas fa-microchip"></i> Hardware: ESP32-S3 | 
-                    <i class="fas fa-satellite-dish"></i> MQTT: HiveMQ Cloud
+                    <i class="fas fa-satellite-dish"></i> MQTT: HiveMQ Cloud WebSocket
                 </p>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuration - UPDATE THIS WITH YOUR ESP32 IP ADDRESS
-        const ESP32_IP = "192.168.1.100"; // Change this to your ESP32's IP address
-        const API_URL = `http://${ESP32_IP}/api/status`;
-        const CONTROL_URL = `http://${ESP32_IP}/control`;
-        const UPDATE_INTERVAL = 5000; // Update every 5 seconds
-        
+        // MQTT Configuration
+        const MQTT_CONFIG = {
+            host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
+            port: 8884, // WebSocket SSL port
+            username: 'vquail',
+            password: 'Vquail12345',
+            protocol: 'wss',
+            clientId: 'vquail-web-' + Math.random().toString(16).substr(2, 8),
+            clean: true,
+            reconnectPeriod: 5000,
+            connectTimeout: 10000
+        };
+
+        // Topics
+        const TOPICS = {
+            SENSORS: 'vquail/secure/status/sensors',
+            DEVICE: 'vquail/secure/status/device',
+            CONTROL: 'vquail/secure/control',
+            WEB_CONTROL: 'vquail/secure/web/control'
+        };
+
         // Login credentials
         const CORRECT_USERNAME = "vquail";
         const CORRECT_PASSWORD = "Vquail12345";
         
         // State variables
         let isLoggedIn = false;
-        let updateInterval;
-        let currentData = {};
+        let mqttClient = null;
+        let apiKey = "";
+        let currentData = {
+            temp: null,
+            hum: null,
+            fan: false,
+            heat: false,
+            auto: true,
+            stage: "Unknown",
+            age: 0,
+            sensor_online: false,
+            alarm: "",
+            uptime: "0",
+            time: "--:--:--",
+            date: "----/--/--"
+        };
         
         // DOM Elements
         const loginScreen = document.getElementById('loginScreen');
@@ -963,20 +1026,21 @@
         const loginText = document.getElementById('loginText');
         const loginSpinner = document.getElementById('loginSpinner');
         const logoutBtn = document.getElementById('logoutBtn');
+        const mqttStatusIndicator = document.getElementById('mqttStatusIndicator');
         
         // Time elements
         const currentTimeEl = document.getElementById('currentTime');
         const currentDateEl = document.getElementById('currentDate');
         
         // Status elements
-        const wifiStatus = document.getElementById('wifiStatus');
-        const wifiStatusText = document.getElementById('wifiStatusText');
-        const mqttStatus = document.getElementById('mqttStatus');
+        const mqttConnectionStatus = document.getElementById('mqttConnectionStatus');
         const mqttStatusText = document.getElementById('mqttStatusText');
         const sensorStatus = document.getElementById('sensorStatus');
         const sensorStatusText = document.getElementById('sensorStatusText');
-        const ntpStatus = document.getElementById('ntpStatus');
-        const ntpStatusText = document.getElementById('ntpStatusText');
+        const controlStatus = document.getElementById('controlStatus');
+        const controlStatusText = document.getElementById('controlStatusText');
+        const apiStatus = document.getElementById('apiStatus');
+        const apiStatusText = document.getElementById('apiStatusText');
         
         // Alarm elements
         const alarmBanner = document.getElementById('alarmBanner');
@@ -1011,8 +1075,8 @@
         
         // System info elements
         const uptimeValue = document.getElementById('uptimeValue');
-        const apiStatus = document.getElementById('apiStatus');
         const lastUpdate = document.getElementById('lastUpdate');
+        const connectionType = document.getElementById('connectionType');
         
         // Quick action buttons
         const bothOnBtn = document.getElementById('bothOnBtn');
@@ -1026,6 +1090,7 @@
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const espIp = document.getElementById('espIp').value.trim();
             
             // Show loading state
             loginText.classList.add('hidden');
@@ -1043,12 +1108,17 @@
                     loginScreen.classList.add('hidden');
                     dashboard.classList.add('active');
                     
-                    // Start data updates
-                    startDataUpdates();
+                    // Initialize MQTT connection
+                    initMQTT();
+                    
+                    // Update time
                     updateTime();
                     
-                    // Save login state (optional)
+                    // Save login state
                     localStorage.setItem('vquail_logged_in', 'true');
+                    if (espIp) {
+                        localStorage.setItem('vquail_esp_ip', espIp);
+                    }
                 } else {
                     // Failed login
                     loginError.style.display = 'block';
@@ -1065,9 +1135,9 @@
         function handleLogout() {
             isLoggedIn = false;
             
-            // Clear interval
-            if (updateInterval) {
-                clearInterval(updateInterval);
+            // Disconnect MQTT
+            if (mqttClient && mqttClient.connected) {
+                mqttClient.end();
             }
             
             // Hide dashboard, show login
@@ -1087,82 +1157,120 @@
                 isLoggedIn = true;
                 loginScreen.classList.add('hidden');
                 dashboard.classList.add('active');
-                startDataUpdates();
+                
+                // Load saved ESP IP
+                const savedEspIp = localStorage.getItem('vquail_esp_ip');
+                if (savedEspIp) {
+                    document.getElementById('espIp').value = savedEspIp;
+                }
+                
+                initMQTT();
                 updateTime();
             }
         }
         
-        // Fetch data from ESP32
-        async function fetchData() {
-            try {
-                const response = await fetch(API_URL);
+        // Initialize MQTT connection
+        function initMQTT() {
+            console.log('Connecting to MQTT WebSocket...');
+            
+            mqttClient = mqtt.connect(MQTT_CONFIG);
+            
+            mqttClient.on('connect', () => {
+                console.log('MQTT Connected');
+                updateMQTTStatus(true, 'Connected');
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // Subscribe to topics
+                mqttClient.subscribe(TOPICS.SENSORS, { qos: 0 });
+                mqttClient.subscribe(TOPICS.DEVICE, { qos: 0 });
+                
+                // Request initial state
+                sendControlCommand({ get_state: true });
+            });
+            
+            mqttClient.on('message', (topic, message) => {
+                try {
+                    const data = JSON.parse(message.toString());
+                    
+                    // Update API key if received
+                    if (data.apikey && !apiKey) {
+                        apiKey = data.apikey;
+                        updateAPIKeyDisplay();
+                    }
+                    
+                    // Update data based on topic
+                    if (topic === TOPICS.SENSORS || topic === TOPICS.DEVICE) {
+                        updateDashboard(data);
+                    }
+                } catch (error) {
+                    console.error('Error parsing MQTT message:', error);
                 }
-                
-                const data = await response.json();
-                currentData = data;
-                updateDashboard(data);
-                apiStatus.textContent = "Connected";
-                apiStatus.style.color = "var(--success)";
-                
-                return data;
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                apiStatus.textContent = "Disconnected";
-                apiStatus.style.color = "var(--danger)";
-                
-                // Update status indicators
-                wifiStatus.className = "status-item offline";
-                wifiStatusText.textContent = "Offline";
-                mqttStatus.className = "status-item offline";
-                mqttStatusText.textContent = "Offline";
-                sensorStatus.className = "status-item offline";
-                sensorStatusText.textContent = "Offline";
-                
-                return null;
+            });
+            
+            mqttClient.on('error', (error) => {
+                console.error('MQTT Error:', error);
+                updateMQTTStatus(false, 'Error: ' + error.message);
+            });
+            
+            mqttClient.on('close', () => {
+                console.log('MQTT Disconnected');
+                updateMQTTStatus(false, 'Disconnected');
+            });
+            
+            mqttClient.on('reconnect', () => {
+                console.log('MQTT Reconnecting...');
+                updateMQTTStatus(false, 'Reconnecting...');
+            });
+        }
+        
+        // Send control command via MQTT
+        function sendControlCommand(command) {
+            if (!mqttClient || !mqttClient.connected) {
+                console.error('MQTT not connected');
+                return;
+            }
+            
+            const message = {
+                ...command,
+                apikey: apiKey,
+                timestamp: new Date().toISOString()
+            };
+            
+            mqttClient.publish(TOPICS.CONTROL, JSON.stringify(message), { qos: 0 });
+            console.log('Sent command:', message);
+        }
+        
+        // Update MQTT status display
+        function updateMQTTStatus(connected, message) {
+            mqttStatusText.textContent = message;
+            
+            if (connected) {
+                mqttConnectionStatus.className = 'status-item online';
+                mqttStatusIndicator.className = 'mqtt-status mqtt-connected';
+                mqttStatusIndicator.innerHTML = '<i class="fas fa-satellite-dish"></i> MQTT: Connected';
+            } else {
+                mqttConnectionStatus.className = 'status-item offline';
+                mqttStatusIndicator.className = 'mqtt-status mqtt-disconnected';
+                mqttStatusIndicator.innerHTML = '<i class="fas fa-satellite-dish"></i> MQTT: ' + message;
             }
         }
         
-        // Send control command
-        async function sendControlCommand(command, value) {
-            try {
-                // In a real implementation, this would send a POST request to the ESP32
-                console.log(`Sending command: ${command} = ${value}`);
-                
-                // For demo purposes, we'll simulate the control
-                // In production, you would use fetch to send the command
-                // const response = await fetch(`${CONTROL_URL}`, {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ command, value, apikey: currentData.apikey })
-                // });
-                
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Update local state
-                if (command === 'fan') {
-                    currentData.fan = value;
-                    updateDeviceStatus();
-                } else if (command === 'heat') {
-                    currentData.heat = value;
-                    updateDeviceStatus();
-                } else if (command === 'auto') {
-                    currentData.auto = value;
-                    updateModeStatus();
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error sending command:', error);
-                return false;
+        // Update API key display
+        function updateAPIKeyDisplay() {
+            if (apiKey) {
+                const shortKey = apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4);
+                apiStatusText.textContent = shortKey;
+                apiStatus.className = 'status-item online';
+            } else {
+                apiStatusText.textContent = 'Not set';
+                apiStatus.className = 'status-item warning';
             }
         }
         
         // Update dashboard with new data
         function updateDashboard(data) {
+            // Merge new data with current data
+            currentData = { ...currentData, ...data };
+            
             // Update status indicators
             updateStatusIndicators(data);
             
@@ -1199,85 +1307,62 @@
         
         // Update status indicators
         function updateStatusIndicators(data) {
-            // WiFi status
-            if (data.wifi) {
-                wifiStatus.className = "status-item online";
-                wifiStatusText.textContent = "Connected";
-            } else {
-                wifiStatus.className = "status-item offline";
-                wifiStatusText.textContent = "Disconnected";
-            }
-            
-            // MQTT status
-            if (data.mqtt) {
-                mqttStatus.className = "status-item online";
-                mqttStatusText.textContent = "Connected";
-            } else {
-                mqttStatus.className = "status-item offline";
-                mqttStatusText.textContent = "Disconnected";
-            }
-            
             // Sensor status
             if (data.sensor_online !== undefined) {
                 if (data.sensor_online) {
-                    sensorStatus.className = "status-item online";
-                    sensorStatusText.textContent = "Online";
+                    sensorStatus.className = 'status-item online';
+                    sensorStatusText.textContent = 'Online';
                 } else {
-                    sensorStatus.className = "status-item offline";
-                    sensorStatusText.textContent = "Offline";
+                    sensorStatus.className = 'status-item offline';
+                    sensorStatusText.textContent = 'Offline';
                 }
             }
             
-            // NTP status
-            if (data.ntp) {
-                ntpStatus.className = "status-item online";
-                ntpStatusText.textContent = "Synchronized";
-            } else {
-                ntpStatus.className = "status-item warning";
-                ntpStatusText.textContent = "Not Synced";
-            }
+            // Control status
+            controlStatus.className = 'status-item online';
+            controlStatusText.textContent = 'Ready';
         }
         
         // Update sensor values
         function updateSensorValues(data) {
             // Temperature
-            if (data.temp !== undefined) {
+            if (data.temp !== undefined && data.temp !== null) {
                 tempValue.textContent = data.temp.toFixed(1);
                 
                 // Update temperature status
-                // In a real implementation, you would compare with stage thresholds
+                // Note: In a real implementation, you would compare with stage thresholds
                 if (data.temp < 20) {
-                    tempStatus.className = "sensor-status danger";
-                    tempStatus.textContent = "TOO LOW";
+                    tempStatus.className = 'sensor-status danger';
+                    tempStatus.textContent = 'TOO LOW';
                 } else if (data.temp > 35) {
-                    tempStatus.className = "sensor-status danger";
-                    tempStatus.textContent = "TOO HIGH";
+                    tempStatus.className = 'sensor-status danger';
+                    tempStatus.textContent = 'TOO HIGH';
                 } else if (data.temp < 25 || data.temp > 30) {
-                    tempStatus.className = "sensor-status warning";
-                    tempStatus.textContent = "WARNING";
+                    tempStatus.className = 'sensor-status warning';
+                    tempStatus.textContent = 'WARNING';
                 } else {
-                    tempStatus.className = "sensor-status normal";
-                    tempStatus.textContent = "NORMAL";
+                    tempStatus.className = 'sensor-status normal';
+                    tempStatus.textContent = 'NORMAL';
                 }
             }
             
             // Humidity
-            if (data.hum !== undefined) {
+            if (data.hum !== undefined && data.hum !== null) {
                 humValue.textContent = data.hum.toFixed(1);
                 
                 // Update humidity status
                 if (data.hum < 40) {
-                    humStatus.className = "sensor-status danger";
-                    humStatus.textContent = "TOO LOW";
+                    humStatus.className = 'sensor-status danger';
+                    humStatus.textContent = 'TOO LOW';
                 } else if (data.hum > 80) {
-                    humStatus.className = "sensor-status danger";
-                    humStatus.textContent = "TOO HIGH";
+                    humStatus.className = 'sensor-status danger';
+                    humStatus.textContent = 'TOO HIGH';
                 } else if (data.hum < 50 || data.hum > 70) {
-                    humStatus.className = "sensor-status warning";
-                    humStatus.textContent = "WARNING";
+                    humStatus.className = 'sensor-status warning';
+                    humStatus.textContent = 'WARNING';
                 } else {
-                    humStatus.className = "sensor-status normal";
-                    humStatus.textContent = "NORMAL";
+                    humStatus.className = 'sensor-status normal';
+                    humStatus.textContent = 'NORMAL';
                 }
             }
         }
@@ -1287,7 +1372,7 @@
             // Fan status
             if (currentData.fan !== undefined) {
                 fanStatusText.textContent = `Status: ${currentData.fan ? 'ON' : 'OFF'}`;
-                fanStatusText.style.color = currentData.fan ? "var(--success)" : "var(--danger)";
+                fanStatusText.style.color = currentData.fan ? 'var(--success)' : 'var(--danger)';
                 
                 // Update button states
                 if (currentData.fan) {
@@ -1302,7 +1387,7 @@
             // Heat status
             if (currentData.heat !== undefined) {
                 heatStatusText.textContent = `Status: ${currentData.heat ? 'ON' : 'OFF'}`;
-                heatStatusText.style.color = currentData.heat ? "var(--success)" : "var(--danger)";
+                heatStatusText.style.color = currentData.heat ? 'var(--success)' : 'var(--danger)';
                 
                 // Update button states
                 if (currentData.heat) {
@@ -1321,11 +1406,11 @@
                 if (currentData.auto) {
                     autoModeBtn.classList.add('active');
                     manualModeBtn.classList.remove('active');
-                    modeDescription.textContent = "Auto mode: System automatically controls devices based on sensor readings.";
+                    modeDescription.textContent = 'Auto mode: System automatically controls devices based on sensor readings.';
                 } else {
                     autoModeBtn.classList.remove('active');
                     manualModeBtn.classList.add('active');
-                    modeDescription.textContent = "Manual mode: You have full control over all devices.";
+                    modeDescription.textContent = 'Manual mode: You have full control over all devices.';
                 }
             }
         }
@@ -1340,16 +1425,16 @@
                 stageAge.textContent = `${data.age} days`;
             }
             
-            // These would come from the API in a real implementation
+            // These would come from the MQTT data in a real implementation
             // For now, we'll set some example values
-            stageTempRange.textContent = "24°C to 28°C";
-            stageHumRange.textContent = "55% to 65%";
-            stageHeatRequired.textContent = "No";
-            stageAgeRange.textContent = "15 to 42 days";
+            stageTempRange.textContent = '24°C to 28°C';
+            stageHumRange.textContent = '55% to 65%';
+            stageHeatRequired.textContent = 'No';
+            stageAgeRange.textContent = '15 to 42 days';
             
             // Update range displays
-            tempRange.textContent = "24°C to 28°C";
-            humRange.textContent = "55% to 65%";
+            tempRange.textContent = '24°C to 28°C';
+            humRange.textContent = '55% to 65%';
         }
         
         // Update system info
@@ -1361,7 +1446,7 @@
         
         // Update alarm banner
         function updateAlarmBanner(data) {
-            if (data.alarm && data.alarm !== "") {
+            if (data.alarm && data.alarm !== '') {
                 alarmBanner.style.display = 'flex';
                 alarmMessage.textContent = data.alarm;
                 
@@ -1396,18 +1481,6 @@
             currentDateEl.textContent = date;
         }
         
-        // Start periodic data updates
-        function startDataUpdates() {
-            // Fetch data immediately
-            fetchData();
-            
-            // Set up interval for updates
-            updateInterval = setInterval(fetchData, UPDATE_INTERVAL);
-            
-            // Update time every second
-            setInterval(updateTime, 1000);
-        }
-        
         // Initialize event listeners
         function initEventListeners() {
             // Login form
@@ -1417,36 +1490,33 @@
             logoutBtn.addEventListener('click', handleLogout);
             
             // Control buttons
-            fanOnBtn.addEventListener('click', () => sendControlCommand('fan', true));
-            fanOffBtn.addEventListener('click', () => sendControlCommand('fan', false));
-            heatOnBtn.addEventListener('click', () => sendControlCommand('heat', true));
-            heatOffBtn.addEventListener('click', () => sendControlCommand('heat', false));
+            fanOnBtn.addEventListener('click', () => sendControlCommand({ fan: true }));
+            fanOffBtn.addEventListener('click', () => sendControlCommand({ fan: false }));
+            heatOnBtn.addEventListener('click', () => sendControlCommand({ heat: true }));
+            heatOffBtn.addEventListener('click', () => sendControlCommand({ heat: false }));
             
             // Mode buttons
-            autoModeBtn.addEventListener('click', () => sendControlCommand('auto', true));
-            manualModeBtn.addEventListener('click', () => sendControlCommand('auto', false));
+            autoModeBtn.addEventListener('click', () => sendControlCommand({ auto: true }));
+            manualModeBtn.addEventListener('click', () => sendControlCommand({ auto: false }));
             
             // Quick action buttons
             bothOnBtn.addEventListener('click', () => {
-                sendControlCommand('fan', true);
-                sendControlCommand('heat', true);
+                sendControlCommand({ fan: true, heat: true });
             });
             
             bothOffBtn.addEventListener('click', () => {
-                sendControlCommand('fan', false);
-                sendControlCommand('heat', false);
+                sendControlCommand({ fan: false, heat: false });
             });
             
             publishBtn.addEventListener('click', () => {
-                // In a real implementation, this would trigger data publishing
-                alert('Data published to MQTT server');
-                fetchData(); // Refresh data
+                sendControlCommand({ publish: true });
+                alert('Update request sent to ESP32');
             });
             
             rebootBtn.addEventListener('click', () => {
                 if (confirm('Are you sure you want to reboot the system? This will temporarily disconnect all devices.')) {
-                    // In a real implementation, this would send a reboot command
-                    alert('System reboot command sent. Please wait 30 seconds for system to restart.');
+                    sendControlCommand({ reboot: true });
+                    alert('Reboot command sent. Please wait 30 seconds for system to restart.');
                 }
             });
         }
@@ -1455,6 +1525,7 @@
         function init() {
             initEventListeners();
             checkLoginStatus();
+            setInterval(updateTime, 1000);
         }
         
         // Start the application when the page loads
