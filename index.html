@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VQuail System Control Panel</title>
+    <title>VQuail System Control Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
+            --bg-color: #0a1929;
+            --card-bg: #132f4c;
+            --text-color: #ffffff;
+            --text-dim: #8c9db5;
+            --accent: #007fff;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196f3;
+            --btn-normal: #1a3a5f;
+            --btn-hover: #2a4a6f;
             --border-radius: 12px;
-            --box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
         }
 
@@ -27,212 +27,260 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             padding: 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        /* Login Page */
+        /* Login Screen */
         .login-container {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
             width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-            padding: 40px 30px;
-            text-align: center;
-            transition: var(--transition);
+            max-width: 400px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.5s ease;
         }
 
-        .login-container:hover {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 10px;
         }
 
         .logo i {
-            font-size: 2.5rem;
-            margin-right: 15px;
+            margin-right: 10px;
         }
 
-        .logo h1 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+        .login-header h1 {
             font-size: 1.8rem;
+            margin-bottom: 5px;
         }
 
-        .login-form h2 {
-            font-family: 'Poppins', sans-serif;
-            margin-bottom: 25px;
-            color: var(--primary-color);
-            font-weight: 500;
+        .login-header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
         }
 
-        .form-group {
+        .login-form .form-group {
             margin-bottom: 20px;
-            text-align: left;
         }
 
-        .form-group label {
+        .login-form label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
+            color: var(--text-dim);
+            font-size: 0.9rem;
         }
 
-        .form-control {
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+        }
+
+        .login-form input {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
+            padding: 12px 15px 12px 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
+            color: var(--text-color);
             font-size: 1rem;
             transition: var(--transition);
         }
 
-        .form-control:focus {
+        .login-form input:focus {
             outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 127, 255, 0.2);
         }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: var(--secondary-color);
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn:hover {
-            background-color: #2980b9;
+        .login-btn:hover {
+            background: #0066cc;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 127, 255, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
         }
 
         .error-message {
-            background-color: rgba(231, 76, 60, 0.1);
-            color: var(--danger-color);
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
             padding: 12px;
             border-radius: 8px;
-            margin-top: 15px;
+            margin-bottom: 20px;
             display: none;
+            align-items: center;
+            gap: 10px;
         }
 
-        .mqtt-settings {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        .mqtt-settings h3 {
-            font-size: 1rem;
-            margin-bottom: 10px;
-            color: #555;
-        }
-
-        .footer-note {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #777;
-        }
-
-        /* API Key Settings */
-        .api-key-settings {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        .api-key-settings h3 {
-            font-size: 1rem;
-            margin-bottom: 10px;
-            color: #555;
-        }
-
-        .api-key-display {
-            background-color: #e8f4f8;
-            border: 1px solid #bce8f1;
-            padding: 10px;
-            border-radius: 6px;
-            font-family: monospace;
-            word-break: break-all;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-
-        .copy-btn {
-            background-color: #5bc0de;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 8px;
-            transition: var(--transition);
-        }
-
-        .copy-btn:hover {
-            background-color: #31b0d5;
-        }
-
-        /* MQTT Connection Status */
-        .mqtt-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            z-index: 1000;
-            display: none;
-        }
-
-        .mqtt-connected {
-            background-color: rgba(39, 174, 96, 0.15);
-            color: var(--success-color);
-            border: 1px solid rgba(39, 174, 96, 0.3);
-        }
-
-        .mqtt-disconnected {
-            background-color: rgba(231, 76, 60, 0.15);
-            color: var(--danger-color);
-            border: 1px solid rgba(231, 76, 60, 0.3);
-        }
-
-        /* Main Dashboard */
+        /* Dashboard */
         .dashboard {
             display: none;
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Header */
+        .dashboard-header {
+            background: var(--card-bg);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+
+        .header-left h1 i {
+            color: var(--accent);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .time-display {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            display: flex;
+            height: calc(100% - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            padding: 20px 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+        }
+
+        .nav-item.active {
+            background: rgba(0, 127, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
             animation: fadeIn 0.5s ease;
         }
 
@@ -241,77 +289,25 @@
             to { opacity: 1; }
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 20px 30px;
-            margin-bottom: 25px;
-        }
-
-        .header-info h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.8rem;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .header-info p {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 10px 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            min-width: 120px;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: #777;
-        }
-
-        .main-content {
+        /* Dashboard Grid */
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        @media (max-width: 992px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .card {
-            background-color: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
             padding: 25px;
             transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .card-header {
@@ -319,1397 +315,1144 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
         }
 
         .card-title {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
-        .card-icon {
-            font-size: 1.8rem;
-            color: var(--secondary-color);
+        .card-title i {
+            color: var(--accent);
         }
 
-        /* Sensor Data Card */
-        .sensor-data {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 8px;
         }
 
-        .sensor-item {
-            text-align: center;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #f8f9fa;
-        }
+        .status-online { background: var(--success); }
+        .status-offline { background: var(--danger); }
 
         .sensor-value {
-            font-size: 2.8rem;
-            font-weight: 600;
+            font-size: 3rem;
+            font-weight: 700;
             margin: 10px 0;
         }
 
-        .temp-value {
-            color: #e74c3c;
+        .unit {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-left: 5px;
         }
 
-        .hum-value {
-            color: #3498db;
-        }
-
-        .sensor-label {
-            font-size: 1rem;
-            color: #666;
-        }
-
-        .sensor-status {
+        .range-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin-top: 15px;
             font-size: 0.9rem;
-            padding: 8px 12px;
-            border-radius: 20px;
-            display: inline-block;
         }
 
-        .status-ok {
-            background-color: rgba(39, 174, 96, 0.15);
-            color: var(--success-color);
-        }
-
-        .status-warning {
-            background-color: rgba(243, 156, 18, 0.15);
-            color: var(--warning-color);
-        }
-
-        .status-danger {
-            background-color: rgba(231, 76, 60, 0.15);
-            color: var(--danger-color);
-        }
-
-        /* Control Card */
-        .control-section {
-            margin-bottom: 25px;
-        }
-
-        .control-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .control-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .control-title {
-            font-weight: 500;
-            color: #555;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: var(--transition);
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: var(--transition);
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--success-color);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(30px);
-        }
-
-        .control-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn-control {
+        .range-bar {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-on {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-off {
-            background-color: #e0e0e0;
-            color: #666;
-        }
-
-        .btn-on.active {
-            background-color: var(--success-color);
-            color: white;
-            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
-        }
-
-        .btn-off.active {
-            background-color: var(--danger-color);
-            color: white;
-            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
-        }
-
-        .mode-indicator {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .mode-auto {
-            background-color: rgba(52, 152, 219, 0.15);
-            color: var(--secondary-color);
-        }
-
-        .mode-manual {
-            background-color: rgba(243, 156, 18, 0.15);
-            color: var(--warning-color);
-        }
-
-        /* Stage Info Card */
-        .stage-info {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .stage-item {
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #ddd;
-            background-color: #f8f9fa;
-        }
-
-        .stage-item.active {
-            border-left-color: var(--success-color);
-            background-color: rgba(39, 174, 96, 0.08);
-        }
-
-        .stage-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: #444;
-        }
-
-        .stage-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .progress-container {
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background-color: #eee;
-            border-radius: 5px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
             overflow: hidden;
         }
 
-        .progress-fill {
+        .range-fill {
             height: 100%;
-            background-color: var(--secondary-color);
-            border-radius: 5px;
-            width: 0%;
+            background: var(--success);
+            border-radius: 3px;
             transition: width 1s ease;
         }
 
-        /* Alarm Card */
-        .alarm-item {
+        .range-fill.warning { background: var(--warning); }
+        .range-fill.danger { background: var(--danger); }
+
+        .device-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--btn-normal);
+            color: var(--text-color);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.active {
+            box-shadow: inset 0 0 0 2px white;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Alarm Panel */
+        .alarm-panel {
+            background: rgba(244, 67, 54, 0.1);
+            border-left: 4px solid var(--danger);
             padding: 15px;
             border-radius: 8px;
-            background-color: #f8f9fa;
-            margin-bottom: 15px;
-            border-left: 4px solid #ddd;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            display: none;
         }
 
-        .alarm-item.critical {
-            border-left-color: var(--danger-color);
-            background-color: rgba(231, 76, 60, 0.08);
+        .alarm-panel i {
+            color: var(--danger);
+            font-size: 1.5rem;
         }
 
-        .alarm-item.warning {
-            border-left-color: var(--warning-color);
-            background-color: rgba(243, 156, 18, 0.08);
-        }
-
-        .alarm-message {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .alarm-time {
-            font-size: 0.85rem;
-            color: #777;
-        }
-
-        .no-alarms {
-            text-align: center;
-            padding: 30px 0;
-            color: #777;
-        }
-
-        /* System Info Card */
-        .info-grid {
+        /* System Status */
+        .status-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
             gap: 15px;
         }
 
-        .info-item {
-            padding: 12px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .info-label {
-            font-size: 0.85rem;
-            color: #777;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            font-weight: 500;
-            color: #444;
-        }
-
-        /* Footer */
-        .footer {
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 15px 30px;
-            color: #666;
-            font-size: 0.9rem;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
-        .logout-btn {
-            background-color: #f8f9fa;
-            color: #666;
-            border: 1px solid #ddd;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+        .status-wifi { background: rgba(76, 175, 80, 0.1); color: var(--success); }
+        .status-mqtt { background: rgba(33, 150, 243, 0.1); color: var(--info); }
+        .status-sd { background: rgba(255, 152, 0, 0.1); color: var(--warning); }
+        .status-sensor { background: rgba(0, 127, 255, 0.1); color: var(--accent); }
 
-        .logout-btn:hover {
-            background-color: #e9ecef;
-        }
-
-        /* Security Badge */
-        .security-badge {
-            display: inline-flex;
-            align-items: center;
-            background-color: rgba(39, 174, 96, 0.1);
-            color: var(--success-color);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-
-        .security-badge i {
-            margin-right: 5px;
-        }
-
-        /* Responsive adjustments */
+        /* Responsive */
         @media (max-width: 768px) {
-            .header {
+            .dashboard-content {
                 flex-direction: column;
-                gap: 20px;
-                text-align: center;
             }
             
-            .header-stats {
+            .sidebar {
                 width: 100%;
-                justify-content: center;
+                display: flex;
+                overflow-x: auto;
+                padding: 10px;
             }
             
-            .footer {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
+            .nav-item {
+                flex-shrink: 0;
+                padding: 10px 20px;
             }
             
-            .sensor-data {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
             }
             
-            .info-grid {
-                grid-template-columns: 1fr;
+            .time-display {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <!-- MQTT Connection Status Indicator -->
-    <div class="mqtt-status" id="mqttStatusIndicator">
-        <i class="fas fa-wifi"></i> <span id="mqttStatusText">Connecting...</span>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fas fa-kiwi-bird"></i>
+                VQuail
+            </div>
+            <h1>System Control Dashboard</h1>
+            <p>ESP32-S3 Smart Quail Farming System</p>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Invalid credentials</span>
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Username</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Enter username" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Password</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Login to Dashboard
+            </button>
+        </form>
+        
+        <div class="login-footer">
+            <p>Version: VQUAIL_S3_TFT_V6 | © 2024 VQuail System</p>
+        </div>
     </div>
 
-    <div class="container">
-        <!-- Login Page -->
-        <div class="login-container" id="loginPage">
-            <div class="logo">
-                <i class="fas fa-dove"></i>
-                <h1>VQuail Control System</h1>
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1>
+                    <i class="fas fa-kiwi-bird"></i>
+                    VQuail Control Center
+                </h1>
             </div>
-            <div class="login-form">
-                <h2>System Login</h2>
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" class="form-control" placeholder="Enter username" value="admin">
+            
+            <div class="header-right">
+                <div class="time-display">
+                    <i class="far fa-clock"></i>
+                    <span id="currentTime">--:--:--</span>
+                    <span id="currentDate">---</span>
+                    <small>(MYT)</small>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter password" value="vquail2024">
-                </div>
-                
-                <div class="api-key-settings">
-                    <h3>API Key (for MQTT authentication)</h3>
-                    <input type="text" id="apiKey" class="form-control" placeholder="Enter your 32-character API key" value="">
-                    <div class="api-key-display" id="apiKeyDisplay" style="display: none;">
-                        <strong>Your API Key:</strong><br>
-                        <span id="apiKeyValue"></span>
-                        <button class="copy-btn" onclick="copyAPIKey()">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                    <p style="font-size: 0.8rem; color: #666; margin-top: 8px;">
-                        The API key is required for secure communication. Get it from your ESP32 system logs.
-                    </p>
-                </div>
-                
-                <div class="mqtt-settings">
-                    <h3>MQTT Connection Settings</h3>
-                    <div class="form-group">
-                        <label for="mqttBroker">MQTT Broker</label>
-                        <input type="text" id="mqttBroker" class="form-control" placeholder="broker.mqtt-dashboard.com" value="broker.mqtt-dashboard.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="mqttPort">Port</label>
-                        <input type="number" id="mqttPort" class="form-control" placeholder="1883" value="1883">
-                    </div>
-                    <div class="form-group">
-                        <label for="mqttClientId">Client ID</label>
-                        <input type="text" id="mqttClientId" class="form-control" placeholder="vquail-web-client" value="vquail-web-client">
-                    </div>
-                    <div class="form-group">
-                        <label for="mqttUsername">MQTT Username</label>
-                        <input type="text" id="mqttUsername" class="form-control" placeholder="vquail" value="vquail">
-                    </div>
-                    <div class="form-group">
-                        <label for="mqttPassword">MQTT Password</label>
-                        <input type="password" id="mqttPassword" class="form-control" placeholder="vquail2024" value="vquail2024">
-                    </div>
-                </div>
-                
-                <button class="btn" id="loginBtn">Login & Connect to MQTT</button>
-                <div class="error-message" id="loginError">
-                    Invalid username or password. Please try again.
-                </div>
-                <div class="footer-note">
-                    <p>Default credentials: admin / vquail2024</p>
-                    <p>API Key: Check ESP32 serial output after first boot</p>
-                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
             </div>
         </div>
 
-        <!-- Main Dashboard -->
-        <div class="dashboard" id="dashboard">
-            <!-- Header -->
-            <div class="header">
-                <div class="header-info">
-                    <h1>VQuail System Control Panel</h1>
-                    <p>Version: VQUAIL_V3.0 | Secure Mode <span class="security-badge"><i class="fas fa-shield-alt"></i> Encrypted</span> | Last update: <span id="lastUpdate">--:--:--</span></p>
+        <!-- Main Content -->
+        <div class="dashboard-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    Dashboard
                 </div>
-                <div class="header-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="uptimeStat">0</div>
-                        <div class="stat-label">Uptime (s)</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="ageStat">0</div>
-                        <div class="stat-label">Age (days)</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stageStat">1</div>
-                        <div class="stat-label">Stage</div>
-                    </div>
+                <div class="nav-item" data-page="control">
+                    <i class="fas fa-sliders-h"></i>
+                    Control Panel
                 </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Sensor Data Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Environmental Data</h2>
-                        <div class="card-icon">
-                            <i class="fas fa-thermometer-half"></i>
-                        </div>
-                    </div>
-                    <div class="sensor-data">
-                        <div class="sensor-item">
-                            <div class="sensor-label">Temperature</div>
-                            <div class="sensor-value temp-value" id="tempValue">--.-</div>
-                            <div class="sensor-status status-ok" id="tempStatus">Awaiting data...</div>
-                        </div>
-                        <div class="sensor-item">
-                            <div class="sensor-label">Humidity</div>
-                            <div class="sensor-value hum-value" id="humValue">--.-</div>
-                            <div class="sensor-status status-ok" id="humStatus">Awaiting data...</div>
-                        </div>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Ideal Range: <span id="idealTempRange">35-37°C</span></span>
-                            <span>Current: <span id="currentTemp">--.-°C</span></span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="tempProgress"></div>
-                        </div>
-                    </div>
+                <div class="nav-item" data-page="charts">
+                    <i class="fas fa-chart-line"></i>
+                    Charts & History
                 </div>
-
-                <!-- Control Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Device Control</h2>
-                        <div class="card-icon">
-                            <i class="fas fa-sliders-h"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="control-section">
-                        <div class="control-header">
-                            <div class="control-title">Fan Control</div>
-                            <div class="mode-indicator mode-auto" id="fanMode">Auto</div>
-                        </div>
-                        <div class="control-buttons">
-                            <button class="btn-control btn-on" id="fanOnBtn" data-device="fan" data-state="true">ON</button>
-                            <button class="btn-control btn-off active" id="fanOffBtn" data-device="fan" data-state="false">OFF</button>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
-                            Last control: <span id="fanControlSource">system</span>
-                        </div>
-                    </div>
-                    
-                    <div class="control-section">
-                        <div class="control-header">
-                            <div class="control-title">Heat Lamp Control</div>
-                            <div class="mode-indicator mode-auto" id="heatMode">Auto</div>
-                        </div>
-                        <div class="control-buttons">
-                            <button class="btn-control btn-on" id="heatOnBtn" data-device="heat" data-state="true">ON</button>
-                            <button class="btn-control btn-off active" id="heatOffBtn" data-device="heat" data-state="false">OFF</button>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
-                            Last control: <span id="heatControlSource">system</span>
-                        </div>
-                    </div>
-                    
-                    <div class="control-section">
-                        <div class="control-header">
-                            <div class="control-title">System Mode</div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="autoToggle" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div>
-                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
-                                <span id="modeDescription">System is in automatic mode. Devices will be controlled based on environmental conditions.</span>
-                            </p>
-                            <div style="margin-top: 10px; font-size: 0.85rem; color: #666;">
-                                Override: <span id="overrideStatus">No</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    Settings
                 </div>
-
-                <!-- Stage Info Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Life Stage Information</h2>
-                        <div class="card-icon">
-                            <i class="fas fa-seedling"></i>
-                        </div>
-                    </div>
-                    <div class="stage-info">
-                        <div class="stage-item active" id="stage1">
-                            <div class="stage-name">Brooding Week 1</div>
-                            <div class="stage-details">
-                                <span>Age: 0-7 days</span>
-                                <span>Temp: 35-37°C</span>
-                            </div>
-                        </div>
-                        <div class="stage-item" id="stage2">
-                            <div class="stage-name">Brooding Week 2</div>
-                            <div class="stage-details">
-                                <span>Age: 8-14 days</span>
-                                <span>Temp: 32-35°C</span>
-                            </div>
-                        </div>
-                        <div class="stage-item" id="stage3">
-                            <div class="stage-name">Grower Phase</div>
-                            <div class="stage-details">
-                                <span>Age: 15-42 days</span>
-                                <span>Temp: 24-28°C</span>
-                            </div>
-                        </div>
-                        <div class="stage-item" id="stage4">
-                            <div class="stage-name">Adult Layer</div>
-                            <div class="stage-details">
-                                <span>Age: 43+ days</span>
-                                <span>Temp: 20-24°C</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Stage Progress: <span id="currentStageName">Brooding Week 1</span></span>
-                            <span><span id="currentAge">0</span> days</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="stageProgress"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Alarm & System Info -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">System Status</h2>
-                        <div class="card-icon">
-                            <i class="fas fa-info-circle"></i>
-                        </div>
-                    </div>
-                    
-                    <div id="alarmContainer">
-                        <!-- Alarms will be displayed here -->
-                        <div class="no-alarms" id="noAlarms">
-                            <i class="fas fa-check-circle" style="font-size: 2rem; color: #27ae60; margin-bottom: 10px;"></i>
-                            <p>No active alarms. All systems are operating normally.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">WiFi Status</div>
-                            <div class="info-value status-ok" id="wifiStatus">Awaiting data...</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">MQTT Status</div>
-                            <div class="info-value status-ok" id="mqttStatus">Connected</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">SD Card</div>
-                            <div class="info-value" id="sdStatus">Awaiting data...</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Control Source</div>
-                            <div class="info-value" id="controlSource">system</div>
-                        </div>
-                    </div>
+                <div class="nav-item" data-page="info">
+                    <i class="fas fa-info-circle"></i>
+                    System Info
                 </div>
             </div>
 
-            <!-- Footer -->
-            <div class="footer">
-                <div>
-                    <p>VQuail Poultry Management System | <span id="currentTime">--:--:--</span> | MQTT Client: <span id="mqttClientIdDisplay">vquail-web-client</span> | API: <span id="apiKeyStatus">Not Set</span></p>
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Alarm Panel -->
+                <div class="alarm-panel" id="alarmPanel">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong id="alarmTitle">ALARM</strong>
+                        <p id="alarmMessage">No active alarms</p>
+                    </div>
                 </div>
-                <div>
-                    <button class="logout-btn" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+
+                <!-- Dashboard Page -->
+                <div class="page active" id="pageDashboard">
+                    <div class="dashboard-grid">
+                        <!-- Temperature Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-thermometer-half"></i>
+                                    Temperature
+                                    <span class="status-indicator" id="tempStatus"></span>
+                                </div>
+                                <div class="card-subtitle" id="tempRange">Target: 35-37°C</div>
+                            </div>
+                            <div class="sensor-value" id="temperatureValue">--</div>
+                            <div class="unit">°C</div>
+                            <div class="range-indicator">
+                                <span>Min</span>
+                                <div class="range-bar">
+                                    <div class="range-fill" id="tempFill" style="width: 50%"></div>
+                                </div>
+                                <span>Max</span>
+                            </div>
+                        </div>
+
+                        <!-- Humidity Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-tint"></i>
+                                    Humidity
+                                    <span class="status-indicator" id="humStatus"></span>
+                                </div>
+                                <div class="card-subtitle" id="humRange">Target: 60-70%</div>
+                            </div>
+                            <div class="sensor-value" id="humidityValue">--</div>
+                            <div class="unit">%</div>
+                            <div class="range-indicator">
+                                <span>Min</span>
+                                <div class="range-bar">
+                                    <div class="range-fill" id="humFill" style="width: 50%"></div>
+                                </div>
+                                <span>Max</span>
+                            </div>
+                        </div>
+
+                        <!-- Stage & Age Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-egg"></i>
+                                    Life Stage
+                                </div>
+                                <div class="card-subtitle" id="ageDisplay">Age: -- days</div>
+                            </div>
+                            <div class="sensor-value" id="stageName">--</div>
+                            <div class="range-indicator">
+                                <span>Stage Progress</span>
+                                <div class="range-bar">
+                                    <div class="range-fill" id="stageProgress" style="width: 25%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Device Control Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-cogs"></i>
+                                    Device Control
+                                </div>
+                                <div class="mode-indicator" id="modeIndicator">AUTO</div>
+                            </div>
+                            <div class="device-controls">
+                                <button class="btn btn-success" id="fanOnBtn">
+                                    <i class="fas fa-wind"></i> FAN ON
+                                </button>
+                                <button class="btn btn-danger" id="fanOffBtn">
+                                    <i class="fas fa-wind"></i> FAN OFF
+                                </button>
+                                <button class="btn btn-warning" id="heatOnBtn">
+                                    <i class="fas fa-fire"></i> HEAT ON
+                                </button>
+                                <button class="btn btn-danger" id="heatOffBtn">
+                                    <i class="fas fa-fire"></i> HEAT OFF
+                                </button>
+                            </div>
+                            <div class="device-controls" style="margin-top: 10px;">
+                                <button class="btn btn-primary" id="autoModeBtn">
+                                    <i class="fas fa-robot"></i> AUTO MODE
+                                </button>
+                                <button class="btn btn-secondary" id="manualModeBtn">
+                                    <i class="fas fa-hand-paper"></i> MANUAL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-network-wired"></i>
+                                System Status
+                            </div>
+                        </div>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <div class="status-icon status-wifi">
+                                    <i class="fas fa-wifi"></i>
+                                </div>
+                                <div>
+                                    <div>WiFi</div>
+                                    <div class="status-text" id="wifiStatus">Disconnected</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon status-mqtt">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <div>
+                                    <div>MQTT</div>
+                                    <div class="status-text" id="mqttStatus">Disconnected</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon status-sd">
+                                    <i class="fas fa-sd-card"></i>
+                                </div>
+                                <div>
+                                    <div>SD Card</div>
+                                    <div class="status-text" id="sdStatus">Not Available</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon status-sensor">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <div>
+                                    <div>Sensor</div>
+                                    <div class="status-text" id="sensorStatus">Offline</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Panel Page -->
+                <div class="page" id="pageControl">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-sliders-h"></i>
+                                Manual Control Panel
+                            </div>
+                        </div>
+                        <div class="dashboard-grid">
+                            <div class="card">
+                                <h3><i class="fas fa-wind"></i> Fan Control</h3>
+                                <p>Current: <strong id="currentFanState">OFF</strong></p>
+                                <div class="device-controls">
+                                    <button class="btn btn-success btn-large" id="fanToggleBtn">
+                                        <i class="fas fa-power-off"></i> TURN FAN ON
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3><i class="fas fa-fire"></i> Heat Lamp Control</h3>
+                                <p>Current: <strong id="currentHeatState">OFF</strong></p>
+                                <div class="device-controls">
+                                    <button class="btn btn-warning btn-large" id="heatToggleBtn">
+                                        <i class="fas fa-power-off"></i> TURN HEAT ON
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" style="margin-top: 20px;">
+                            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                            <div class="device-controls">
+                                <button class="btn btn-success" id="bothOnBtn">
+                                    <i class="fas fa-play"></i> BOTH ON
+                                </button>
+                                <button class="btn btn-danger" id="bothOffBtn">
+                                    <i class="fas fa-stop"></i> BOTH OFF
+                                </button>
+                                <button class="btn btn-primary" id="publishBtn">
+                                    <i class="fas fa-cloud-upload-alt"></i> PUBLISH STATE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Page -->
+                <div class="page" id="pageCharts">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-chart-line"></i>
+                                Temperature & Humidity Trends
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tempChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="humChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="page" id="pageSettings">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-cog"></i>
+                                System Settings
+                            </div>
+                        </div>
+                        <div class="dashboard-grid">
+                            <div class="card">
+                                <h3><i class="fas fa-egg"></i> Life Stage Settings</h3>
+                                <div class="device-controls">
+                                    <button class="btn btn-primary stage-btn" data-stage="0">Brood W1</button>
+                                    <button class="btn btn-primary stage-btn" data-stage="1">Brood W2</button>
+                                    <button class="btn btn-primary stage-btn" data-stage="2">Grower</button>
+                                    <button class="btn btn-primary stage-btn" data-stage="3">Adult</button>
+                                </div>
+                                <div style="margin-top: 15px;">
+                                    <label>Age Adjustment (days)</label>
+                                    <div class="device-controls">
+                                        <button class="btn btn-danger" id="ageDownBtn">
+                                            <i class="fas fa-minus"></i> -
+                                        </button>
+                                        <span id="currentAge" style="padding: 10px; font-weight: bold;">0</span>
+                                        <button class="btn btn-success" id="ageUpBtn">
+                                            <i class="fas fa-plus"></i> +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3><i class="fas fa-tachometer-alt"></i> Calibration</h3>
+                                <div style="margin: 15px 0;">
+                                    <label>Temperature Offset (°C)</label>
+                                    <div class="device-controls">
+                                        <button class="btn btn-danger" id="tempDownBtn">
+                                            <i class="fas fa-minus"></i> -
+                                        </button>
+                                        <span id="tempOffset" style="padding: 10px; font-weight: bold;">0.0</span>
+                                        <button class="btn btn-success" id="tempUpBtn">
+                                            <i class="fas fa-plus"></i> +
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="margin: 15px 0;">
+                                    <label>Humidity Offset (%)</label>
+                                    <div class="device-controls">
+                                        <button class="btn btn-danger" id="humDownBtn">
+                                            <i class="fas fa-minus"></i> -
+                                        </button>
+                                        <span id="humOffset" style="padding: 10px; font-weight: bold;">0.0</span>
+                                        <button class="btn btn-success" id="humUpBtn">
+                                            <i class="fas fa-plus"></i> +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="device-controls" style="margin-top: 20px;">
+                            <button class="btn btn-success" id="saveConfigBtn">
+                                <i class="fas fa-save"></i> SAVE CONFIGURATION
+                            </button>
+                            <button class="btn btn-warning" id="rebootBtn">
+                                <i class="fas fa-redo"></i> REBOOT SYSTEM
+                            </button>
+                            <button class="btn btn-danger" id="defaultBtn">
+                                <i class="fas fa-undo"></i> RESTORE DEFAULTS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Page -->
+                <div class="page" id="pageInfo">
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    System Information
+                                </div>
+                            </div>
+                            <div style="line-height: 2;">
+                                <p><i class="fas fa-code-branch"></i> <strong>Version:</strong> <span id="sysVersion">VQUAIL_S3_TFT_V6</span></p>
+                                <p><i class="fas fa-microchip"></i> <strong>Board:</strong> ESP32-S3</p>
+                                <p><i class="fas fa-clock"></i> <strong>Uptime:</strong> <span id="sysUptime">--</span></p>
+                                <p><i class="fas fa-wifi"></i> <strong>IP Address:</strong> <span id="sysIP">--</span></p>
+                                <p><i class="fas fa-hdd"></i> <strong>SD Card Size:</strong> <span id="sdSize">-- MB</span></p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-network-wired"></i>
+                                    Network Information
+                                </div>
+                            </div>
+                            <div style="line-height: 2;">
+                                <p><i class="fas fa-signal"></i> <strong>WiFi RSSI:</strong> <span id="wifiRSSI">-- dBm</span></p>
+                                <p><i class="fas fa-cloud"></i> <strong>MQTT Broker:</strong> HiveMQ Cloud</p>
+                                <p><i class="fas fa-sync-alt"></i> <strong>NTP Status:</strong> <span id="ntpStatus">Not Synchronized</span></p>
+                                <p><i class="fas fa-user-shield"></i> <strong>API Key:</strong> <span id="apiKeyPreview">************</span></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global MQTT client
-        let mqttClient = null;
-        let lastDataTimestamp = 0;
-        let dataTimeout = null;
-        let currentAPIKey = "";
+        // Configuration
+        const ESP_IP = window.location.hostname || "vquail.local"; // Change this to your ESP's IP
+        const ESP_PORT = 80;
+        const API_ENDPOINT = `http://${ESP_IP}:${ESP_PORT}/api/status`;
+        const WEB_CREDENTIALS = {
+            username: "vquail",
+            password: "Vquail12345"
+        };
 
-        // Login functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginPage = document.getElementById('loginPage');
-            const dashboard = document.getElementById('dashboard');
-            const loginBtn = document.getElementById('loginBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const loginError = document.getElementById('loginError');
-            
-            // Check if already logged in
-            if(localStorage.getItem('vquail_loggedin') === 'true') {
-                loginPage.style.display = 'none';
-                dashboard.style.display = 'block';
-                loadSettings();
-                connectToMQTT();
-            }
-            
-            // Load saved API key if exists
-            const savedAPIKey = localStorage.getItem('vquail_api_key');
-            if(savedAPIKey) {
-                document.getElementById('apiKey').value = savedAPIKey;
-                currentAPIKey = savedAPIKey;
-                document.getElementById('apiKeyStatus').textContent = "Set";
-                document.getElementById('apiKeyStatus').className = "security-badge";
-                document.getElementById('apiKeyDisplay').style.display = 'block';
-                document.getElementById('apiKeyValue').textContent = savedAPIKey;
-            }
-            
-            // Login button event
-            loginBtn.addEventListener('click', function() {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                currentAPIKey = document.getElementById('apiKey').value.trim();
-                
-                // Default credentials: admin / vquail2024
-                if(username === 'admin' && password === 'vquail2024') {
-                    loginError.style.display = 'none';
-                    
-                    // Validate API key length
-                    if(currentAPIKey.length !== 32 && currentAPIKey.length > 0) {
-                        alert("API Key must be exactly 32 characters long. Leave empty if not using secure mode.");
-                        return;
-                    }
-                    
-                    localStorage.setItem('vquail_loggedin', 'true');
-                    localStorage.setItem('vquail_api_key', currentAPIKey);
-                    saveSettings();
-                    loginPage.style.display = 'none';
-                    dashboard.style.display = 'block';
-                    loadSettings();
-                    connectToMQTT();
-                } else {
-                    loginError.style.display = 'block';
-                }
-            });
-            
-            // Allow login on Enter key
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if(e.key === 'Enter') {
-                    loginBtn.click();
-                }
-            });
-            
-            // API Key input event
-            document.getElementById('apiKey').addEventListener('input', function() {
-                const apiKey = this.value.trim();
-                if(apiKey.length === 32) {
-                    document.getElementById('apiKeyDisplay').style.display = 'block';
-                    document.getElementById('apiKeyValue').textContent = apiKey;
-                    currentAPIKey = apiKey;
-                } else {
-                    document.getElementById('apiKeyDisplay').style.display = 'none';
-                }
-            });
-            
-            // Logout button event
-            logoutBtn.addEventListener('click', function() {
-                if(mqttClient && mqttClient.isConnected()) {
-                    mqttClient.disconnect();
-                }
-                localStorage.removeItem('vquail_loggedin');
-                dashboard.style.display = 'none';
-                loginPage.style.display = 'block';
-                document.getElementById('password').value = '';
-                loginError.style.display = 'none';
-                updateMQTTStatus(false);
-            });
-            
-            // Control buttons functionality
-            setupControlButtons();
-            
-            // Update time every second
-            setInterval(updateTime, 1000);
+        // State variables
+        let currentState = {
+            temp: 0,
+            hum: 0,
+            fan: false,
+            heat: false,
+            auto: true,
+            stage: "Brood W1",
+            age: 0,
+            wifi: false,
+            mqtt: false,
+            ntp: false,
+            alarm: "",
+            uptime: 0,
+            time: "",
+            date: "",
+            sensorOnline: false
+        };
+
+        let charts = {
+            temp: null,
+            hum: null
+        };
+
+        // DOM Elements
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const currentTime = document.getElementById('currentTime');
+        const currentDate = document.getElementById('currentDate');
+        const alarmPanel = document.getElementById('alarmPanel');
+        const alarmTitle = document.getElementById('alarmTitle');
+        const alarmMessage = document.getElementById('alarmMessage');
+        
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            setupEventListeners();
             updateTime();
+            setInterval(updateTime, 1000);
             
-            // Check for data timeout every 10 seconds
-            setInterval(checkDataTimeout, 10000);
+            if (isLoggedIn()) {
+                startDataPolling();
+                initializeCharts();
+            }
         });
-        
-        function saveSettings() {
-            localStorage.setItem('mqtt_broker', document.getElementById('mqttBroker').value);
-            localStorage.setItem('mqtt_port', document.getElementById('mqttPort').value);
-            localStorage.setItem('mqtt_client_id', document.getElementById('mqttClientId').value);
-            localStorage.setItem('mqtt_username', document.getElementById('mqttUsername').value);
-            localStorage.setItem('mqtt_password', document.getElementById('mqttPassword').value);
-            localStorage.setItem('api_key', currentAPIKey);
-        }
-        
-        function loadSettings() {
-            document.getElementById('mqttBroker').value = localStorage.getItem('mqtt_broker') || 'broker.mqtt-dashboard.com';
-            document.getElementById('mqttPort').value = localStorage.getItem('mqtt_port') || '1883';
-            document.getElementById('mqttClientId').value = localStorage.getItem('mqtt_client_id') || 'vquail-web-' + Math.floor(Math.random() * 10000);
-            document.getElementById('mqttUsername').value = localStorage.getItem('mqtt_username') || 'vquail';
-            document.getElementById('mqttPassword').value = localStorage.getItem('mqtt_password') || 'vquail2024';
-            
-            const apiKey = localStorage.getItem('api_key') || '';
-            document.getElementById('apiKey').value = apiKey;
-            document.getElementById('apiKeyStatus').textContent = apiKey ? "Set" : "Not Set";
-            if(apiKey) {
-                document.getElementById('apiKeyStatus').className = "security-badge";
+
+        // Login Functions
+        function checkLoginStatus() {
+            if (isLoggedIn()) {
+                showDashboard();
             }
-            
-            document.getElementById('mqttClientIdDisplay').textContent = document.getElementById('mqttClientId').value;
         }
-        
-        function copyAPIKey() {
-            const apiKey = document.getElementById('apiKeyValue').textContent;
-            navigator.clipboard.writeText(apiKey).then(function() {
-                const copyBtn = document.querySelector('.copy-btn');
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
-                }, 2000);
-            });
+
+        function isLoggedIn() {
+            return localStorage.getItem('vquail_logged_in') === 'true';
         }
-        
-        function connectToMQTT() {
-            const broker = document.getElementById('mqttBroker').value;
-            const port = parseInt(document.getElementById('mqttPort').value);
-            const clientId = document.getElementById('mqttClientId').value;
-            const username = document.getElementById('mqttUsername').value;
-            const password = document.getElementById('mqttPassword').value;
-            
-            updateMQTTStatus(false, 'Connecting...');
-            
-            // Create MQTT client
-            mqttClient = new Paho.MQTT.Client(broker, port, clientId);
-            
-            // Set callback handlers
-            mqttClient.onConnectionLost = onConnectionLost;
-            mqttClient.onMessageArrived = onMessageArrived;
-            
-            // Connect options
-            const options = {
-                onSuccess: onConnect,
-                onFailure: onConnectFail,
-                cleanSession: true,
-                keepAliveInterval: 30,
-                reconnect: true
-            };
-            
-            // Add authentication if provided
-            if(username && password) {
-                options.userName = username;
-                options.password = password;
-            }
-            
-            // Connect the client
-            mqttClient.connect(options);
+
+        function setLoggedIn(status) {
+            localStorage.setItem('vquail_logged_in', status);
         }
-        
-        function onConnect() {
-            console.log("MQTT Connected successfully");
-            updateMQTTStatus(true, 'Connected');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
             
-            // Subscribe to secure VQuail topics
-            if(currentAPIKey) {
-                // Secure mode with API key
-                mqttClient.subscribe("vquail/secure/status/sensors");
-                mqttClient.subscribe("vquail/secure/status/control");
-                mqttClient.subscribe("vquail/secure/alarms");
-                mqttClient.subscribe("vquail/secure/events/#");
-                
-                console.log("Subscribed to secure topics with API key authentication");
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === WEB_CREDENTIALS.username && password === WEB_CREDENTIALS.password) {
+                setLoggedIn(true);
+                showDashboard();
+                startDataPolling();
+                initializeCharts();
+                errorMessage.style.display = 'none';
             } else {
-                // Fallback to non-secure topics
-                mqttClient.subscribe("vquail/data");
-                mqttClient.subscribe("vquail/device");
-                mqttClient.subscribe("vquail/alarms");
-                mqttClient.subscribe("vquail/status");
+                errorText.textContent = 'Invalid username or password';
+                errorMessage.style.display = 'flex';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            setLoggedIn(false);
+            showLogin();
+            stopDataPolling();
+        });
+
+        function showLogin() {
+            loginContainer.style.display = 'block';
+            dashboard.style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showDashboard() {
+            loginContainer.style.display = 'none';
+            dashboard.style.display = 'block';
+        }
+
+        // Navigation
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.getAttribute('data-page');
                 
-                console.log("Subscribed to non-secure topics (no API key)");
-            }
-        }
-        
-        function onConnectFail(response) {
-            console.error("MQTT Connection failed: " + response.errorMessage);
-            updateMQTTStatus(false, 'Connection failed');
-            
-            // Try to reconnect after 5 seconds
-            setTimeout(connectToMQTT, 5000);
-        }
-        
-        function onConnectionLost(response) {
-            console.error("MQTT Connection lost: " + response.errorMessage);
-            updateMQTTStatus(false, 'Disconnected');
-            
-            // Try to reconnect after 3 seconds
-            setTimeout(connectToMQTT, 3000);
-        }
-        
-        function onMessageArrived(message) {
-            console.log("MQTT Message received: " + message.destinationName);
-            
-            // Update last data timestamp
-            lastDataTimestamp = Date.now();
-            document.getElementById('lastDataReceived').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-            
-            try {
-                const data = JSON.parse(message.payloadString);
+                // Update active nav item
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
                 
-                // Validate API key for secure topics
-                if(message.destinationName.startsWith("vquail/secure/") && data.apikey !== currentAPIKey) {
-                    console.warn("Received message with invalid API key");
-                    return;
-                }
-                
-                switch(message.destinationName) {
-                    case "vquail/secure/status/sensors":
-                    case "vquail/data":
-                        updateSensorData(data);
-                        break;
-                    case "vquail/secure/status/control":
-                    case "vquail/device":
-                        updateDeviceStatus(data);
-                        break;
-                    case "vquail/secure/alarms":
-                    case "vquail/alarms":
-                        updateAlarms(data);
-                        break;
-                    case "vquail/secure/events/stage_change":
-                        updateStageChange(data);
-                        break;
-                }
-            } catch(e) {
-                console.error("Error parsing MQTT message: ", e);
-            }
-        }
-        
-        function updateMQTTStatus(connected, message = '') {
-            const statusElement = document.getElementById('mqttStatusIndicator');
-            const statusText = document.getElementById('mqttStatusText');
-            const dashboardStatus = document.getElementById('mqttStatus');
-            
-            if(connected) {
-                statusElement.className = 'mqtt-status mqtt-connected';
-                statusElement.style.display = 'block';
-                statusText.textContent = currentAPIKey ? `Secure: ${message}` : message || 'Connected to MQTT';
-                dashboardStatus.textContent = currentAPIKey ? 'Secure' : 'Connected';
-                dashboardStatus.className = 'info-value status-ok';
-            } else {
-                statusElement.className = 'mqtt-status mqtt-disconnected';
-                statusElement.style.display = 'block';
-                statusText.textContent = message || 'Disconnected from MQTT';
-                dashboardStatus.textContent = 'Disconnected';
-                dashboardStatus.className = 'info-value status-danger';
-            }
-        }
-        
-        function updateSensorData(data) {
-            // Update temperature
-            if(data.temp !== undefined) {
-                document.getElementById('tempValue').textContent = data.temp.toFixed(1);
-                document.getElementById('currentTemp').textContent = data.temp.toFixed(1) + '°C';
-                updateSensorStatus(data.temp, data.hum, data.stage);
-                updateTemperatureProgress(data.temp, data.stage || 1);
-            }
-            
-            // Update humidity
-            if(data.hum !== undefined) {
-                document.getElementById('humValue').textContent = data.hum.toFixed(1);
-                updateSensorStatus(data.temp, data.hum, data.stage);
-            }
-            
-            // Update smooth values if available
-            if(data.smooth_temp !== undefined) {
-                console.log("Smooth Temp: " + data.smooth_temp.toFixed(1) + "°C");
-            }
-            
-            // Update stage information
-            if(data.stage !== undefined) {
-                document.getElementById('stageStat').textContent = data.stage;
-                document.getElementById('currentStageName').textContent = data.stage;
-                updateStageVisualization(data.stage, data.age || 0);
-            }
-            
-            // Update age
-            if(data.age !== undefined) {
-                document.getElementById('ageStat').textContent = data.age;
-                document.getElementById('currentAge').textContent = data.age;
-            }
-            
-            // Update uptime
-            if(data.uptime !== undefined) {
-                document.getElementById('uptimeStat').textContent = data.uptime;
-            }
-            
-            // Update auto mode
-            if(data.auto_mode !== undefined) {
-                document.getElementById('autoToggle').checked = data.auto_mode;
-                updateModeDescription(data.auto_mode);
-            }
-            
-            // Update override status
-            if(data.override !== undefined) {
-                document.getElementById('overrideStatus').textContent = data.override ? "Yes" : "No";
-            }
-            
-            // Update timestamp
-            if(data.timestamp) {
-                document.getElementById('lastUpdate').textContent = data.timestamp.split(' ')[1] || data.timestamp;
-            }
-            
-            // Update alarm status
-            if(data.alarm !== undefined && data.alarm) {
-                // Alarm is handled separately via alarms topic
-            }
-        }
-        
-        function updateDeviceStatus(data) {
-            // Update fan status
-            if(data.fan !== undefined) {
-                const isOn = data.fan === true || data.fan === "true" || data.fan === "ON";
-                document.getElementById('fanOnBtn').classList.toggle('active', isOn);
-                document.getElementById('fanOffBtn').classList.toggle('active', !isOn);
-                
-                if(data.control_source) {
-                    document.getElementById('fanControlSource').textContent = data.control_source;
-                }
-                
-                if(data.manual || data.control_source === "web" || data.control_source === "mqtt") {
-                    document.getElementById('fanMode').textContent = "Manual";
-                    document.getElementById('fanMode').className = "mode-indicator mode-manual";
-                } else {
-                    document.getElementById('fanMode').textContent = "Auto";
-                    document.getElementById('fanMode').className = "mode-indicator mode-auto";
-                }
-            }
-            
-            // Update heat lamp status
-            if(data.heat !== undefined) {
-                const isOn = data.heat === true || data.heat === "true" || data.heat === "ON";
-                document.getElementById('heatOnBtn').classList.toggle('active', isOn);
-                document.getElementById('heatOffBtn').classList.toggle('active', !isOn);
-                
-                if(data.control_source) {
-                    document.getElementById('heatControlSource').textContent = data.control_source;
-                }
-                
-                if(data.manual || data.control_source === "web" || data.control_source === "mqtt") {
-                    document.getElementById('heatMode').textContent = "Manual";
-                    document.getElementById('heatMode').className = "mode-indicator mode-manual";
-                } else {
-                    document.getElementById('heatMode').textContent = "Auto";
-                    document.getElementById('heatMode').className = "mode-indicator mode-auto";
-                }
-            }
-            
-            // Update control source
-            if(data.control_source) {
-                document.getElementById('controlSource').textContent = data.control_source;
-            }
-            
-            // Update override
-            if(data.override !== undefined) {
-                document.getElementById('overrideStatus').textContent = data.override ? "Yes" : "No";
-            }
-        }
-        
-        function updateAlarms(data) {
-            const alarmContainer = document.getElementById('alarmContainer');
-            const noAlarms = document.getElementById('noAlarms');
-            
-            if(data.type === "clear" || !data.message) {
-                // Clear alarms
-                alarmContainer.innerHTML = '';
-                alarmContainer.appendChild(noAlarms);
-                noAlarms.style.display = 'block';
-                return;
-            }
-            
-            // Hide "no alarms" message
-            noAlarms.style.display = 'none';
-            
-            // Create alarm element
-            const alarmElement = document.createElement('div');
-            alarmElement.className = `alarm-item ${data.type === 'critical' ? 'critical' : 'warning'}`;
-            
-            const alarmMessage = document.createElement('div');
-            alarmMessage.className = 'alarm-message';
-            alarmMessage.textContent = data.message;
-            
-            const alarmTime = document.createElement('div');
-            alarmTime.className = 'alarm-time';
-            alarmTime.textContent = data.time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-            
-            alarmElement.appendChild(alarmMessage);
-            alarmElement.appendChild(alarmTime);
-            
-            // Add to container (at the beginning)
-            alarmContainer.insertBefore(alarmElement, alarmContainer.firstChild);
-            
-            // Keep only last 5 alarms
-            const alarms = alarmContainer.getElementsByClassName('alarm-item');
-            if(alarms.length > 5) {
-                alarmContainer.removeChild(alarms[alarms.length - 1]);
-            }
-            
-            // Show visual alert for critical alarms
-            if(data.type === 'critical') {
-                document.title = "⚠️ ALARM - VQuail System";
-                setTimeout(() => {
-                    document.title = "VQuail System Control Panel";
-                }, 2000);
-                
-                // Play alert sound if supported
-                try {
-                    const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQ=');
-                    audio.play().catch(e => console.log("Audio alert failed:", e));
-                } catch(e) {
-                    console.log("Audio not supported");
-                }
-            }
-        }
-        
-        function updateStageChange(data) {
-            console.log("Stage change detected:", data);
-            if(data.new_stage) {
-                updateStageVisualization(getStageNumber(data.new_stage), data.age || 0);
-                showNotification(`Stage changed to ${data.new_stage}`);
-            }
-        }
-        
-        function getStageNumber(stageName) {
-            const stages = ["Brooding Week 1", "Brooding Week 2", "Grower Phase", "Adult Layer"];
-            return stages.indexOf(stageName) + 1;
-        }
-        
-        function updateSensorStatus(temp, hum, stage) {
-            if(temp === undefined || hum === undefined) return;
-            
-            const tempStatus = document.getElementById('tempStatus');
-            const humStatus = document.getElementById('humStatus');
-            
-            // Temperature status based on stage
-            let tempStatusText = "Normal";
-            let tempStatusClass = "status-ok";
-            
-            // Define temperature ranges for each stage
-            const tempRanges = [
-                {min: 35, max: 37}, // Stage 1
-                {min: 32, max: 35}, // Stage 2
-                {min: 24, max: 28}, // Stage 3
-                {min: 20, max: 24}  // Stage 4
-            ];
-            
-            const currentStage = stage || 1;
-            const range = tempRanges[currentStage - 1] || tempRanges[0];
-            
-            if(temp < range.min - 2) {
-                tempStatusText = "Too Low";
-                tempStatusClass = "status-danger";
-            } else if(temp < range.min) {
-                tempStatusText = "Low";
-                tempStatusClass = "status-warning";
-            } else if(temp > range.max + 2) {
-                tempStatusText = "Too High";
-                tempStatusClass = "status-danger";
-            } else if(temp > range.max) {
-                tempStatusText = "High";
-                tempStatusClass = "status-warning";
-            }
-            
-            // Humidity status
-            let humStatusText = "Normal";
-            let humStatusClass = "status-ok";
-            
-            // Define humidity ranges
-            const humRanges = [
-                {min: 60, max: 70}, // Stage 1
-                {min: 60, max: 70}, // Stage 2
-                {min: 55, max: 65}, // Stage 3
-                {min: 50, max: 60}  // Stage 4
-            ];
-            
-            const humRange = humRanges[currentStage - 1] || humRanges[0];
-            
-            if(hum < humRange.min - 5) {
-                humStatusText = "Too Low";
-                humStatusClass = "status-danger";
-            } else if(hum < humRange.min) {
-                humStatusText = "Low";
-                humStatusClass = "status-warning";
-            } else if(hum > humRange.max + 5) {
-                humStatusText = "Too High";
-                humStatusClass = "status-danger";
-            } else if(hum > humRange.max) {
-                humStatusText = "High";
-                humStatusClass = "status-warning";
-            }
-            
-            tempStatus.textContent = tempStatusText;
-            tempStatus.className = "sensor-status " + tempStatusClass;
-            
-            humStatus.textContent = humStatusText;
-            humStatus.className = "sensor-status " + humStatusClass;
-        }
-        
-        function updateStageVisualization(stage, age) {
-            // Reset all stages
-            for(let i = 1; i <= 4; i++) {
-                const stageElement = document.getElementById('stage' + i);
-                stageElement.classList.remove('active');
-            }
-            
-            // Highlight current stage
-            const currentStageElement = document.getElementById('stage' + stage);
-            if(currentStageElement) {
-                currentStageElement.classList.add('active');
-            }
-            
-            // Update stage name
-            const stageNames = [
-                "Brooding Week 1",
-                "Brooding Week 2", 
-                "Grower Phase",
-                "Adult Layer"
-            ];
-            
-            if(stage >= 1 && stage <= 4) {
-                document.getElementById('currentStageName').textContent = stageNames[stage-1];
-            }
-            
-            // Update stage progress bar
-            let progressPercent = 0;
-            const stageDurations = [7, 7, 28, 999]; // Days per stage
-            if(stage >= 1 && stage <= 4) {
-                const stageStartAge = stage === 1 ? 0 : 
-                                     stage === 2 ? 7 : 
-                                     stage === 3 ? 14 : 42;
-                const stageDuration = stageDurations[stage-1];
-                progressPercent = Math.min(((age - stageStartAge) / stageDuration) * 100, 100);
-            }
-            
-            document.getElementById('stageProgress').style.width = progressPercent + '%';
-            
-            // Update ideal temperature range based on stage
-            const tempRanges = ["35-37°C", "32-35°C", "24-28°C", "20-24°C"];
-            if(stage >= 1 && stage <= 4) {
-                document.getElementById('idealTempRange').textContent = tempRanges[stage-1];
-            }
-        }
-        
-        function updateTemperatureProgress(temp, stage) {
-            // Calculate how far the temperature is within the ideal range
-            const tempRanges = [
-                {min: 35, max: 37}, // Stage 1
-                {min: 32, max: 35}, // Stage 2
-                {min: 24, max: 28}, // Stage 3
-                {min: 20, max: 24}  // Stage 4
-            ];
-            
-            const range = tempRanges[stage - 1] || tempRanges[0];
-            const position = parseFloat(temp) - range.min;
-            let percent = (position / (range.max - range.min)) * 100;
-            
-            // Clamp between 0 and 100
-            percent = Math.max(0, Math.min(100, percent));
-            
-            document.getElementById('tempProgress').style.width = percent + '%';
-            
-            // Change color based on position in range
-            const progressFill = document.getElementById('tempProgress');
-            if(percent < 20 || percent > 80) {
-                progressFill.style.backgroundColor = "#e74c3c"; // Red for extreme values
-            } else if(percent < 30 || percent > 70) {
-                progressFill.style.backgroundColor = "#f39c12"; // Orange for borderline values
-            } else {
-                progressFill.style.backgroundColor = "#27ae60"; // Green for ideal values
-            }
-        }
-        
-        function updateModeDescription(isAuto) {
-            const description = document.getElementById('modeDescription');
-            if(isAuto) {
-                description.textContent = "System is in automatic mode. Devices will be controlled based on environmental conditions.";
-            } else {
-                description.textContent = "System is in manual mode. Devices are controlled by user input.";
-            }
-        }
-        
-        function checkDataTimeout() {
-            const now = Date.now();
-            const timeout = 60000; // 60 seconds
-            
-            if(lastDataTimestamp > 0 && (now - lastDataTimestamp) > timeout) {
-                // Data is stale
-                document.getElementById('tempStatus').textContent = "No recent data";
-                document.getElementById('tempStatus').className = "sensor-status status-warning";
-                document.getElementById('humStatus').textContent = "No recent data";
-                document.getElementById('humStatus').className = "sensor-status status-warning";
-            }
-        }
-        
-        function setupControlButtons() {
-            // Device control buttons
-            document.querySelectorAll('.btn-control').forEach(button => {
-                button.addEventListener('click', function() {
-                    if(!mqttClient || !mqttClient.isConnected()) {
-                        alert("Not connected to MQTT. Please check connection.");
-                        return;
+                // Show selected page
+                pages.forEach(p => {
+                    p.classList.remove('active');
+                    if (p.id === `page${page.charAt(0).toUpperCase() + page.slice(1)}`) {
+                        p.classList.add('active');
                     }
-                    
-                    const device = this.getAttribute('data-device');
-                    const state = this.getAttribute('data-state') === 'true';
-                    
-                    // Update UI immediately
-                    if(device === 'fan') {
-                        document.getElementById('fanOnBtn').classList.toggle('active', state);
-                        document.getElementById('fanOffBtn').classList.toggle('active', !state);
-                        document.getElementById('fanMode').textContent = "Manual";
-                        document.getElementById('fanMode').className = "mode-indicator mode-manual";
-                        document.getElementById('fanControlSource').textContent = "web";
-                    } else if(device === 'heat') {
-                        document.getElementById('heatOnBtn').classList.toggle('active', state);
-                        document.getElementById('heatOffBtn').classList.toggle('active', !state);
-                        document.getElementById('heatMode').textContent = "Manual";
-                        document.getElementById('heatMode').className = "mode-indicator mode-manual";
-                        document.getElementById('heatControlSource').textContent = "web";
-                    }
-                    
-                    // Prepare MQTT message with API key
-                    const messageData = {
-                        [device]: state,
-                        apikey: currentAPIKey
-                    };
-                    
-                    // Send MQTT command
-                    const message = new Paho.MQTT.Message(JSON.stringify(messageData));
-                    message.destinationName = currentAPIKey ? "vquail/secure/control" : "vquail/control/devices";
-                    mqttClient.send(message);
-                    
-                    console.log(`Sent MQTT command to ${message.destinationName}: ${device} = ${state}`);
                 });
             });
-            
-            // Auto mode toggle
-            document.getElementById('autoToggle').addEventListener('change', function() {
-                if(!mqttClient || !mqttClient.isConnected()) {
-                    alert("Not connected to MQTT. Please check connection.");
-                    this.checked = !this.checked; // Revert change
-                    return;
-                }
-                
-                const isAuto = this.checked;
-                updateModeDescription(isAuto);
-                
-                // Prepare MQTT message with API key
-                const messageData = {
-                    auto: isAuto,
-                    apikey: currentAPIKey
-                };
-                
-                // Send MQTT command
-                const message = new Paho.MQTT.Message(JSON.stringify(messageData));
-                message.destinationName = currentAPIKey ? "vquail/secure/control" : "vquail/control/devices";
-                mqttClient.send(message);
-                
-                console.log(`Sent MQTT command to ${message.destinationName}: auto mode = ${isAuto}`);
-            });
-        }
-        
+        });
+
+        // Time Update
         function updateTime() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-            document.getElementById('currentTime').textContent = timeString;
+            currentTime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+            currentDate.textContent = now.toLocaleDateString('en-US');
+        }
+
+        // Data Polling
+        let pollingInterval;
+        
+        function startDataPolling() {
+            fetchData();
+            pollingInterval = setInterval(fetchData, 5000); // Update every 5 seconds
         }
         
-        function showNotification(message) {
-            // Check if browser supports notifications
-            if (!("Notification" in window)) {
-                return;
+        function stopDataPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch(API_ENDPOINT);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showOfflineMode();
+            }
+        }
+
+        function updateDashboard(data) {
+            currentState = data;
+            
+            // Update sensor values
+            document.getElementById('temperatureValue').textContent = data.temp.toFixed(1);
+            document.getElementById('humidityValue').textContent = data.hum.toFixed(1);
+            
+            // Update status indicators
+            document.getElementById('tempStatus').className = `status-indicator ${data.sensorOnline ? 'status-online' : 'status-offline'}`;
+            document.getElementById('humStatus').className = `status-indicator ${data.sensorOnline ? 'status-online' : 'status-offline'}`;
+            
+            // Update device states
+            document.getElementById('currentFanState').textContent = data.fan ? 'ON' : 'OFF';
+            document.getElementById('currentHeatState').textContent = data.heat ? 'ON' : 'OFF';
+            
+            // Update mode indicator
+            document.getElementById('modeIndicator').textContent = data.auto ? 'AUTO' : 'MANUAL';
+            
+            // Update stage and age
+            document.getElementById('stageName').textContent = data.stage;
+            document.getElementById('ageDisplay').textContent = `Age: ${data.age} days`;
+            document.getElementById('currentAge').textContent = data.age;
+            
+            // Update system status
+            document.getElementById('wifiStatus').textContent = data.wifi ? 'Connected' : 'Disconnected';
+            document.getElementById('mqttStatus').textContent = data.mqtt ? 'Connected' : 'Disconnected';
+            document.getElementById('sensorStatus').textContent = data.sensorOnline ? 'Online' : 'Offline';
+            
+            // Update alarm panel
+            if (data.alarm) {
+                alarmPanel.style.display = 'flex';
+                alarmMessage.textContent = data.alarm;
+            } else {
+                alarmPanel.style.display = 'none';
             }
             
-            // Check if permission is already granted
-            if (Notification.permission === "granted") {
-                new Notification("VQuail System", {
-                    body: message,
-                    icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzI3Y2U2MCIgZD0iTTEyLDIyQzE3LjUyLDIyIDIyLDE3LjUyIDIyLDEyQzIyLDYuNDggMTcuNTIsMiAxMiwyQzYuNDgsMiAyLDYuNDggMiwxMkMyLDE3LjUyIDYuNDgsMjIgMTIsMjJNMTIsNEMxNi40MSw0IDIwLDcuNTkgMjAsMTJDMjAsMTYuNDEgMTYuNDEsMjAgMTIsMjBDNy41OSwyMCA0LDE2LjQxIDQsMTJDNCw3LjU5IDcuNTksNCAxMiw0TTE0LjU5LDhLODk5QzE0LjIyLDguNiAxNCw5LjI4IDE0LDEwSDEwQzEwLDguOSAxMC45LDggMTIsOFMxNCw4LjkgMTQsMTBIMTQuMDhDMTQuMDMsOS42NyAxNCw5LjM0IDE0LDlDMTQsOC40NSAxNC4xOCw4IDE0LjU5LDhNMTYsMTVWNkgxMlYxNUgxNk0xNiwxOEgxMlYxNkgxNlYxOEoiLz48L3N2Zz4="
-                });
-            } else if (Notification.permission !== "denied") {
-                // Request permission
-                Notification.requestPermission().then(function(permission) {
-                    if (permission === "granted") {
-                        new Notification("VQuail System", {
-                            body: message,
-                            icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzI3Y2U2MCIgZD0iTTEyLDIyQzE3LjUyLDIyIDIyLDE3LjUyIDIyLDEyQzIyLDYuNDggMTcuNTIsMiAxMiwyQzYuNDgsMiAyLDYuNDggMiwxMkMyLDE3LjUyIDYuNDgsMjIgMTIsMjJNMTIsNEMxNi40MSw0IDIwLDcuNTkgMjAsMTJDMjAsMTYuNDEgMTYuNDEsMjAgMTIsMjBDNy41OSwyMCA0LDE2LjQxIDQsMTJDNCw3LjU5IDcuNTksNCAxMiw0TTE0LjU5LDhLODk5QzE0LjIyLDguNiAxNCw5LjI4IDE0LDEwSDEwQzEwLDguOSAxMC45LDggMTIsOFMxNCw4LjkgMTQsMTBIMTQuMDhDMTQuMDMsOS42NyAxNCw5LjM0IDE0LDlDMTQsOC40NSAxNC4xOCw4IDE0LjU5LDhNMTYsMTVWNkgxMlYxNUgxNk0xNiwxOEgxMlYxNkgxNlYxOEoiLz48L3N2Zz4="
-                        });
+            // Update info page
+            document.getElementById('sysUptime').textContent = `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`;
+            document.getElementById('ntpStatus').textContent = data.ntp ? 'Synchronized' : 'Not Synchronized';
+            
+            // Update range indicators based on stage
+            updateRangeIndicators(data.stage, data.temp, data.hum);
+            
+            // Update charts
+            updateCharts(data.temp, data.hum);
+            
+            // Update button states
+            updateButtonStates();
+        }
+
+        function showOfflineMode() {
+            document.getElementById('temperatureValue').textContent = '--';
+            document.getElementById('humidityValue').textContent = '--';
+            document.getElementById('wifiStatus').textContent = 'Disconnected';
+            document.getElementById('mqttStatus').textContent = 'Disconnected';
+            document.getElementById('sensorStatus').textContent = 'Offline';
+            
+            alarmPanel.style.display = 'flex';
+            alarmTitle.textContent = 'CONNECTION LOST';
+            alarmMessage.textContent = 'Cannot connect to VQuail system';
+        }
+
+        // Range Indicators
+        function updateRangeIndicators(stage, temp, hum) {
+            const stageConfigs = {
+                'Brood W1': { tempMin: 35, tempMax: 37, humMin: 60, humMax: 70 },
+                'Brood W2': { tempMin: 32, tempMax: 35, humMin: 60, humMax: 70 },
+                'Grower': { tempMin: 24, tempMax: 28, humMin: 55, humMax: 65 },
+                'Adult': { tempMin: 20, tempMax: 24, humMin: 50, humMax: 60 }
+            };
+            
+            const config = stageConfigs[stage] || stageConfigs['Brood W1'];
+            
+            // Update range displays
+            document.getElementById('tempRange').textContent = `Target: ${config.tempMin}-${config.tempMax}°C`;
+            document.getElementById('humRange').textContent = `Target: ${config.humMin}-${config.humMax}%`;
+            
+            // Calculate and update fill percentages
+            const tempPercent = Math.max(0, Math.min(100, ((temp - config.tempMin) / (config.tempMax - config.tempMin)) * 100));
+            const humPercent = Math.max(0, Math.min(100, ((hum - config.humMin) / (config.humMax - config.humMin)) * 100));
+            
+            const tempFill = document.getElementById('tempFill');
+            const humFill = document.getElementById('humFill');
+            
+            tempFill.style.width = `${tempPercent}%`;
+            humFill.style.width = `${humPercent}%`;
+            
+            // Update colors based on position
+            tempFill.className = 'range-fill ' + 
+                (tempPercent < 0 ? 'danger' : 
+                 tempPercent > 100 ? 'danger' : 
+                 tempPercent < 20 || tempPercent > 80 ? 'warning' : '');
+                 
+            humFill.className = 'range-fill ' + 
+                (humPercent < 0 ? 'danger' : 
+                 humPercent > 100 ? 'danger' : 
+                 humPercent < 20 || humPercent > 80 ? 'warning' : '');
+        }
+
+        // Charts
+        function initializeCharts() {
+            const tempCtx = document.getElementById('tempChart').getContext('2d');
+            const humCtx = document.getElementById('humChart').getContext('2d');
+            
+            charts.temp = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: [],
+                        borderColor: '#f44336',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8c9db5'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8c9db5'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
                     }
-                });
+                }
+            });
+            
+            charts.hum = new Chart(humCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Humidity (%)',
+                        data: [],
+                        borderColor: '#2196f3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8c9db5'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8c9db5'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(temp, hum) {
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Update temperature chart
+            if (charts.temp.data.labels.length > 20) {
+                charts.temp.data.labels.shift();
+                charts.temp.data.datasets[0].data.shift();
             }
+            charts.temp.data.labels.push(timeLabel);
+            charts.temp.data.datasets[0].data.push(temp);
+            charts.temp.update();
+            
+            // Update humidity chart
+            if (charts.hum.data.labels.length > 20) {
+                charts.hum.data.labels.shift();
+                charts.hum.data.datasets[0].data.shift();
+            }
+            charts.hum.data.labels.push(timeLabel);
+            charts.hum.data.datasets[0].data.push(hum);
+            charts.hum.update();
+        }
+
+        // Control Functions
+        function sendControlCommand(command, value) {
+            // This would send a command to the ESP32 via MQTT or HTTP
+            console.log(`Sending command: ${command} = ${value}`);
+            
+            // In a real implementation, you would make an HTTP request or MQTT publish here
+            // For now, we'll just update the local state
+            if (command === 'fan') currentState.fan = value;
+            if (command === 'heat') currentState.heat = value;
+            if (command === 'auto') currentState.auto = value;
+            
+            updateButtonStates();
+        }
+
+        function updateButtonStates() {
+            // Update fan buttons
+            const fanOnBtn = document.getElementById('fanOnBtn');
+            const fanOffBtn = document.getElementById('fanOffBtn');
+            const fanToggleBtn = document.getElementById('fanToggleBtn');
+            
+            fanOnBtn.classList.toggle('active', currentState.fan);
+            fanOffBtn.classList.toggle('active', !currentState.fan);
+            fanToggleBtn.innerHTML = currentState.fan ? 
+                '<i class="fas fa-power-off"></i> TURN FAN OFF' : 
+                '<i class="fas fa-power-off"></i> TURN FAN ON';
+            fanToggleBtn.className = `btn ${currentState.fan ? 'btn-danger' : 'btn-success'} btn-large`;
+            
+            // Update heat buttons
+            const heatOnBtn = document.getElementById('heatOnBtn');
+            const heatOffBtn = document.getElementById('heatOffBtn');
+            const heatToggleBtn = document.getElementById('heatToggleBtn');
+            
+            heatOnBtn.classList.toggle('active', currentState.heat);
+            heatOffBtn.classList.toggle('active', !currentState.heat);
+            heatToggleBtn.innerHTML = currentState.heat ? 
+                '<i class="fas fa-power-off"></i> TURN HEAT OFF' : 
+                '<i class="fas fa-power-off"></i> TURN HEAT ON';
+            heatToggleBtn.className = `btn ${currentState.heat ? 'btn-danger' : 'btn-warning'} btn-large`;
+            
+            // Update mode buttons
+            const autoModeBtn = document.getElementById('autoModeBtn');
+            const manualModeBtn = document.getElementById('manualModeBtn');
+            
+            autoModeBtn.classList.toggle('active', currentState.auto);
+            manualModeBtn.classList.toggle('active', !currentState.auto);
+        }
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Fan controls
+            document.getElementById('fanOnBtn').addEventListener('click', () => sendControlCommand('fan', true));
+            document.getElementById('fanOffBtn').addEventListener('click', () => sendControlCommand('fan', false));
+            document.getElementById('fanToggleBtn').addEventListener('click', () => sendControlCommand('fan', !currentState.fan));
+            
+            // Heat controls
+            document.getElementById('heatOnBtn').addEventListener('click', () => sendControlCommand('heat', true));
+            document.getElementById('heatOffBtn').addEventListener('click', () => sendControlCommand('heat', false));
+            document.getElementById('heatToggleBtn').addEventListener('click', () => sendControlCommand('heat', !currentState.heat));
+            
+            // Mode controls
+            document.getElementById('autoModeBtn').addEventListener('click', () => sendControlCommand('auto', true));
+            document.getElementById('manualModeBtn').addEventListener('click', () => sendControlCommand('auto', false));
+            
+            // Quick actions
+            document.getElementById('bothOnBtn').addEventListener('click', () => {
+                sendControlCommand('fan', true);
+                sendControlCommand('heat', true);
+            });
+            
+            document.getElementById('bothOffBtn').addEventListener('click', () => {
+                sendControlCommand('fan', false);
+                sendControlCommand('heat', false);
+            });
+            
+            document.getElementById('publishBtn').addEventListener('click', () => {
+                console.log('Publishing current state...');
+                // In real implementation, this would trigger an MQTT publish
+            });
+            
+            // Settings controls
+            document.querySelectorAll('.stage-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const stage = parseInt(btn.getAttribute('data-stage'));
+                    console.log(`Setting stage to: ${stage}`);
+                    // Send stage change command
+                });
+            });
+            
+            document.getElementById('ageDownBtn').addEventListener('click', () => {
+                if (currentState.age > 0) {
+                    currentState.age--;
+                    document.getElementById('currentAge').textContent = currentState.age;
+                }
+            });
+            
+            document.getElementById('ageUpBtn').addEventListener('click', () => {
+                currentState.age++;
+                document.getElementById('currentAge').textContent = currentState.age;
+            });
+            
+            document.getElementById('saveConfigBtn').addEventListener('click', () => {
+                console.log('Saving configuration...');
+                alert('Configuration saved!');
+            });
+            
+            document.getElementById('rebootBtn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to reboot the system?')) {
+                    console.log('Rebooting system...');
+                    // Send reboot command
+                }
+            });
+            
+            document.getElementById('defaultBtn').addEventListener('click', () => {
+                if (confirm('Restore all settings to default values?')) {
+                    console.log('Restoring defaults...');
+                    // Send restore defaults command
+                }
+            });
         }
     </script>
 </body>
