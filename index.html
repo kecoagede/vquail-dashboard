@@ -113,6 +113,44 @@
             display: none;
         }
 
+        /* Connection Setup */
+        .setup-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a2e38 0%, #084041 100%);
+        }
+
+        .setup-box {
+            background: rgba(24, 51, 63, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .setup-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #07ffff;
+            font-weight: 600;
+        }
+
+        .setup-subtitle {
+            font-size: 14px;
+            color: #8c8c8c;
+            margin-bottom: 30px;
+        }
+
+        .setup-logo {
+            font-size: 50px;
+            color: #07ffff;
+            margin-bottom: 20px;
+        }
+
         /* Main Interface */
         .main-container {
             display: none;
@@ -570,54 +608,6 @@
             color: #07ffff;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-right {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 10px;
-            }
-            
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .control-buttons {
-                grid-template-columns: 1fr;
-            }
-            
-            .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .navigation {
-                flex-wrap: wrap;
-            }
-            
-            .nav-btn {
-                flex: 1;
-                min-width: 100px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .login-box {
-                padding: 20px;
-            }
-            
-            .content {
-                padding: 10px;
-            }
-            
-            .device-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-        }
-
         /* Loading Spinner */
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.1);
@@ -664,6 +654,92 @@
         .toast.warning {
             border-left-color: #fd55ff;
         }
+
+        /* Connection Test */
+        .test-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #07ffff, #07a2ff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .test-btn:hover {
+            background: linear-gradient(to right, #07a2ff, #07ffff);
+        }
+
+        .test-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(10, 30, 40, 0.5);
+            display: none;
+        }
+
+        .test-result.success {
+            display: block;
+            border-left: 4px solid #07e007;
+            color: #07e007;
+        }
+
+        .test-result.error {
+            display: block;
+            border-left: 4px solid #ff5555;
+            color: #ff5555;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-right {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .navigation {
+                flex-wrap: wrap;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-box, .setup-box {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .device-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -695,6 +771,36 @@
                     Invalid username or password
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Connection Setup Screen -->
+    <div class="setup-container" id="setupScreen">
+        <div class="setup-box">
+            <div class="setup-logo">
+                <i class="fas fa-wifi"></i>
+            </div>
+            <h1 class="setup-title">Connect to VQuail System</h1>
+            <p class="setup-subtitle">Enter your ESP32 IP address to connect</p>
+            
+            <div class="input-group">
+                <label for="espIp"><i class="fas fa-server"></i> ESP32 IP Address</label>
+                <input type="text" id="espIp" placeholder="e.g., 192.168.1.100" required>
+            </div>
+            
+            <button class="test-btn" onclick="testConnection()">
+                <i class="fas fa-plug"></i> Test Connection
+            </button>
+            
+            <div class="test-result" id="testResult"></div>
+            
+            <button class="login-btn" onclick="saveConnection()" style="margin-top: 20px;">
+                <i class="fas fa-check"></i> Connect
+            </button>
+            
+            <div class="error-message" id="setupError">
+                Connection failed. Please check IP address.
+            </div>
         </div>
     </div>
 
@@ -896,7 +1002,7 @@
                     <div class="control-group">
                         <div class="control-group-title">Operation Mode</div>
                         <div class="mode-selection">
-                            <button class="mode-btn active" id="autoModeBtn" onclick="setControlMode(true)">
+                            <button class="mode-btn" id="autoModeBtn" onclick="setControlMode(true)">
                                 <i class="fas fa-robot"></i> AUTO MODE
                             </button>
                             <button class="mode-btn" id="manualModeBtn" onclick="setControlMode(false)">
@@ -951,77 +1057,32 @@
                     </h3>
                     
                     <div class="control-group">
-                        <div class="control-group-title">Life Stage Configuration</div>
-                        <div class="button-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <button class="btn" onclick="setLifeStage(0)">
-                                BROOD W1
+                        <div class="control-group-title">Connection Settings</div>
+                        <div class="button-grid">
+                            <button class="btn btn-warning" onclick="changeConnection()">
+                                <i class="fas fa-exchange-alt"></i> Change ESP32 IP
                             </button>
-                            <button class="btn" onclick="setLifeStage(1)">
-                                BROOD W2
+                            <button class="btn btn-primary" onclick="showApiKey()">
+                                <i class="fas fa-key"></i> Show API Key
                             </button>
-                            <button class="btn" onclick="setLifeStage(2)">
-                                GROWER
-                            </button>
-                            <button class="btn" onclick="setLifeStage(3)">
-                                ADULT
-                            </button>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #8c8c8c;">
+                            Current IP: <span id="currentIp">Not connected</span>
                         </div>
                     </div>
                     
                     <div class="control-group">
-                        <div class="control-group-title">Age Settings (Days)</div>
-                        <div class="button-grid">
-                            <button class="btn btn-danger" onclick="adjustAge(-1)">
-                                <i class="fas fa-minus"></i> DECREASE
+                        <div class="control-group-title">System Actions</div>
+                        <div class="quick-actions">
+                            <button class="quick-btn btn-success" onclick="saveSettings()">
+                                <i class="fas fa-save"></i>
+                                SAVE SETTINGS
                             </button>
-                            <button class="btn" style="pointer-events: none;">
-                                <span id="currentAgeDisplay">0</span> DAYS
-                            </button>
-                            <button class="btn btn-success" onclick="adjustAge(1)">
-                                <i class="fas fa-plus"></i> INCREASE
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <div class="control-group-title">Calibration</div>
-                        <div class="button-grid">
-                            <div style="grid-column: span 2; text-align: center;">
-                                Temperature Offset: <span id="tempOffset">0.0</span>°C
-                            </div>
-                            <button class="btn" onclick="adjustCalibration('temp', -0.5)">
-                                <i class="fas fa-minus"></i> -0.5°C
-                            </button>
-                            <button class="btn" onclick="adjustCalibration('temp', 0.5)">
-                                <i class="fas fa-plus"></i> +0.5°C
+                            <button class="quick-btn btn-warning" onclick="rebootSystem()">
+                                <i class="fas fa-redo"></i>
+                                REBOOT SYSTEM
                             </button>
                         </div>
-                        <div class="button-grid" style="margin-top: 10px;">
-                            <div style="grid-column: span 2; text-align: center;">
-                                Humidity Offset: <span id="humOffset">0.0</span>%
-                            </div>
-                            <button class="btn" onclick="adjustCalibration('hum', -0.5)">
-                                <i class="fas fa-minus"></i> -0.5%
-                            </button>
-                            <button class="btn" onclick="adjustCalibration('hum', 0.5)">
-                                <i class="fas fa-plus"></i> +0.5%
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-actions">
-                        <button class="quick-btn btn-success" onclick="saveSettings()">
-                            <i class="fas fa-save"></i>
-                            SAVE SETTINGS
-                        </button>
-                        <button class="quick-btn btn-warning" onclick="rebootSystem()">
-                            <i class="fas fa-redo"></i>
-                            REBOOT SYSTEM
-                        </button>
-                        <button class="quick-btn btn-danger" onclick="resetSettings()">
-                            <i class="fas fa-undo"></i>
-                            RESET DEFAULTS
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1041,44 +1102,18 @@
                         </div>
                         
                         <div class="info-item">
-                            <div class="info-label">ESP32 Chip ID</div>
-                            <div class="info-value" id="chipId">Loading...</div>
+                            <div class="info-label">Connection Status</div>
+                            <div class="info-value" id="connectionStatus">Disconnected</div>
                         </div>
                         
                         <div class="info-item">
-                            <div class="info-label">Free Memory</div>
-                            <div class="info-value" id="freeMemory">Loading...</div>
+                            <div class="info-label">Last Update</div>
+                            <div class="info-value" id="lastDataUpdate">Never</div>
                         </div>
                         
                         <div class="info-item">
-                            <div class="info-label">SD Card</div>
-                            <div class="info-value" id="sdStatus">Checking...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-grid" style="margin-top: 20px;">
-                        <div class="info-item">
-                            <div class="info-label">WiFi Signal</div>
-                            <div class="info-value" id="wifiSignal">-- dBm</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">NTP Status</div>
-                            <div class="info-value" id="ntpStatus">Checking...</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">MQTT Server</div>
-                            <div class="info-value">HiveMQ Cloud</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">API Key</div>
-                            <div class="info-value">
-                                <button class="btn" onclick="copyApiKey()" style="font-size: 12px; padding: 5px 10px;">
-                                    <i class="fas fa-copy"></i> Copy API Key
-                                </button>
-                            </div>
+                            <div class="info-label">API Status</div>
+                            <div class="info-value" id="apiStatus">Inactive</div>
                         </div>
                     </div>
                     
@@ -1116,8 +1151,8 @@
 
     <script>
         // Configuration
-        const API_BASE_URL = window.location.origin; // Use same origin as the page
-        const API_KEY = ''; // Will be populated after login
+        let API_BASE_URL = '';
+        let API_KEY = '';
         const UPDATE_INTERVAL = 5000; // 5 seconds
         const RETRY_INTERVAL = 10000; // 10 seconds
         
@@ -1138,16 +1173,33 @@
             uptime: '0',
             time: '00:00:00',
             date: '---',
-            sensor_online: false
+            sensor_online: false,
+            apikey: ''
         };
         
         // Stage configurations (must match ESP32 code)
         const stages = {
-            0: { name: 'Brood W1', tempMin: 35.0, tempMax: 37.0, humMin: 60.0, humMax: 70.0, color: '#F9A6' },
-            1: { name: 'Brood W2', tempMin: 32.0, tempMax: 35.0, humMin: 60.0, humMax: 70.0, color: '#FD20' },
-            2: { name: 'Grower', tempMin: 24.0, tempMax: 28.0, humMin: 55.0, humMax: 65.0, color: '#2F6B' },
-            3: { name: 'Adult', tempMin: 20.0, tempMax: 24.0, humMin: 50.0, humMax: 60.0, color: '#4AFF' }
+            'Brood W1': { tempMin: 35.0, tempMax: 37.0, humMin: 60.0, humMax: 70.0, color: '#F9A6' },
+            'Brood W2': { tempMin: 32.0, tempMax: 35.0, humMin: 60.0, humMax: 70.0, color: '#FD20' },
+            'Grower': { tempMin: 24.0, tempMax: 28.0, humMin: 55.0, humMax: 65.0, color: '#2F6B' },
+            'Adult': { tempMin: 20.0, tempMax: 24.0, humMin: 50.0, humMax: 60.0, color: '#4AFF' }
         };
+
+        // Check for saved connection on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedIp = localStorage.getItem('vquail_ip');
+            if (savedIp) {
+                // Auto-connect if IP is saved
+                API_BASE_URL = `http://${savedIp}`;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainInterface').style.display = 'flex';
+                document.getElementById('currentIp').textContent = savedIp;
+                fetchSystemData();
+                setInterval(fetchSystemData, UPDATE_INTERVAL);
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
+        });
 
         // Login functionality
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -1156,21 +1208,13 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Hardcoded credentials (same as ESP32)
+            // Hardcoded credentials (same as ESP32 web interface)
             if (username === 'vquail' && password === 'Vquail12345') {
                 // Successful login
                 document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainInterface').style.display = 'flex';
+                document.getElementById('setupScreen').style.display = 'flex';
                 
-                // Start fetching data
-                fetchSystemData();
-                setInterval(fetchSystemData, UPDATE_INTERVAL);
-                
-                // Start clock update
-                updateClock();
-                setInterval(updateClock, 1000);
-                
-                showToast('Login successful!', 'success');
+                showToast('Login successful! Enter ESP32 IP address', 'success');
             } else {
                 // Failed login
                 document.getElementById('loginError').style.display = 'block';
@@ -1180,38 +1224,126 @@
             }
         });
 
+        // Test connection to ESP32
+        async function testConnection() {
+            const ip = document.getElementById('espIp').value.trim();
+            if (!ip) {
+                showToast('Please enter IP address', 'error');
+                return;
+            }
+            
+            const testUrl = `http://${ip}/api/status`;
+            const resultDiv = document.getElementById('testResult');
+            
+            try {
+                const response = await fetch(testUrl, { timeout: 5000 });
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `<i class="fas fa-check"></i> Connection successful!<br>`;
+                    resultDiv.innerHTML += `System: VQuail<br>`;
+                    resultDiv.innerHTML += `Temp: ${data.temp || '--'}°C<br>`;
+                    resultDiv.innerHTML += `API Key found: ${data.apikey ? 'Yes' : 'No'}`;
+                    showToast('Connection test successful!', 'success');
+                } else {
+                    throw new Error('HTTP error');
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `<i class="fas fa-times"></i> Connection failed<br>`;
+                resultDiv.innerHTML += `Check if ESP32 is connected to WiFi<br>`;
+                resultDiv.innerHTML += `Check IP address and try again`;
+                showToast('Connection test failed', 'error');
+            }
+        }
+
+        // Save connection and proceed
+        function saveConnection() {
+            const ip = document.getElementById('espIp').value.trim();
+            if (!ip) {
+                showToast('Please enter IP address', 'error');
+                return;
+            }
+            
+            API_BASE_URL = `http://${ip}`;
+            localStorage.setItem('vquail_ip', ip);
+            
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('mainInterface').style.display = 'flex';
+            document.getElementById('currentIp').textContent = ip;
+            
+            showToast('Connected to ESP32!', 'success');
+            
+            // Start fetching data
+            fetchSystemData();
+            setInterval(fetchSystemData, UPDATE_INTERVAL);
+            
+            // Start clock update
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // Change connection
+        function changeConnection() {
+            if (confirm('Change ESP32 connection? Current data fetching will stop.')) {
+                localStorage.removeItem('vquail_ip');
+                document.getElementById('mainInterface').style.display = 'none';
+                document.getElementById('setupScreen').style.display = 'flex';
+                document.getElementById('espIp').value = '';
+                document.getElementById('testResult').className = 'test-result';
+                showToast('Connection reset', 'warning');
+            }
+        }
+
+        // Show API key
+        function showApiKey() {
+            if (API_KEY) {
+                if (confirm(`Your API key is: ${API_KEY}\n\nCopy to clipboard?`)) {
+                    navigator.clipboard.writeText(API_KEY)
+                        .then(() => showToast('API key copied to clipboard', 'success'))
+                        .catch(() => showToast('Failed to copy API key', 'error'));
+                }
+            } else {
+                showToast('API key not available yet. Try fetching data first.', 'warning');
+            }
+        }
+
         // Fetch system data from ESP32
         async function fetchSystemData() {
+            if (!API_BASE_URL) return;
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/api/status`, {
-                    headers: {
-                        'X-API-Key': API_KEY
-                    }
+                    signal: AbortSignal.timeout(10000)
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch data');
+                    throw new Error(`HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
+                
+                // Store API key from response
+                if (data.apikey && data.apikey.length === 32) {
+                    API_KEY = data.apikey;
+                }
+                
                 updateSystemData(data);
                 updateUI();
                 
+                // Update last update time
+                document.getElementById('lastDataUpdate').textContent = new Date().toLocaleTimeString();
+                document.getElementById('apiStatus').textContent = 'Active';
+                document.getElementById('connectionStatus').textContent = 'Connected';
+                
             } catch (error) {
                 console.error('Error fetching data:', error);
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                document.getElementById('apiStatus').textContent = 'Inactive';
                 
-                // Try to get API key if not set
-                if (!API_KEY) {
-                    try {
-                        const keyResponse = await fetch(`${API_BASE_URL}/api/status`);
-                        const keyData = await keyResponse.json();
-                        if (keyData.apikey) {
-                            API_KEY = keyData.apikey;
-                            showToast('API key retrieved successfully', 'success');
-                        }
-                    } catch (e) {
-                        console.error('Failed to get API key:', e);
-                    }
+                // Show error toast only occasionally to avoid spam
+                if (Math.random() < 0.1) { // 10% chance
+                    showToast('Connection lost. Retrying...', 'error');
                 }
             }
         }
@@ -1237,7 +1369,7 @@
                 tempValue.textContent = systemData.temp.toFixed(1);
                 
                 // Color coding based on stage limits
-                const currentStage = getCurrentStage();
+                const currentStage = stages[systemData.stage];
                 if (currentStage) {
                     const tempRange = document.getElementById('tempRange');
                     tempRange.textContent = `Range: ${currentStage.tempMin} to ${currentStage.tempMax}°C`;
@@ -1252,6 +1384,17 @@
                         tempCard.classList.remove('cold', 'hot');
                     }
                 }
+                
+                // Update status dot
+                const tempDot = document.getElementById('tempStatusDot');
+                const tempStatus = document.getElementById('tempStatusText');
+                if (systemData.sensor_online) {
+                    tempDot.className = 'status-dot online';
+                    tempStatus.textContent = 'Online';
+                } else {
+                    tempDot.className = 'status-dot offline';
+                    tempStatus.textContent = 'Offline';
+                }
             }
             
             // Update humidity
@@ -1259,10 +1402,21 @@
             if (humValue) {
                 humValue.textContent = systemData.hum.toFixed(1);
                 
-                const currentStage = getCurrentStage();
+                const currentStage = stages[systemData.stage];
                 if (currentStage) {
                     const humRange = document.getElementById('humRange');
                     humRange.textContent = `Range: ${currentStage.humMin} to ${currentStage.humMax}%`;
+                }
+                
+                // Update status dot
+                const humDot = document.getElementById('humStatusDot');
+                const humStatus = document.getElementById('humStatusText');
+                if (systemData.sensor_online) {
+                    humDot.className = 'status-dot online';
+                    humStatus.textContent = 'Online';
+                } else {
+                    humDot.className = 'status-dot offline';
+                    humStatus.textContent = 'Offline';
                 }
             }
             
@@ -1351,6 +1505,11 @@
 
         // Control devices
         async function controlDevice(device, state) {
+            if (!API_KEY) {
+                showToast('API key not available. Please wait for connection.', 'error');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/api/control`, {
                     method: 'POST',
@@ -1371,6 +1530,9 @@
                     // Update local state
                     systemData[device] = state;
                     updateDeviceStatus(device, state);
+                    
+                    // Refresh data to get updated state
+                    fetchSystemData();
                 } else {
                     throw new Error('Failed to control device');
                 }
@@ -1382,6 +1544,11 @@
 
         // Set control mode
         async function setControlMode(isAuto) {
+            if (!API_KEY) {
+                showToast('API key not available. Please wait for connection.', 'error');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/api/control`, {
                     method: 'POST',
@@ -1399,6 +1566,7 @@
                     systemData.auto = isAuto;
                     updateModeButtons(isAuto);
                     showToast(`Mode set to ${isAuto ? 'AUTO' : 'MANUAL'}`, 'success');
+                    fetchSystemData(); // Refresh data
                 }
             } catch (error) {
                 console.error('Error setting mode:', error);
@@ -1408,134 +1576,29 @@
 
         // Control both devices
         function controlBoth(state) {
+            if (!API_KEY) {
+                showToast('API key not available. Please wait for connection.', 'error');
+                return;
+            }
+            
+            // Send both commands in one request
             controlDevice('fan', state);
             controlDevice('heat', state);
         }
 
         // Publish state (for manual refresh)
-        async function publishState() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/status`, {
-                    headers: {
-                        'X-API-Key': API_KEY
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    updateSystemData(data);
-                    updateUI();
-                    showToast('State refreshed', 'success');
-                }
-            } catch (error) {
-                console.error('Error publishing state:', error);
-                showToast('Failed to refresh state', 'error');
-            }
+        function publishState() {
+            fetchSystemData();
+            showToast('Refreshing data...', 'success');
         }
 
-        // Screen navigation
-        function switchScreen(screen) {
-            // Hide all screens
-            document.getElementById('homeScreen').style.display = 'none';
-            document.getElementById('controlScreen').style.display = 'none';
-            document.getElementById('settingsScreen').style.display = 'none';
-            document.getElementById('infoScreen').style.display = 'none';
-            
-            // Show selected screen
-            document.getElementById(`${screen}Screen`).style.display = 'block';
-            
-            // Update navigation buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`.nav-btn[onclick="switchScreen('${screen}')"]`).classList.add('active');
-            
-            currentScreen = screen;
-        }
-
-        // Settings functions
-        async function setLifeStage(stageIndex) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/control`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': API_KEY
-                    },
-                    body: JSON.stringify({
-                        stage: stageIndex,
-                        apikey: API_KEY
-                    })
-                });
-                
-                if (response.ok) {
-                    showToast(`Life stage set to ${stages[stageIndex].name}`, 'success');
-                    fetchSystemData(); // Refresh data
-                }
-            } catch (error) {
-                console.error('Error setting life stage:', error);
-                showToast('Failed to set life stage', 'error');
-            }
-        }
-
-        async function adjustAge(change) {
-            try {
-                const newAge = systemData.age + change;
-                if (newAge < 0) return;
-                
-                const response = await fetch(`${API_BASE_URL}/api/control`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': API_KEY
-                    },
-                    body: JSON.stringify({
-                        age: newAge,
-                        apikey: API_KEY
-                    })
-                });
-                
-                if (response.ok) {
-                    systemData.age = newAge;
-                    document.getElementById('currentAgeDisplay').textContent = newAge;
-                    showToast(`Age set to ${newAge} days`, 'success');
-                }
-            } catch (error) {
-                console.error('Error adjusting age:', error);
-                showToast('Failed to adjust age', 'error');
-            }
-        }
-
-        async function adjustCalibration(type, change) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/control`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': API_KEY
-                    },
-                    body: JSON.stringify({
-                        [`${type}_offset`]: change,
-                        apikey: API_KEY
-                    })
-                });
-                
-                if (response.ok) {
-                    const element = document.getElementById(`${type}Offset`);
-                    const currentValue = parseFloat(element.textContent);
-                    const newValue = currentValue + change;
-                    element.textContent = newValue.toFixed(1);
-                    
-                    showToast(`${type.toUpperCase()} calibration adjusted by ${change}`, 'success');
-                    fetchSystemData(); // Refresh data
-                }
-            } catch (error) {
-                console.error('Error adjusting calibration:', error);
-                showToast('Failed to adjust calibration', 'error');
-            }
-        }
-
+        // Save settings
         async function saveSettings() {
+            if (!API_KEY) {
+                showToast('API key not available. Please wait for connection.', 'error');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/api/control`, {
                     method: 'POST',
@@ -1558,8 +1621,14 @@
             }
         }
 
+        // Reboot system
         async function rebootSystem() {
-            if (confirm('Are you sure you want to reboot the system?')) {
+            if (!API_KEY) {
+                showToast('API key not available. Please wait for connection.', 'error');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to reboot the system? This will disconnect for about 30 seconds.')) {
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/control`, {
                         method: 'POST',
@@ -1574,10 +1643,18 @@
                     });
                     
                     if (response.ok) {
-                        showToast('System rebooting...', 'warning');
+                        showToast('System rebooting... Reconnecting in 30 seconds.', 'warning');
+                        
+                        // Clear API key and stop updates
+                        API_KEY = '';
+                        clearInterval(window.dataInterval);
+                        
+                        // Try to reconnect after 30 seconds
                         setTimeout(() => {
-                            location.reload();
-                        }, 5000);
+                            showToast('Attempting to reconnect...', 'info');
+                            fetchSystemData();
+                            window.dataInterval = setInterval(fetchSystemData, UPDATE_INTERVAL);
+                        }, 30000);
                     }
                 } catch (error) {
                     console.error('Error rebooting system:', error);
@@ -1586,63 +1663,34 @@
             }
         }
 
-        async function resetSettings() {
-            if (confirm('Are you sure you want to reset all settings to defaults?')) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/control`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-API-Key': API_KEY
-                        },
-                        body: JSON.stringify({
-                            reset_defaults: true,
-                            apikey: API_KEY
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        showToast('Settings reset to defaults', 'success');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 3000);
-                    }
-                } catch (error) {
-                    console.error('Error resetting settings:', error);
-                    showToast('Failed to reset settings', 'error');
-                }
-            }
-        }
-
-        // Copy API key
-        function copyApiKey() {
-            if (systemData.apikey) {
-                navigator.clipboard.writeText(systemData.apikey)
-                    .then(() => showToast('API key copied to clipboard', 'success'))
-                    .catch(err => {
-                        console.error('Failed to copy:', err);
-                        showToast('Failed to copy API key', 'error');
-                    });
+        // Screen navigation
+        function switchScreen(screen) {
+            // Hide all screens
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('controlScreen').style.display = 'none';
+            document.getElementById('settingsScreen').style.display = 'none';
+            document.getElementById('infoScreen').style.display = 'none';
+            
+            // Show selected screen
+            document.getElementById(`${screen}Screen`).style.display = 'block';
+            
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.nav-btn[onclick="switchScreen('${screen}')"]`).classList.add('active');
+            
+            currentScreen = screen;
+            
+            // Refresh data when switching to control screen
+            if (screen === 'control') {
+                fetchSystemData();
             }
         }
 
         // Helper functions
-        function getCurrentStage() {
-            for (const stage of Object.values(stages)) {
-                if (stage.name === systemData.stage) {
-                    return stage;
-                }
-            }
-            return null;
-        }
-
         function getStageColor(stageName) {
-            for (const stage of Object.values(stages)) {
-                if (stage.name === stageName) {
-                    return stage.color;
-                }
-            }
-            return '#07ffff';
+            return stages[stageName] ? stages[stageName].color : '#07ffff';
         }
 
         // Update clock
@@ -1683,18 +1731,31 @@
             }, 3000);
         }
 
+        // Add timeout support to fetch
+        if (!window.AbortSignal.timeout) {
+            window.AbortSignal.timeout = function(ms) {
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(new Error('Timeout')), ms);
+                return controller.signal;
+            };
+        }
+
         // Initialize clock
         updateClock();
 
         // Auto-refresh data on focus
         window.addEventListener('focus', () => {
-            fetchSystemData();
+            if (API_BASE_URL) {
+                fetchSystemData();
+            }
         });
 
         // Handle offline/online status
         window.addEventListener('online', () => {
             showToast('Connection restored', 'success');
-            fetchSystemData();
+            if (API_BASE_URL) {
+                fetchSystemData();
+            }
         });
 
         window.addEventListener('offline', () => {
