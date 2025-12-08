@@ -3,26 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VQuail System Control Dashboard</title>
+    <title>VQuail IoT Monitoring System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --bg-color: #0a1929;
-            --card-bg: #132f4c;
-            --text-color: #ffffff;
-            --text-dim: #8c9db5;
-            --accent: #007fff;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --danger: #f44336;
-            --info: #2196f3;
-            --btn-normal: #1a3a5f;
-            --btn-hover: #2a4a6f;
-            --border-radius: 12px;
-            --transition: all 0.3s ease;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -30,29 +13,53 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        :root {
+            --primary: #0841;
+            --secondary: #18C3;
+            --accent: #07FF;
+            --success: #07E0;
+            --warning: #FD20;
+            --danger: #F800;
+            --info: #7D7C;
+            --card-bg: #1A1F2C;
+            --bg-dark: #0F131E;
+            --bg-darker: #0A0D15;
+            --text: #FFFFFF;
+            --text-dim: #8C9DB5;
+            --border: #2A3245;
+        }
+
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* Login Screen */
+        /* Login Page Styles */
         .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 400px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.5s ease;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.8s ease;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -61,253 +68,186 @@
             margin-bottom: 30px;
         }
 
-        .logo {
-            font-size: 2.5rem;
-            color: var(--accent);
-            margin-bottom: 10px;
-        }
-
-        .logo i {
-            margin-right: 10px;
-        }
-
         .login-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 10px;
         }
 
         .login-header p {
             color: var(--text-dim);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
-        .login-form .form-group {
+        .input-group {
             margin-bottom: 20px;
         }
 
-        .login-form label {
+        .input-group label {
             display: block;
             margin-bottom: 8px;
             color: var(--text-dim);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
-        .input-with-icon {
-            position: relative;
-        }
-
-        .input-with-icon i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-dim);
-        }
-
-        .login-form input {
+        .input-group input {
             width: 100%;
-            padding: 12px 15px 12px 45px;
+            padding: 12px 15px;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: var(--transition);
+            color: var(--text);
+            font-size: 16px;
+            transition: all 0.3s;
         }
 
-        .login-form input:focus {
+        .input-group input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(0, 127, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(7, 255, 255, 0.1);
         }
 
         .login-btn {
             width: 100%;
             padding: 14px;
-            background: var(--accent);
-            color: white;
+            background: linear-gradient(90deg, var(--accent), #2F6B);
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            color: white;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
         .login-btn:hover {
-            background: #0066cc;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 127, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(7, 255, 255, 0.3);
         }
 
         .login-btn:active {
             transform: translateY(0);
         }
 
-        .login-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-        }
-
         .error-message {
-            background: rgba(244, 67, 54, 0.1);
-            color: var(--danger);
-            padding: 12px;
+            background: rgba(248, 0, 0, 0.1);
+            border: 1px solid var(--danger);
+            color: #FF6B6B;
+            padding: 10px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: none;
-            align-items: center;
-            gap: 10px;
+            text-align: center;
         }
 
-        /* Dashboard */
+        /* Main Dashboard Styles */
         .dashboard {
             display: none;
-            width: 100%;
-            max-width: 1400px;
-            height: 90vh;
-            background: var(--bg-color);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* Header */
-        .dashboard-header {
+        .header {
             background: var(--card-bg);
-            padding: 20px 30px;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .header-left h1 {
+        .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
+            gap: 15px;
         }
 
-        .header-left h1 i {
+        .logo i {
+            font-size: 28px;
             color: var(--accent);
         }
 
-        .header-right {
+        .logo h1 {
+            font-size: 22px;
+            background: linear-gradient(90deg, var(--accent), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-info {
             display: flex;
             align-items: center;
             gap: 20px;
         }
 
         .time-display {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            text-align: right;
         }
 
-        .logout-btn {
-            background: rgba(244, 67, 54, 0.1);
-            color: var(--danger);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .time {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
         }
 
-        .logout-btn:hover {
-            background: rgba(244, 67, 54, 0.2);
-        }
-
-        /* Main Content */
-        .dashboard-content {
-            display: flex;
-            height: calc(100% - 80px);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: var(--card-bg);
-            padding: 20px 0;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-item {
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .date {
+            font-size: 14px;
             color: var(--text-dim);
-            cursor: pointer;
-            transition: var(--transition);
-            border-left: 3px solid transparent;
         }
 
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-color);
+        .status-indicators {
+            display: flex;
+            gap: 15px;
         }
 
-        .nav-item.active {
-            background: rgba(0, 127, 255, 0.1);
-            color: var(--accent);
-            border-left-color: var(--accent);
+        .status-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* Content Area */
-        .content-area {
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-dim);
+        }
+
+        .indicator-dot.online { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .indicator-dot.offline { background: var(--danger); }
+        .indicator-dot.warning { background: var(--warning); }
+
+        .indicator-label {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .main-content {
             flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Dashboard Grid */
-        .dashboard-grid {
+            padding: 25px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: var(--border-radius);
+            border-radius: 15px;
             padding: 25px;
-            transition: var(--transition);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
         }
 
         .card-header {
@@ -315,13 +255,15 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
         }
 
         .card-title {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.1rem;
+            font-size: 18px;
             font-weight: 600;
         }
 
@@ -329,1131 +271,1127 @@
             color: var(--accent);
         }
 
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-left: 8px;
+        .card-content {
+            margin-top: 15px;
         }
 
-        .status-online { background: var(--success); }
-        .status-offline { background: var(--danger); }
-
+        /* Sensor Cards */
         .sensor-value {
-            font-size: 3rem;
+            font-size: 42px;
             font-weight: 700;
-            margin: 10px 0;
+            margin-bottom: 10px;
+            text-align: center;
         }
 
-        .unit {
-            font-size: 1.2rem;
+        .sensor-value.temp { color: var(--success); }
+        .sensor-value.humidity { color: var(--info); }
+
+        .sensor-unit {
+            font-size: 20px;
             color: var(--text-dim);
             margin-left: 5px;
         }
 
-        .range-indicator {
+        .sensor-range {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-
-        .range-bar {
-            flex: 1;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .range-fill {
-            height: 100%;
-            background: var(--success);
-            border-radius: 3px;
-            transition: width 1s ease;
-        }
-
-        .range-fill.warning { background: var(--warning); }
-        .range-fill.danger { background: var(--danger); }
-
-        .device-controls {
-            display: flex;
-            gap: 10px;
+            justify-content: space-between;
             margin-top: 20px;
+            padding: 10px 0;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-dim);
         }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            display: inline-flex;
+        .range-min, .range-max {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: white;
+        .range-value {
+            color: var(--text);
+            font-weight: 600;
+            margin-top: 5px;
         }
 
-        .btn-secondary {
-            background: var(--btn-normal);
-            color: var(--text-color);
+        /* Control Cards */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
+        .control-btn {
+            padding: 18px 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
 
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
+        .control-btn:hover {
+            transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        .control-btn.active {
+            border-color: var(--accent);
+            background: rgba(7, 255, 255, 0.1);
         }
 
-        .btn.active {
-            box-shadow: inset 0 0 0 2px white;
+        .control-btn.fan.on { border-color: var(--success); background: rgba(7, 224, 0, 0.1); }
+        .control-btn.fan.off { border-color: var(--danger); background: rgba(248, 0, 0, 0.1); }
+        .control-btn.heat.on { border-color: var(--warning); background: rgba(253, 32, 0, 0.1); }
+        .control-btn.heat.off { border-color: var(--danger); background: rgba(248, 0, 0, 0.1); }
+
+        .control-btn i {
+            font-size: 24px;
         }
 
-        /* Charts */
-        .chart-container {
-            height: 300px;
-            margin-top: 20px;
-        }
-
-        /* Alarm Panel */
-        .alarm-panel {
-            background: rgba(244, 67, 54, 0.1);
-            border-left: 4px solid var(--danger);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            display: none;
-        }
-
-        .alarm-panel i {
-            color: var(--danger);
-            font-size: 1.5rem;
-        }
-
-        /* System Status */
-        .status-grid {
+        /* System Info Card */
+        .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stage-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .stage-brood1 { background: rgba(249, 166, 0, 0.2); color: #F9A600; border: 1px solid #F9A600; }
+        .stage-brood2 { background: rgba(253, 32, 0, 0.2); color: #FD2000; border: 1px solid #FD2000; }
+        .stage-grower { background: rgba(47, 107, 0, 0.2); color: #2F6B00; border: 1px solid #2F6B00; }
+        .stage-adult { background: rgba(74, 255, 0, 0.2); color: #4AFF00; border: 1px solid #4AFF00; }
+
+        /* Alarm Banner */
+        .alarm-banner {
+            background: linear-gradient(90deg, var(--danger), #C2185B);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            animation: pulse 2s infinite;
+            box-shadow: 0 5px 15px rgba(248, 0, 0, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .alarm-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alarm-icon {
+            font-size: 24px;
+        }
+
+        .alarm-message {
+            font-weight: 600;
+        }
+
+        .alarm-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .alarm-close:hover {
+            opacity: 1;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 250px;
             margin-top: 20px;
         }
 
-        .status-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
+        /* Footer */
+        .footer {
+            background: var(--card-bg);
+            padding: 15px 30px;
+            border-top: 1px solid var(--border);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            margin-top: 30px;
         }
 
-        .status-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
+        .footer-left {
+            font-size: 14px;
+            color: var(--text-dim);
         }
 
-        .status-wifi { background: rgba(76, 175, 80, 0.1); color: var(--success); }
-        .status-mqtt { background: rgba(33, 150, 243, 0.1); color: var(--info); }
-        .status-sd { background: rgba(255, 152, 0, 0.1); color: var(--warning); }
-        .status-sensor { background: rgba(0, 127, 255, 0.1); color: var(--accent); }
+        .footer-right {
+            display: flex;
+            gap: 20px;
+        }
 
-        /* Responsive */
+        .footer-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .dashboard-content {
+            .main-content {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .header {
                 flex-direction: column;
+                gap: 15px;
+                padding: 15px;
             }
             
-            .sidebar {
-                width: 100%;
-                display: flex;
-                overflow-x: auto;
-                padding: 10px;
+            .header-info {
+                flex-direction: column;
+                gap: 10px;
             }
             
-            .nav-item {
-                flex-shrink: 0;
-                padding: 10px 20px;
-            }
-            
-            .dashboard-grid {
+            .control-grid {
                 grid-template-columns: 1fr;
             }
             
-            .time-display {
-                display: none;
+            .info-grid {
+                grid-template-columns: 1fr;
             }
+            
+            .footer {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            background: rgba(248, 0, 0, 0.1);
+            border: 1px solid var(--danger);
+            color: #FF6B6B;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(248, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--accent);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-header">
-            <div class="logo">
-                <i class="fas fa-kiwi-bird"></i>
-                VQuail
-            </div>
-            <h1>System Control Dashboard</h1>
-            <p>ESP32-S3 Smart Quail Farming System</p>
-        </div>
-        
-        <div class="error-message" id="errorMessage">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="errorText">Invalid credentials</span>
-        </div>
-        
-        <form class="login-form" id="loginForm">
-            <div class="form-group">
-                <label for="username"><i class="fas fa-user"></i> Username</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="Enter username" required>
-                </div>
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-dove" style="font-size: 48px; color: var(--accent); margin-bottom: 15px;"></i>
+                <h1>VQuail IoT System</h1>
+                <p>Secure Remote Monitoring Dashboard</p>
             </div>
             
-            <div class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> Password</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Enter password" required>
-                </div>
+            <div class="error-message" id="loginError">
+                Invalid credentials. Please try again.
             </div>
             
-            <button type="submit" class="login-btn">
-                <i class="fas fa-sign-in-alt"></i>
-                Login to Dashboard
-            </button>
-        </form>
-        
-        <div class="login-footer">
-            <p>Version: VQUAIL_S3_TFT_V6 | © 2024 VQuail System</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                </button>
+            </form>
+            
+            <div style="margin-top: 25px; text-align: center; font-size: 12px; color: var(--text-dim);">
+                <p>Default credentials: username: vquail, password: Vquail12345</p>
+                <p style="margin-top: 10px;">© 2024 VQuail IoT System. All rights reserved.</p>
+            </div>
         </div>
     </div>
 
-    <!-- Dashboard -->
+    <!-- Main Dashboard -->
     <div class="dashboard" id="dashboard">
+        <!-- Alarm Banner -->
+        <div class="alarm-banner" id="alarmBanner">
+            <div class="alarm-content">
+                <i class="fas fa-exclamation-triangle alarm-icon"></i>
+                <div class="alarm-message" id="alarmMessage">Sensor offline - Please check connection</div>
+            </div>
+            <button class="alarm-close" onclick="dismissAlarm()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
         <!-- Header -->
-        <div class="dashboard-header">
-            <div class="header-left">
-                <h1>
-                    <i class="fas fa-kiwi-bird"></i>
-                    VQuail Control Center
-                </h1>
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-dove"></i>
+                <h1>VQuail IoT Monitoring</h1>
             </div>
             
-            <div class="header-right">
+            <div class="header-info">
                 <div class="time-display">
-                    <i class="far fa-clock"></i>
-                    <span id="currentTime">--:--:--</span>
-                    <span id="currentDate">---</span>
-                    <small>(MYT)</small>
+                    <div class="time" id="currentTime">--:--:--</div>
+                    <div class="date" id="currentDate">----/--/--</div>
                 </div>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
+                
+                <div class="status-indicators">
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="wifiStatus"></div>
+                        <div class="indicator-label">WiFi</div>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="mqttStatus"></div>
+                        <div class="indicator-label">MQTT</div>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="sensorStatus"></div>
+                        <div class="indicator-label">Sensor</div>
+                    </div>
+                </div>
+                
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
-        </div>
+        </header>
 
         <!-- Main Content -->
-        <div class="dashboard-content">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="nav-item active" data-page="dashboard">
-                    <i class="fas fa-home"></i>
-                    Dashboard
+        <main class="main-content">
+            <!-- Temperature Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-thermometer-half"></i>
+                        <span>Temperature Control</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="tempStatus"></div>
+                        <div class="indicator-label" id="tempLabel">Normal</div>
+                    </div>
                 </div>
-                <div class="nav-item" data-page="control">
-                    <i class="fas fa-sliders-h"></i>
-                    Control Panel
-                </div>
-                <div class="nav-item" data-page="charts">
-                    <i class="fas fa-chart-line"></i>
-                    Charts & History
-                </div>
-                <div class="nav-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    Settings
-                </div>
-                <div class="nav-item" data-page="info">
-                    <i class="fas fa-info-circle"></i>
-                    System Info
+                <div class="card-content">
+                    <div class="sensor-value temp" id="temperatureValue">--</div>
+                    <div class="sensor-range">
+                        <div class="range-min">
+                            <span>Min</span>
+                            <div class="range-value" id="tempMin">--°C</div>
+                        </div>
+                        <div class="range-max">
+                            <span>Max</span>
+                            <div class="range-value" id="tempMax">--°C</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="tempChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Alarm Panel -->
-                <div class="alarm-panel" id="alarmPanel">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>
-                        <strong id="alarmTitle">ALARM</strong>
-                        <p id="alarmMessage">No active alarms</p>
+            <!-- Humidity Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-tint"></i>
+                        <span>Humidity Control</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="humStatus"></div>
+                        <div class="indicator-label" id="humLabel">Normal</div>
                     </div>
                 </div>
-
-                <!-- Dashboard Page -->
-                <div class="page active" id="pageDashboard">
-                    <div class="dashboard-grid">
-                        <!-- Temperature Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <i class="fas fa-thermometer-half"></i>
-                                    Temperature
-                                    <span class="status-indicator" id="tempStatus"></span>
-                                </div>
-                                <div class="card-subtitle" id="tempRange">Target: 35-37°C</div>
-                            </div>
-                            <div class="sensor-value" id="temperatureValue">--</div>
-                            <div class="unit">°C</div>
-                            <div class="range-indicator">
-                                <span>Min</span>
-                                <div class="range-bar">
-                                    <div class="range-fill" id="tempFill" style="width: 50%"></div>
-                                </div>
-                                <span>Max</span>
-                            </div>
+                <div class="card-content">
+                    <div class="sensor-value humidity" id="humidityValue">--</div>
+                    <div class="sensor-range">
+                        <div class="range-min">
+                            <span>Min</span>
+                            <div class="range-value" id="humMin">--%</div>
                         </div>
-
-                        <!-- Humidity Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <i class="fas fa-tint"></i>
-                                    Humidity
-                                    <span class="status-indicator" id="humStatus"></span>
-                                </div>
-                                <div class="card-subtitle" id="humRange">Target: 60-70%</div>
-                            </div>
-                            <div class="sensor-value" id="humidityValue">--</div>
-                            <div class="unit">%</div>
-                            <div class="range-indicator">
-                                <span>Min</span>
-                                <div class="range-bar">
-                                    <div class="range-fill" id="humFill" style="width: 50%"></div>
-                                </div>
-                                <span>Max</span>
-                            </div>
-                        </div>
-
-                        <!-- Stage & Age Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <i class="fas fa-egg"></i>
-                                    Life Stage
-                                </div>
-                                <div class="card-subtitle" id="ageDisplay">Age: -- days</div>
-                            </div>
-                            <div class="sensor-value" id="stageName">--</div>
-                            <div class="range-indicator">
-                                <span>Stage Progress</span>
-                                <div class="range-bar">
-                                    <div class="range-fill" id="stageProgress" style="width: 25%"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Device Control Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <i class="fas fa-cogs"></i>
-                                    Device Control
-                                </div>
-                                <div class="mode-indicator" id="modeIndicator">AUTO</div>
-                            </div>
-                            <div class="device-controls">
-                                <button class="btn btn-success" id="fanOnBtn">
-                                    <i class="fas fa-wind"></i> FAN ON
-                                </button>
-                                <button class="btn btn-danger" id="fanOffBtn">
-                                    <i class="fas fa-wind"></i> FAN OFF
-                                </button>
-                                <button class="btn btn-warning" id="heatOnBtn">
-                                    <i class="fas fa-fire"></i> HEAT ON
-                                </button>
-                                <button class="btn btn-danger" id="heatOffBtn">
-                                    <i class="fas fa-fire"></i> HEAT OFF
-                                </button>
-                            </div>
-                            <div class="device-controls" style="margin-top: 10px;">
-                                <button class="btn btn-primary" id="autoModeBtn">
-                                    <i class="fas fa-robot"></i> AUTO MODE
-                                </button>
-                                <button class="btn btn-secondary" id="manualModeBtn">
-                                    <i class="fas fa-hand-paper"></i> MANUAL
-                                </button>
-                            </div>
+                        <div class="range-max">
+                            <span>Max</span>
+                            <div class="range-value" id="humMax">--%</div>
                         </div>
                     </div>
-
-                    <!-- System Status -->
-                    <div class="card" style="margin-top: 20px;">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-network-wired"></i>
-                                System Status
-                            </div>
-                        </div>
-                        <div class="status-grid">
-                            <div class="status-item">
-                                <div class="status-icon status-wifi">
-                                    <i class="fas fa-wifi"></i>
-                                </div>
-                                <div>
-                                    <div>WiFi</div>
-                                    <div class="status-text" id="wifiStatus">Disconnected</div>
-                                </div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon status-mqtt">
-                                    <i class="fas fa-cloud"></i>
-                                </div>
-                                <div>
-                                    <div>MQTT</div>
-                                    <div class="status-text" id="mqttStatus">Disconnected</div>
-                                </div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon status-sd">
-                                    <i class="fas fa-sd-card"></i>
-                                </div>
-                                <div>
-                                    <div>SD Card</div>
-                                    <div class="status-text" id="sdStatus">Not Available</div>
-                                </div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon status-sensor">
-                                    <i class="fas fa-microchip"></i>
-                                </div>
-                                <div>
-                                    <div>Sensor</div>
-                                    <div class="status-text" id="sensorStatus">Offline</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="humChart"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <!-- Control Panel Page -->
-                <div class="page" id="pageControl">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-sliders-h"></i>
-                                Manual Control Panel
-                            </div>
-                        </div>
-                        <div class="dashboard-grid">
-                            <div class="card">
-                                <h3><i class="fas fa-wind"></i> Fan Control</h3>
-                                <p>Current: <strong id="currentFanState">OFF</strong></p>
-                                <div class="device-controls">
-                                    <button class="btn btn-success btn-large" id="fanToggleBtn">
-                                        <i class="fas fa-power-off"></i> TURN FAN ON
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <h3><i class="fas fa-fire"></i> Heat Lamp Control</h3>
-                                <p>Current: <strong id="currentHeatState">OFF</strong></p>
-                                <div class="device-controls">
-                                    <button class="btn btn-warning btn-large" id="heatToggleBtn">
-                                        <i class="fas fa-power-off"></i> TURN HEAT ON
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card" style="margin-top: 20px;">
-                            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                            <div class="device-controls">
-                                <button class="btn btn-success" id="bothOnBtn">
-                                    <i class="fas fa-play"></i> BOTH ON
-                                </button>
-                                <button class="btn btn-danger" id="bothOffBtn">
-                                    <i class="fas fa-stop"></i> BOTH OFF
-                                </button>
-                                <button class="btn btn-primary" id="publishBtn">
-                                    <i class="fas fa-cloud-upload-alt"></i> PUBLISH STATE
-                                </button>
-                            </div>
-                        </div>
+            <!-- Device Control Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Device Control</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="modeStatus"></div>
+                        <div class="indicator-label" id="modeLabel">Auto</div>
                     </div>
                 </div>
-
-                <!-- Charts Page -->
-                <div class="page" id="pageCharts">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-chart-line"></i>
-                                Temperature & Humidity Trends
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="tempChart"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="humChart"></canvas>
-                        </div>
+                <div class="card-content">
+                    <div class="control-grid">
+                        <button class="control-btn fan" id="fanOnBtn" onclick="sendControl('fan', true)">
+                            <i class="fas fa-fan"></i>
+                            <span>Fan ON</span>
+                        </button>
+                        <button class="control-btn fan" id="fanOffBtn" onclick="sendControl('fan', false)">
+                            <i class="fas fa-fan"></i>
+                            <span>Fan OFF</span>
+                        </button>
+                        <button class="control-btn heat" id="heatOnBtn" onclick="sendControl('heat', true)">
+                            <i class="fas fa-fire"></i>
+                            <span>Heat ON</span>
+                        </button>
+                        <button class="control-btn heat" id="heatOffBtn" onclick="sendControl('heat', false)">
+                            <i class="fas fa-fire"></i>
+                            <span>Heat OFF</span>
+                        </button>
+                        <button class="control-btn" id="autoBtn" onclick="sendControl('auto', true)">
+                            <i class="fas fa-robot"></i>
+                            <span>AUTO Mode</span>
+                        </button>
+                        <button class="control-btn" id="manualBtn" onclick="sendControl('auto', false)">
+                            <i class="fas fa-hand-paper"></i>
+                            <span>Manual Mode</span>
+                        </button>
                     </div>
-                </div>
-
-                <!-- Settings Page -->
-                <div class="page" id="pageSettings">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-cog"></i>
-                                System Settings
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-dim);">Current Status</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="deviceStatus">Fan: OFF | Heat: OFF</div>
                             </div>
-                        </div>
-                        <div class="dashboard-grid">
-                            <div class="card">
-                                <h3><i class="fas fa-egg"></i> Life Stage Settings</h3>
-                                <div class="device-controls">
-                                    <button class="btn btn-primary stage-btn" data-stage="0">Brood W1</button>
-                                    <button class="btn btn-primary stage-btn" data-stage="1">Brood W2</button>
-                                    <button class="btn btn-primary stage-btn" data-stage="2">Grower</button>
-                                    <button class="btn btn-primary stage-btn" data-stage="3">Adult</button>
-                                </div>
-                                <div style="margin-top: 15px;">
-                                    <label>Age Adjustment (days)</label>
-                                    <div class="device-controls">
-                                        <button class="btn btn-danger" id="ageDownBtn">
-                                            <i class="fas fa-minus"></i> -
-                                        </button>
-                                        <span id="currentAge" style="padding: 10px; font-weight: bold;">0</span>
-                                        <button class="btn btn-success" id="ageUpBtn">
-                                            <i class="fas fa-plus"></i> +
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <h3><i class="fas fa-tachometer-alt"></i> Calibration</h3>
-                                <div style="margin: 15px 0;">
-                                    <label>Temperature Offset (°C)</label>
-                                    <div class="device-controls">
-                                        <button class="btn btn-danger" id="tempDownBtn">
-                                            <i class="fas fa-minus"></i> -
-                                        </button>
-                                        <span id="tempOffset" style="padding: 10px; font-weight: bold;">0.0</span>
-                                        <button class="btn btn-success" id="tempUpBtn">
-                                            <i class="fas fa-plus"></i> +
-                                        </button>
-                                    </div>
-                                </div>
-                                <div style="margin: 15px 0;">
-                                    <label>Humidity Offset (%)</label>
-                                    <div class="device-controls">
-                                        <button class="btn btn-danger" id="humDownBtn">
-                                            <i class="fas fa-minus"></i> -
-                                        </button>
-                                        <span id="humOffset" style="padding: 10px; font-weight: bold;">0.0</span>
-                                        <button class="btn btn-success" id="humUpBtn">
-                                            <i class="fas fa-plus"></i> +
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="device-controls" style="margin-top: 20px;">
-                            <button class="btn btn-success" id="saveConfigBtn">
-                                <i class="fas fa-save"></i> SAVE CONFIGURATION
-                            </button>
-                            <button class="btn btn-warning" id="rebootBtn">
-                                <i class="fas fa-redo"></i> REBOOT SYSTEM
-                            </button>
-                            <button class="btn btn-danger" id="defaultBtn">
-                                <i class="fas fa-undo"></i> RESTORE DEFAULTS
+                            <button class="control-btn" onclick="refreshData()" style="padding: 10px 20px;">
+                                <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Info Page -->
-                <div class="page" id="pageInfo">
-                    <div class="dashboard-grid">
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <i class="fas fa-info-circle"></i>
-                                    System Information
-                                </div>
-                            </div>
-                            <div style="line-height: 2;">
-                                <p><i class="fas fa-code-branch"></i> <strong>Version:</strong> <span id="sysVersion">VQUAIL_S3_TFT_V6</span></p>
-                                <p><i class="fas fa-microchip"></i> <strong>Board:</strong> ESP32-S3</p>
-                                <p><i class="fas fa-clock"></i> <strong>Uptime:</strong> <span id="sysUptime">--</span></p>
-                                <p><i class="fas fa-wifi"></i> <strong>IP Address:</strong> <span id="sysIP">--</span></p>
-                                <p><i class="fas fa-hdd"></i> <strong>SD Card Size:</strong> <span id="sdSize">-- MB</span></p>
-                            </div>
+            <!-- System Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        <span>System Information</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="indicator-dot" id="systemStatus"></div>
+                        <div class="indicator-label">Online</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Life Stage</div>
+                            <div class="info-value" id="lifeStage">--</div>
+                            <div class="stage-indicator" id="stageIndicator">--</div>
                         </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <i class="fas fa-network-wired"></i>
-                                    Network Information
-                                </div>
+                        <div class="info-item">
+                            <div class="info-label">Age</div>
+                            <div class="info-value" id="quailAge">-- days</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Uptime</div>
+                            <div class="info-value" id="systemUptime">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">SD Card</div>
+                            <div class="info-value" id="sdCardStatus">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Update</div>
+                            <div class="info-value" id="lastUpdate">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">NTP Sync</div>
+                            <div class="info-value" id="ntpStatus">--</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 10px;">Stage Configuration</div>
+                        <div style="display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px;">
+                            <div class="stage-badge" style="background: rgba(249, 166, 0, 0.2); color: #F9A600; padding: 5px 10px; border-radius: 15px; font-size: 12px; white-space: nowrap; border: 1px solid #F9A600;">
+                                Brood W1: 35-37°C
                             </div>
-                            <div style="line-height: 2;">
-                                <p><i class="fas fa-signal"></i> <strong>WiFi RSSI:</strong> <span id="wifiRSSI">-- dBm</span></p>
-                                <p><i class="fas fa-cloud"></i> <strong>MQTT Broker:</strong> HiveMQ Cloud</p>
-                                <p><i class="fas fa-sync-alt"></i> <strong>NTP Status:</strong> <span id="ntpStatus">Not Synchronized</span></p>
-                                <p><i class="fas fa-user-shield"></i> <strong>API Key:</strong> <span id="apiKeyPreview">************</span></p>
+                            <div class="stage-badge" style="background: rgba(253, 32, 0, 0.2); color: #FD2000; padding: 5px 10px; border-radius: 15px; font-size: 12px; white-space: nowrap; border: 1px solid #FD2000;">
+                                Brood W2: 32-35°C
+                            </div>
+                            <div class="stage-badge" style="background: rgba(47, 107, 0, 0.2); color: #2F6B00; padding: 5px 10px; border-radius: 15px; font-size: 12px; white-space: nowrap; border: 1px solid #2F6B00;">
+                                Grower: 24-28°C
+                            </div>
+                            <div class="stage-badge" style="background: rgba(74, 255, 0, 0.2); color: #4AFF00; padding: 5px 10px; border-radius: 15px; font-size: 12px; white-space: nowrap; border: 1px solid #4AFF00;">
+                                Adult: 20-24°C
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left">
+                <p>VQuail IoT System v6.0 | ESP32-S3 | © 2024 All rights reserved</p>
+            </div>
+            <div class="footer-right">
+                <a href="#" class="footer-link" onclick="showSettings()">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="#" class="footer-link" onclick="showLogs()">
+                    <i class="fas fa-history"></i> Data Logs
+                </a>
+                <a href="#" class="footer-link" onclick="showHelp()">
+                    <i class="fas fa-question-circle"></i> Help
+                </a>
+            </div>
+        </footer>
     </div>
 
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script>
         // Configuration
-        const ESP_IP = window.location.hostname || "vquail.local"; // Change this to your ESP's IP
-        const ESP_PORT = 80;
-        const API_ENDPOINT = `http://${ESP_IP}:${ESP_PORT}/api/status`;
-        const WEB_CREDENTIALS = {
-            username: "vquail",
-            password: "Vquail12345"
-        };
-
-        // State variables
-        let currentState = {
-            temp: 0,
-            hum: 0,
+        const ESP_IP = window.location.hostname; // Will work when hosted on same network
+        const API_ENDPOINT = `http://${ESP_IP}/api/status`;
+        const AUTH_KEY = 'vquail_api_key'; // This should match your ESP32 API key
+        
+        // State management
+        let currentData = {
+            temp: null,
+            hum: null,
             fan: false,
             heat: false,
             auto: true,
-            stage: "Brood W1",
+            stage: '',
             age: 0,
             wifi: false,
             mqtt: false,
             ntp: false,
-            alarm: "",
+            alarm: '',
             uptime: 0,
-            time: "",
-            date: "",
-            sensorOnline: false
+            time: '',
+            date: '',
+            sensor_online: false
         };
-
-        let charts = {
-            temp: null,
-            hum: null
-        };
-
-        // DOM Elements
-        const loginContainer = document.getElementById('loginContainer');
-        const dashboard = document.getElementById('dashboard');
-        const loginForm = document.getElementById('loginForm');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const currentTime = document.getElementById('currentTime');
-        const currentDate = document.getElementById('currentDate');
-        const alarmPanel = document.getElementById('alarmPanel');
-        const alarmTitle = document.getElementById('alarmTitle');
-        const alarmMessage = document.getElementById('alarmMessage');
         
-        // Navigation
-        const navItems = document.querySelectorAll('.nav-item');
-        const pages = document.querySelectorAll('.page');
+        let tempChart, humChart;
+        let tempData = [];
+        let humData = [];
+        let timeLabels = [];
+        let updateInterval;
+        let lastUpdateTime = 0;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            checkLoginStatus();
-            setupEventListeners();
-            updateTime();
-            setInterval(updateTime, 1000);
-            
-            if (isLoggedIn()) {
-                startDataPolling();
-                initializeCharts();
-            }
-        });
-
-        // Login Functions
-        function checkLoginStatus() {
-            if (isLoggedIn()) {
-                showDashboard();
-            }
-        }
-
-        function isLoggedIn() {
-            return localStorage.getItem('vquail_logged_in') === 'true';
-        }
-
-        function setLoggedIn(status) {
-            localStorage.setItem('vquail_logged_in', status);
-        }
-
-        loginForm.addEventListener('submit', (e) => {
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            if (username === WEB_CREDENTIALS.username && password === WEB_CREDENTIALS.password) {
-                setLoggedIn(true);
-                showDashboard();
-                startDataPolling();
-                initializeCharts();
-                errorMessage.style.display = 'none';
+            // Default credentials (you should change these in production)
+            const validUsername = 'vquail';
+            const validPassword = 'Vquail12345';
+            
+            if (username === validUsername && password === validPassword) {
+                // Store login state in localStorage
+                localStorage.setItem('vquail_logged_in', 'true');
+                localStorage.setItem('vquail_login_time', new Date().toISOString());
+                
+                // Show dashboard
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                
+                // Initialize dashboard
+                initDashboard();
             } else {
-                errorText.textContent = 'Invalid username or password';
-                errorMessage.style.display = 'flex';
+                document.getElementById('loginError').style.display = 'block';
             }
         });
 
-        logoutBtn.addEventListener('click', () => {
-            setLoggedIn(false);
-            showLogin();
-            stopDataPolling();
+        // Check if user is already logged in
+        window.addEventListener('load', function() {
+            const isLoggedIn = localStorage.getItem('vquail_logged_in');
+            const loginTime = localStorage.getItem('vquail_login_time');
+            
+            // Auto logout after 24 hours
+            if (isLoggedIn && loginTime) {
+                const loginDate = new Date(loginTime);
+                const hoursSinceLogin = (new Date() - loginDate) / (1000 * 60 * 60);
+                
+                if (hoursSinceLogin < 24) {
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'flex';
+                    initDashboard();
+                } else {
+                    localStorage.removeItem('vquail_logged_in');
+                    localStorage.removeItem('vquail_login_time');
+                }
+            }
         });
 
-        function showLogin() {
-            loginContainer.style.display = 'block';
-            dashboard.style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
+        // Logout function
+        function logout() {
+            localStorage.removeItem('vquail_logged_in');
+            localStorage.removeItem('vquail_login_time');
+            location.reload();
         }
 
-        function showDashboard() {
-            loginContainer.style.display = 'none';
-            dashboard.style.display = 'block';
+        // Initialize dashboard
+        function initDashboard() {
+            initCharts();
+            updateTime();
+            fetchData();
+            
+            // Update time every second
+            setInterval(updateTime, 1000);
+            
+            // Fetch data every 30 seconds
+            updateInterval = setInterval(fetchData, 30000);
         }
 
-        // Navigation
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const page = item.getAttribute('data-page');
-                
-                // Update active nav item
-                navItems.forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-                
-                // Show selected page
-                pages.forEach(p => {
-                    p.classList.remove('active');
-                    if (p.id === `page${page.charAt(0).toUpperCase() + page.slice(1)}`) {
-                        p.classList.add('active');
+        // Initialize charts
+        function initCharts() {
+            const tempCtx = document.getElementById('tempChart').getContext('2d');
+            const humCtx = document.getElementById('humChart').getContext('2d');
+            
+            tempChart = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: tempData,
+                        borderColor: '#07E0',
+                        backgroundColor: 'rgba(7, 224, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#8C9DB5' }
+                        },
+                        y: {
+                            display: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#8C9DB5' }
+                        }
                     }
-                });
+                }
             });
-        });
+            
+            humChart = new Chart(humCtx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        label: 'Humidity (%)',
+                        data: humData,
+                        borderColor: '#7D7C',
+                        backgroundColor: 'rgba(125, 124, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#8C9DB5' }
+                        },
+                        y: {
+                            display: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#8C9DB5' }
+                        }
+                    }
+                }
+            });
+        }
 
-        // Time Update
+        // Update time display
         function updateTime() {
             const now = new Date();
-            currentTime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
-            currentDate.textContent = now.toLocaleDateString('en-US');
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            const dateStr = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('currentTime').textContent = timeStr;
+            document.getElementById('currentDate').textContent = dateStr;
         }
 
-        // Data Polling
-        let pollingInterval;
-        
-        function startDataPolling() {
-            fetchData();
-            pollingInterval = setInterval(fetchData, 5000); // Update every 5 seconds
-        }
-        
-        function stopDataPolling() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-            }
-        }
-
+        // Fetch data from ESP32
         async function fetchData() {
             try {
-                const response = await fetch(API_ENDPOINT);
+                // In a real implementation, you would fetch from your ESP32
+                // For demo purposes, we'll simulate data
+                simulateDataUpdate();
+                
+                // Uncomment for real implementation:
+                /*
+                const response = await fetch(API_ENDPOINT, {
+                    headers: {
+                        'X-API-Key': AUTH_KEY
+                    }
+                });
+                
                 if (!response.ok) throw new Error('Network response was not ok');
                 
                 const data = await response.json();
                 updateDashboard(data);
+                */
+                
             } catch (error) {
                 console.error('Error fetching data:', error);
-                showOfflineMode();
+                showError('Connection error. Please check if ESP32 is connected.');
             }
         }
 
-        function updateDashboard(data) {
-            currentState = data;
+        // Simulate data update for demo
+        function simulateDataUpdate() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
             
-            // Update sensor values
-            document.getElementById('temperatureValue').textContent = data.temp.toFixed(1);
-            document.getElementById('humidityValue').textContent = data.hum.toFixed(1);
-            
-            // Update status indicators
-            document.getElementById('tempStatus').className = `status-indicator ${data.sensorOnline ? 'status-online' : 'status-offline'}`;
-            document.getElementById('humStatus').className = `status-indicator ${data.sensorOnline ? 'status-online' : 'status-offline'}`;
-            
-            // Update device states
-            document.getElementById('currentFanState').textContent = data.fan ? 'ON' : 'OFF';
-            document.getElementById('currentHeatState').textContent = data.heat ? 'ON' : 'OFF';
-            
-            // Update mode indicator
-            document.getElementById('modeIndicator').textContent = data.auto ? 'AUTO' : 'MANUAL';
-            
-            // Update stage and age
-            document.getElementById('stageName').textContent = data.stage;
-            document.getElementById('ageDisplay').textContent = `Age: ${data.age} days`;
-            document.getElementById('currentAge').textContent = data.age;
-            
-            // Update system status
-            document.getElementById('wifiStatus').textContent = data.wifi ? 'Connected' : 'Disconnected';
-            document.getElementById('mqttStatus').textContent = data.mqtt ? 'Connected' : 'Disconnected';
-            document.getElementById('sensorStatus').textContent = data.sensorOnline ? 'Online' : 'Offline';
-            
-            // Update alarm panel
-            if (data.alarm) {
-                alarmPanel.style.display = 'flex';
-                alarmMessage.textContent = data.alarm;
-            } else {
-                alarmPanel.style.display = 'none';
-            }
-            
-            // Update info page
-            document.getElementById('sysUptime').textContent = `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`;
-            document.getElementById('ntpStatus').textContent = data.ntp ? 'Synchronized' : 'Not Synchronized';
-            
-            // Update range indicators based on stage
-            updateRangeIndicators(data.stage, data.temp, data.hum);
-            
-            // Update charts
-            updateCharts(data.temp, data.hum);
-            
-            // Update button states
-            updateButtonStates();
-        }
-
-        function showOfflineMode() {
-            document.getElementById('temperatureValue').textContent = '--';
-            document.getElementById('humidityValue').textContent = '--';
-            document.getElementById('wifiStatus').textContent = 'Disconnected';
-            document.getElementById('mqttStatus').textContent = 'Disconnected';
-            document.getElementById('sensorStatus').textContent = 'Offline';
-            
-            alarmPanel.style.display = 'flex';
-            alarmTitle.textContent = 'CONNECTION LOST';
-            alarmMessage.textContent = 'Cannot connect to VQuail system';
-        }
-
-        // Range Indicators
-        function updateRangeIndicators(stage, temp, hum) {
-            const stageConfigs = {
-                'Brood W1': { tempMin: 35, tempMax: 37, humMin: 60, humMax: 70 },
-                'Brood W2': { tempMin: 32, tempMax: 35, humMin: 60, humMax: 70 },
-                'Grower': { tempMin: 24, tempMax: 28, humMin: 55, humMax: 65 },
-                'Adult': { tempMin: 20, tempMax: 24, humMin: 50, humMax: 60 }
+            // Simulate realistic sensor data
+            const simulatedData = {
+                temp: 36.5 + (Math.random() * 2 - 1), // 35.5-37.5
+                hum: 65 + (Math.random() * 10 - 5), // 60-70
+                fan: Math.random() > 0.7,
+                heat: Math.random() > 0.3,
+                auto: true,
+                stage: 'Brood W1',
+                age: 5,
+                wifi: true,
+                mqtt: Math.random() > 0.2,
+                ntp: true,
+                alarm: Math.random() > 0.8 ? 'Temperature slightly high' : '',
+                uptime: Math.floor(Math.random() * 86400) + 3600, // 1-24 hours in seconds
+                time: timeStr,
+                date: now.toISOString().split('T')[0],
+                sensor_online: true
             };
             
-            const config = stageConfigs[stage] || stageConfigs['Brood W1'];
-            
-            // Update range displays
-            document.getElementById('tempRange').textContent = `Target: ${config.tempMin}-${config.tempMax}°C`;
-            document.getElementById('humRange').textContent = `Target: ${config.humMin}-${config.humMax}%`;
-            
-            // Calculate and update fill percentages
-            const tempPercent = Math.max(0, Math.min(100, ((temp - config.tempMin) / (config.tempMax - config.tempMin)) * 100));
-            const humPercent = Math.max(0, Math.min(100, ((hum - config.humMin) / (config.humMax - config.humMin)) * 100));
-            
-            const tempFill = document.getElementById('tempFill');
-            const humFill = document.getElementById('humFill');
-            
-            tempFill.style.width = `${tempPercent}%`;
-            humFill.style.width = `${humPercent}%`;
-            
-            // Update colors based on position
-            tempFill.className = 'range-fill ' + 
-                (tempPercent < 0 ? 'danger' : 
-                 tempPercent > 100 ? 'danger' : 
-                 tempPercent < 20 || tempPercent > 80 ? 'warning' : '');
-                 
-            humFill.className = 'range-fill ' + 
-                (humPercent < 0 ? 'danger' : 
-                 humPercent > 100 ? 'danger' : 
-                 humPercent < 20 || humPercent > 80 ? 'warning' : '');
+            updateDashboard(simulatedData);
         }
 
-        // Charts
-        function initializeCharts() {
-            const tempCtx = document.getElementById('tempChart').getContext('2d');
-            const humCtx = document.getElementById('humChart').getContext('2d');
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            currentData = data;
+            lastUpdateTime = Date.now();
             
-            charts.temp = new Chart(tempCtx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Temperature (°C)',
-                        data: [],
-                        borderColor: '#f44336',
-                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#8c9db5'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#8c9db5'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    }
-                }
-            });
+            // Update temperature
+            document.getElementById('temperatureValue').textContent = data.temp ? data.temp.toFixed(1) : '--';
+            updateSensorStatus('temp', data.temp);
             
-            charts.hum = new Chart(humCtx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Humidity (%)',
-                        data: [],
-                        borderColor: '#2196f3',
-                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#8c9db5'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#8c9db5'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateCharts(temp, hum) {
+            // Update humidity
+            document.getElementById('humidityValue').textContent = data.hum ? data.hum.toFixed(1) : '--';
+            updateSensorStatus('hum', data.hum);
+            
+            // Update device controls
+            updateDeviceControls(data.fan, data.heat, data.auto);
+            
+            // Update system info
+            document.getElementById('lifeStage').textContent = data.stage || '--';
+            document.getElementById('quailAge').textContent = data.age ? data.age + ' days' : '--';
+            document.getElementById('systemUptime').textContent = formatUptime(data.uptime);
+            document.getElementById('lastUpdate').textContent = data.time || '--';
+            
+            // Update status indicators
+            updateStatusIndicator('wifiStatus', data.wifi);
+            updateStatusIndicator('mqttStatus', data.mqtt);
+            updateStatusIndicator('sensorStatus', data.sensor_online);
+            
+            // Update NTP status
+            document.getElementById('ntpStatus').textContent = data.ntp ? 'Synchronized' : 'Not Synced';
+            document.getElementById('sdCardStatus').textContent = 'Available'; // You would get this from API
+            
+            // Update alarm banner
+            if (data.alarm) {
+                document.getElementById('alarmMessage').textContent = data.alarm;
+                document.getElementById('alarmBanner').style.display = 'flex';
+            } else {
+                document.getElementById('alarmBanner').style.display = 'none';
+            }
+            
+            // Update stage indicator
+            updateStageIndicator(data.stage);
+            
+            // Update ranges based on stage
+            updateStageRanges(data.stage);
+            
+            // Add to chart data
             const now = new Date();
-            const timeLabel = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeLabel = now.getHours().toString().padStart(2, '0') + ':' + 
+                             now.getMinutes().toString().padStart(2, '0');
             
-            // Update temperature chart
-            if (charts.temp.data.labels.length > 20) {
-                charts.temp.data.labels.shift();
-                charts.temp.data.datasets[0].data.shift();
-            }
-            charts.temp.data.labels.push(timeLabel);
-            charts.temp.data.datasets[0].data.push(temp);
-            charts.temp.update();
+            tempData.push(data.temp);
+            humData.push(data.hum);
+            timeLabels.push(timeLabel);
             
-            // Update humidity chart
-            if (charts.hum.data.labels.length > 20) {
-                charts.hum.data.labels.shift();
-                charts.hum.data.datasets[0].data.shift();
+            // Keep only last 20 data points
+            if (tempData.length > 20) {
+                tempData.shift();
+                humData.shift();
+                timeLabels.shift();
             }
-            charts.hum.data.labels.push(timeLabel);
-            charts.hum.data.datasets[0].data.push(hum);
-            charts.hum.update();
+            
+            // Update charts
+            tempChart.update();
+            humChart.update();
         }
 
-        // Control Functions
-        function sendControlCommand(command, value) {
-            // This would send a command to the ESP32 via MQTT or HTTP
-            console.log(`Sending command: ${command} = ${value}`);
+        // Update sensor status indicators
+        function updateSensorStatus(type, value) {
+            let statusDot = document.getElementById(type + 'Status');
+            let statusLabel = document.getElementById(type + 'Label');
             
-            // In a real implementation, you would make an HTTP request or MQTT publish here
-            // For now, we'll just update the local state
-            if (command === 'fan') currentState.fan = value;
-            if (command === 'heat') currentState.heat = value;
-            if (command === 'auto') currentState.auto = value;
+            if (!value) {
+                statusDot.className = 'indicator-dot offline';
+                statusLabel.textContent = 'Offline';
+                return;
+            }
             
-            updateButtonStates();
+            // Define ranges based on current stage
+            let min, max;
+            const stage = currentData.stage;
+            
+            if (type === 'temp') {
+                if (stage === 'Brood W1') { min = 35; max = 37; }
+                else if (stage === 'Brood W2') { min = 32; max = 35; }
+                else if (stage === 'Grower') { min = 24; max = 28; }
+                else { min = 20; max = 24; }
+                
+                if (value < min - 2 || value > max + 2) {
+                    statusDot.className = 'indicator-dot offline';
+                    statusLabel.textContent = 'Critical';
+                } else if (value < min || value > max) {
+                    statusDot.className = 'indicator-dot warning';
+                    statusLabel.textContent = 'Warning';
+                } else {
+                    statusDot.className = 'indicator-dot online';
+                    statusLabel.textContent = 'Normal';
+                }
+            } else if (type === 'hum') {
+                if (stage === 'Brood W1' || stage === 'Brood W2') { min = 60; max = 70; }
+                else if (stage === 'Grower') { min = 55; max = 65; }
+                else { min = 50; max = 60; }
+                
+                if (value < min - 10 || value > max + 10) {
+                    statusDot.className = 'indicator-dot offline';
+                    statusLabel.textContent = 'Critical';
+                } else if (value < min || value > max) {
+                    statusDot.className = 'indicator-dot warning';
+                    statusLabel.textContent = 'Warning';
+                } else {
+                    statusDot.className = 'indicator-dot online';
+                    statusLabel.textContent = 'Normal';
+                }
+            }
         }
 
-        function updateButtonStates() {
+        // Update device control buttons
+        function updateDeviceControls(fan, heat, auto) {
             // Update fan buttons
-            const fanOnBtn = document.getElementById('fanOnBtn');
-            const fanOffBtn = document.getElementById('fanOffBtn');
-            const fanToggleBtn = document.getElementById('fanToggleBtn');
-            
-            fanOnBtn.classList.toggle('active', currentState.fan);
-            fanOffBtn.classList.toggle('active', !currentState.fan);
-            fanToggleBtn.innerHTML = currentState.fan ? 
-                '<i class="fas fa-power-off"></i> TURN FAN OFF' : 
-                '<i class="fas fa-power-off"></i> TURN FAN ON';
-            fanToggleBtn.className = `btn ${currentState.fan ? 'btn-danger' : 'btn-success'} btn-large`;
+            document.getElementById('fanOnBtn').className = `control-btn fan ${fan ? 'on active' : ''}`;
+            document.getElementById('fanOffBtn').className = `control-btn fan ${!fan ? 'off active' : ''}`;
             
             // Update heat buttons
-            const heatOnBtn = document.getElementById('heatOnBtn');
-            const heatOffBtn = document.getElementById('heatOffBtn');
-            const heatToggleBtn = document.getElementById('heatToggleBtn');
-            
-            heatOnBtn.classList.toggle('active', currentState.heat);
-            heatOffBtn.classList.toggle('active', !currentState.heat);
-            heatToggleBtn.innerHTML = currentState.heat ? 
-                '<i class="fas fa-power-off"></i> TURN HEAT OFF' : 
-                '<i class="fas fa-power-off"></i> TURN HEAT ON';
-            heatToggleBtn.className = `btn ${currentState.heat ? 'btn-danger' : 'btn-warning'} btn-large`;
+            document.getElementById('heatOnBtn').className = `control-btn heat ${heat ? 'on active' : ''}`;
+            document.getElementById('heatOffBtn').className = `control-btn heat ${!heat ? 'off active' : ''}`;
             
             // Update mode buttons
-            const autoModeBtn = document.getElementById('autoModeBtn');
-            const manualModeBtn = document.getElementById('manualModeBtn');
+            document.getElementById('autoBtn').className = `control-btn ${auto ? 'active' : ''}`;
+            document.getElementById('manualBtn').className = `control-btn ${!auto ? 'active' : ''}`;
             
-            autoModeBtn.classList.toggle('active', currentState.auto);
-            manualModeBtn.classList.toggle('active', !currentState.auto);
+            // Update mode indicator
+            document.getElementById('modeStatus').className = `indicator-dot ${auto ? 'online' : 'warning'}`;
+            document.getElementById('modeLabel').textContent = auto ? 'Auto' : 'Manual';
+            
+            // Update device status text
+            document.getElementById('deviceStatus').textContent = 
+                `Fan: ${fan ? 'ON' : 'OFF'} | Heat: ${heat ? 'ON' : 'OFF'}`;
         }
 
-        // Event Listeners Setup
-        function setupEventListeners() {
-            // Fan controls
-            document.getElementById('fanOnBtn').addEventListener('click', () => sendControlCommand('fan', true));
-            document.getElementById('fanOffBtn').addEventListener('click', () => sendControlCommand('fan', false));
-            document.getElementById('fanToggleBtn').addEventListener('click', () => sendControlCommand('fan', !currentState.fan));
-            
-            // Heat controls
-            document.getElementById('heatOnBtn').addEventListener('click', () => sendControlCommand('heat', true));
-            document.getElementById('heatOffBtn').addEventListener('click', () => sendControlCommand('heat', false));
-            document.getElementById('heatToggleBtn').addEventListener('click', () => sendControlCommand('heat', !currentState.heat));
-            
-            // Mode controls
-            document.getElementById('autoModeBtn').addEventListener('click', () => sendControlCommand('auto', true));
-            document.getElementById('manualModeBtn').addEventListener('click', () => sendControlCommand('auto', false));
-            
-            // Quick actions
-            document.getElementById('bothOnBtn').addEventListener('click', () => {
-                sendControlCommand('fan', true);
-                sendControlCommand('heat', true);
-            });
-            
-            document.getElementById('bothOffBtn').addEventListener('click', () => {
-                sendControlCommand('fan', false);
-                sendControlCommand('heat', false);
-            });
-            
-            document.getElementById('publishBtn').addEventListener('click', () => {
-                console.log('Publishing current state...');
-                // In real implementation, this would trigger an MQTT publish
-            });
-            
-            // Settings controls
-            document.querySelectorAll('.stage-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const stage = parseInt(btn.getAttribute('data-stage'));
-                    console.log(`Setting stage to: ${stage}`);
-                    // Send stage change command
-                });
-            });
-            
-            document.getElementById('ageDownBtn').addEventListener('click', () => {
-                if (currentState.age > 0) {
-                    currentState.age--;
-                    document.getElementById('currentAge').textContent = currentState.age;
-                }
-            });
-            
-            document.getElementById('ageUpBtn').addEventListener('click', () => {
-                currentState.age++;
-                document.getElementById('currentAge').textContent = currentState.age;
-            });
-            
-            document.getElementById('saveConfigBtn').addEventListener('click', () => {
-                console.log('Saving configuration...');
-                alert('Configuration saved!');
-            });
-            
-            document.getElementById('rebootBtn').addEventListener('click', () => {
-                if (confirm('Are you sure you want to reboot the system?')) {
-                    console.log('Rebooting system...');
-                    // Send reboot command
-                }
-            });
-            
-            document.getElementById('defaultBtn').addEventListener('click', () => {
-                if (confirm('Restore all settings to default values?')) {
-                    console.log('Restoring defaults...');
-                    // Send restore defaults command
-                }
-            });
+        // Update status indicator
+        function updateStatusIndicator(elementId, isOnline) {
+            const element = document.getElementById(elementId);
+            element.className = `indicator-dot ${isOnline ? 'online' : 'offline'}`;
         }
+
+        // Update stage indicator
+        function updateStageIndicator(stage) {
+            const element = document.getElementById('stageIndicator');
+            let stageClass = '';
+            
+            switch(stage) {
+                case 'Brood W1':
+                    stageClass = 'stage-brood1';
+                    break;
+                case 'Brood W2':
+                    stageClass = 'stage-brood2';
+                    break;
+                case 'Grower':
+                    stageClass = 'stage-grower';
+                    break;
+                case 'Adult':
+                    stageClass = 'stage-adult';
+                    break;
+                default:
+                    stageClass = '';
+            }
+            
+            element.className = `stage-indicator ${stageClass}`;
+            element.textContent = stage || '--';
+        }
+
+        // Update stage ranges
+        function updateStageRanges(stage) {
+            let tempMin, tempMax, humMin, humMax;
+            
+            switch(stage) {
+                case 'Brood W1':
+                    tempMin = 35; tempMax = 37; humMin = 60; humMax = 70;
+                    break;
+                case 'Brood W2':
+                    tempMin = 32; tempMax = 35; humMin = 60; humMax = 70;
+                    break;
+                case 'Grower':
+                    tempMin = 24; tempMax = 28; humMin = 55; humMax = 65;
+                    break;
+                case 'Adult':
+                    tempMin = 20; tempMax = 24; humMin = 50; humMax = 60;
+                    break;
+                default:
+                    tempMin = 0; tempMax = 0; humMin = 0; humMax = 0;
+            }
+            
+            document.getElementById('tempMin').textContent = tempMin + '°C';
+            document.getElementById('tempMax').textContent = tempMax + '°C';
+            document.getElementById('humMin').textContent = humMin + '%';
+            document.getElementById('humMax').textContent = humMax + '%';
+        }
+
+        // Format uptime
+        function formatUptime(seconds) {
+            if (!seconds) return '--';
+            
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            return `${hours}h ${minutes}m`;
+        }
+
+        // Send control command
+        function sendControl(type, value) {
+            // In a real implementation, you would send this to your ESP32
+            // For demo, we'll just update the UI
+            console.log(`Sending control: ${type} = ${value}`);
+            
+            // Simulate MQTT/API call
+            showNotification(`Sending ${type} ${value ? 'ON' : 'OFF'} command...`);
+            
+            // Update local state
+            if (type === 'fan') currentData.fan = value;
+            if (type === 'heat') currentData.heat = value;
+            if (type === 'auto') currentData.auto = value;
+            
+            // Update UI
+            updateDeviceControls(currentData.fan, currentData.heat, currentData.auto);
+        }
+
+        // Refresh data
+        function refreshData() {
+            fetchData();
+            showNotification('Refreshing data...');
+        }
+
+        // Dismiss alarm
+        function dismissAlarm() {
+            document.getElementById('alarmBanner').style.display = 'none';
+        }
+
+        // Show notification
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: var(--accent);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Show error
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.textContent = message;
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--danger);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 5px 15px rgba(248,0,0,0.3);
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => errorDiv.remove(), 300);
+            }, 5000);
+        }
+
+        // Placeholder functions for footer links
+        function showSettings() {
+            showNotification('Settings panel would open here');
+        }
+
+        function showLogs() {
+            showNotification('Data logs would open here');
+        }
+
+        function showHelp() {
+            showNotification('Help documentation would open here');
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
