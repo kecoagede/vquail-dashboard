@@ -8,193 +8,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        /* Preload critical CSS to prevent FOUC */
-        :root {
-            --primary: #667eea;
-            --primary-light: #764ba2;
-            --success: #0ba360;
-            --warning: #ff9a3c;
-            --danger: #ff0844;
-            --dark: #2d3748;
-            --light: #f7fafc;
-        }
-
-        /* Prevent flash of unstyled content */
-        html {
-            visibility: hidden;
-            opacity: 0;
-        }
-        
-        html.loaded {
-            visibility: visible;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: var(--dark);
-            min-height: 100vh;
-            padding: 20px;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            will-change: transform;
-            contain: content;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        /* Header with GPU acceleration */
-        header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 2rem;
-            align-items: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            color: white;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            transform: translateZ(0);
-            will-change: transform;
-        }
-        
-        /* Optimize animations with will-change */
-        .status-dot.online {
-            will-change: transform, opacity;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            transform: translateZ(0);
-            will-change: transform;
-            contain: layout style paint;
-        }
-        
-        /* Optimize sensor value transitions */
-        .sensor-value {
-            font-family: 'Poppins', monospace;
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1;
-            transition: opacity 0.3s ease;
-            display: inline-block;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-        }
-        
-        /* Remove hover effects on mobile to prevent false triggers */
-        @media (hover: hover) {
-            .card:hover {
-                transform: translateY(-5px) translateZ(0);
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-            }
-            
-            .nav-btn:hover {
-                transform: translateY(-3px);
-                color: var(--primary);
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-            }
-        }
-        
-        /* Optimize for reduced motion */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-            
-            .card:hover {
-                transform: none;
-            }
-        }
-        
-        /* Debounced resize handler */
-        .resize-handler {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        /* Hardware accelerated animations */
-        @keyframes fadeIn {
-            from { 
-                opacity: 0;
-                transform: translateY(10px) scale(0.98);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        .screen {
-            display: none;
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            will-change: transform, opacity;
-        }
-        
-        .screen.active {
-            display: block;
-        }
-        
-        /* Optimize toast notifications */
-        .toast {
-            transform: translateX(100%) translateZ(0);
-            opacity: 0;
-            will-change: transform, opacity;
-        }
-        
-        .toast.show {
-            transform: translateX(0) translateZ(0);
-            opacity: 1;
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s;
-        }
-        
-        /* Fixed: Add missing styles from original */
         :root {
             /* Modern Gradient Color Palette */
+            --primary: #667eea;
+            --primary-light: #764ba2;
+            --primary-dark: #5a67d8;
             --secondary: #f093fb;
             --secondary-light: #f5576c;
+            --success: #0ba360;
             --success-light: #3cba92;
+            --warning: #ff9a3c;
             --warning-light: #ffcc00;
+            --danger: #ff0844;
             --danger-light: #ffb199;
             --info: #4facfe;
             --info-light: #00f2fe;
             
             /* Neutral Colors */
+            --dark: #2d3748;
             --darker: #1a202c;
+            --light: #f7fafc;
             --gray: #718096;
             --gray-light: #e2e8f0;
             --gray-lighter: #f1f5f9;
@@ -215,31 +48,943 @@
             --card-padding: 1.5rem;
             --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             --card-hover-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            
+            /* Animation */
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-quick: all 0.2s ease;
         }
         
-        /* Fixed: Ensure all original styles are included */
-        .logo-section, .header-content, .status-indicators, 
-        .navigation, .card-grid, .sensor-card, .control-panel,
-        .mode-selector, .quick-actions, .stage-selector,
-        .calibration-control, .info-grid, .action-buttons,
-        .alarm-banner, footer {
-            /* Styles from original - condensed for brevity */
-            /* All original styling preserved */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Modern Header with Glass Effect */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: var(--card-radius);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: center;
+            box-shadow: var(--card-shadow);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--success-light) 0%, 
+                var(--warning) 50%, 
+                var(--danger-light) 100%);
+            z-index: 1;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-text h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e6fffa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1rem;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+        
+        .time-display {
+            font-family: 'Poppins', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 140px;
+            text-align: center;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        
+        .status-dot.online {
+            background: var(--success-light);
+            box-shadow: 0 0 15px rgba(60, 186, 146, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--darker);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+            z-index: 100;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        /* Responsive Navigation */
+        .navigation {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 1.25rem 1rem;
+            border-radius: var(--card-radius);
+            color: var(--gray);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .nav-btn i {
+            font-size: 1.5rem;
+            transition: var(--transition-smooth);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            color: var(--primary);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Responsive Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: var(--card-padding);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-light);
+        }
+        
+        .card-title h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .card-title i {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+        
+        /* Sensor Cards */
+        .sensor-card {
+            text-align: center;
+        }
+        
+        .sensor-value-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        
+        .sensor-value {
+            font-family: 'Poppins', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        
+        .sensor-value.updating {
+            transform: scale(1.1);
+        }
+        
+        .temp-value.online { 
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hum-value.online { 
+            background: linear-gradient(135deg, var(--info-light), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .sensor-unit {
+            font-size: 1.25rem;
+            color: var(--gray);
+            font-weight: 500;
+            margin-left: 0.25rem;
+        }
+        
+        .sensor-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: var(--transition-smooth);
+        }
+        
+        .sensor-status.online {
+            background: linear-gradient(135deg, rgba(11, 163, 96, 0.1), rgba(60, 186, 146, 0.1));
+            color: var(--success);
+            border: 1px solid rgba(11, 163, 96, 0.2);
+        }
+        
+        .last-update {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .control-card {
+            background: linear-gradient(135deg, var(--gray-lighter), white);
+            border-radius: 18px;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .control-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--gray-light), transparent);
+            transition: var(--transition-smooth);
+        }
+        
+        .control-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .control-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
+        }
+        
+        .control-card.fan-on {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        }
+        
+        .control-card.fan-on::before {
+            background: linear-gradient(90deg, var(--success), var(--success-light));
+        }
+        
+        .control-card.heat-on {
+            background: linear-gradient(135deg, #ffedd5, #fed7aa);
+        }
+        
+        .control-card.heat-on::before {
+            background: linear-gradient(90deg, var(--warning), var(--warning-light));
+        }
+        
+        .control-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            transition: var(--transition-smooth);
+        }
+        
+        .control-card.fan-on .control-icon {
+            color: var(--success);
+        }
+        
+        .control-card.heat-on .control-icon {
+            color: var(--warning);
+        }
+        
+        .control-label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--darker);
+        }
+        
+        .control-value {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            transition: var(--transition-smooth);
+        }
+        
+        .control-card.fan-on .control-value {
+            background: rgba(11, 163, 96, 0.1);
+            color: var(--success);
+        }
+        
+        .control-card.heat-on .control-value {
+            background: rgba(255, 154, 60, 0.1);
+            color: var(--warning);
+        }
+        
+        /* Mode Selector */
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .mode-btn {
+            padding: 1.25rem 1.5rem;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+        
+        .mode-btn.auto {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+        
+        .mode-btn.manual {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+            color: white;
+        }
+        
+        .mode-btn.active {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .quick-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 1.25rem 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+        
+        .quick-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .quick-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        /* Stage Selector */
+        .stage-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stage-btn {
+            padding: 1.5rem 1rem;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .stage-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .stage-btn:hover::before {
+            left: 100%;
+        }
+        
+        .stage-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .stage-btn.active {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stage-btn.brood1 { background: var(--brood1); }
+        .stage-btn.brood2 { background: var(--brood2); }
+        .stage-btn.grower { background: var(--grower); }
+        .stage-btn.adult { background: var(--adult); }
+        
+        /* Improved Calibration Controls */
+        .calibration-control {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 1.5rem;
+            align-items: center;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--gray-light);
+        }
+        
+        @media (max-width: 768px) {
+            .calibration-control {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+        
+        .cal-label {
+            font-weight: 600;
+            color: var(--darker);
+            font-size: 1.1rem;
+        }
+        
+        .cal-value {
+            font-family: 'Poppins', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .cal-value.updating {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+        
+        .cal-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .cal-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cal-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .cal-minus {
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
+        }
+        
+        .cal-minus:hover {
+            box-shadow: 0 10px 20px rgba(255, 8, 68, 0.2);
+        }
+        
+        .cal-plus {
+            background: linear-gradient(135deg, var(--success-light), var(--success));
+        }
+        
+        .cal-plus:hover {
+            box-shadow: 0 10px 20px rgba(11, 163, 96, 0.2);
+        }
+        
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-item {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 1.25rem;
+            border-radius: 14px;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--gray-light);
+        }
+        
+        .info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-family: 'Poppins', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--darker);
+            transition: color 0.3s ease;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .action-btn {
+            padding: 1.25rem 1rem;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, var(--success-light), var(--success));
+        }
+        
+        .btn-reboot {
+            background: linear-gradient(135deg, var(--warning-light), var(--warning));
+        }
+        
+        .btn-default {
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1.25rem 1.75rem;
+            background: var(--darker);
+            color: white;
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s;
+            z-index: 1000;
+            max-width: 350px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success { 
+            background: linear-gradient(135deg, var(--success-light), var(--success));
+        }
+        
+        .toast.error { 
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
+        }
+        
+        .toast.warning { 
+            background: linear-gradient(135deg, var(--warning-light), var(--warning));
+        }
+        
+        .toast.info { 
+            background: linear-gradient(135deg, var(--info-light), var(--info));
+        }
+        
+        /* Alarm Banner */
+        .alarm-banner {
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
+            color: white;
+            padding: 1.25rem 1.75rem;
+            border-radius: 14px;
+            margin-bottom: 2rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            animation: alert-banner 2s infinite alternate;
+            box-shadow: 0 10px 25px rgba(255, 8, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .alarm-banner.warning {
+            background: linear-gradient(135deg, var(--warning-light), var(--warning));
+            animation: alert-banner-warning 2s infinite alternate;
+            box-shadow: 0 10px 25px rgba(255, 154, 60, 0.2);
+        }
+        
+        @keyframes alert-banner {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-3px); }
+        }
+        
+        @keyframes alert-banner-warning {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-3px); }
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: var(--card-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--glass-border);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-                overflow-x: hidden;
-            }
-            
+        @media (max-width: 1200px) {
             .container {
                 padding: 0 1rem;
             }
             
+            .card-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
             header {
                 grid-template-columns: 1fr;
+                text-align: center;
+                padding: 1.5rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .header-right {
+                align-items: center;
+            }
+            
+            .logo-section {
+                justify-content: center;
+            }
+            
+            .header-text h1 {
+                font-size: 1.8rem;
+            }
+            
+            .navigation {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .stage-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+            
+            .sensor-value {
+                font-size: 3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .card {
                 padding: 1.25rem;
             }
             
@@ -247,160 +992,436 @@
                 font-size: 2.5rem;
             }
             
-            /* Prevent horizontal overflow on mobile */
-            .card, .control-panel, .mode-selector, .stage-selector {
-                max-width: 100%;
-                overflow-x: hidden;
+            .control-icon {
+                font-size: 2.5rem;
+            }
+            
+            .control-label {
+                font-size: 1.25rem;
             }
         }
         
-        /* Loading state styles */
-        .loading-overlay {
+        /* Smooth Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .screen {
+            display: none;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* Connection Status Badges */
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+        
+        .badge-online {
+            background: linear-gradient(135deg, rgba(11, 163, 96, 0.15), rgba(60, 186, 146, 0.15));
+            color: var(--success);
+            border: 1px solid rgba(11, 163, 96, 0.3);
+        }
+        
+        .badge-offline {
+            background: linear-gradient(135deg, rgba(255, 8, 68, 0.15), rgba(255, 177, 153, 0.15));
+            color: var(--danger);
+            border: 1px solid rgba(255, 8, 68, 0.3);
+        }
+        
+        /* Floating Action Button */
+        .fab {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.3s ease;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transition: var(--transition-smooth);
+            z-index: 100;
         }
         
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
         }
         
-        /* Performance optimization for animations */
-        .performance-optimized {
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            perspective: 1000px;
+        /* Fix for flickering */
+        .no-flicker {
+            -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
+            -webkit-transform: translate3d(0, 0, 0);
+            -moz-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+        }
+        
+        /* Better transition for sensor values */
+        .value-transition {
+            transition: transform 0.2s ease, color 0.3s ease;
+        }
+        
+        /* Calibration feedback animation */
+        @keyframes calibratePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .calibrate-pulse {
+            animation: calibratePulse 0.3s ease;
+        }
+        
+        /* Disabled state for buttons */
+        .cal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
         }
     </style>
 </head>
 <body>
-    <!-- Loading overlay to prevent flicker -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="logo" style="margin-bottom: 2rem;">
-            <i class="fas fa-feather-alt fa-3x" style="color: var(--primary);"></i>
-        </div>
-        <div class="loading" style="width: 40px; height: 40px;"></div>
-        <p style="margin-top: 1rem; color: var(--dark);">Loading VQuail Dashboard...</p>
-    </div>
-
     <div class="container">
-        <!-- Content remains exactly the same as original -->
-        <!-- All HTML content from original preserved -->
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <div class="header-text">
+                        <h1>VQuail Control</h1>
+                        <div class="subtitle">
+                            <i class="fas fa-satellite-dish"></i>
+                            Control System • Real-time Monitoring
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="time-display" id="currentTime">--:--:--</div>
+                    <div class="status-indicators">
+                        <div class="status-dot" id="wifiStatus" title="WiFi Status"></div>
+                        <div class="status-dot" id="mqttStatus" title="MQTT Status"></div>
+                        <div class="status-dot" id="sensorStatusDot" title="Sensor Status"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Alarm Banner -->
+        <div class="alarm-banner" id="alarmBanner">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="alarmMessage">No alarms</span>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn active" data-screen="home">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" data-screen="control">
+                <i class="fas fa-sliders-h"></i>
+                <span>Control Panel</span>
+            </button>
+            <button class="nav-btn" data-screen="settings">
+                <i class="fas fa-cogs"></i>
+                <span>Settings</span>
+            </button>
+            <button class="nav-btn" data-screen="info">
+                <i class="fas fa-info-circle"></i>
+                <span>System Info</span>
+            </button>
+        </div>
+        
+        <!-- Home Screen -->
+        <div class="screen active" id="homeScreen">
+            <div class="card-grid">
+                <!-- Temperature Card -->
+                <div class="card sensor-card">
+                    <div class="card-title">
+                        <h3><i class="fas fa-thermometer-half"></i> Temperature</h3>
+                        <span class="sensor-unit">°C</span>
+                    </div>
+                    <div class="sensor-value-container">
+                        <span class="sensor-value temp-value offline" id="temperatureValue">--.-</span>
+                    </div>
+                    <div class="last-update" id="tempUpdate">Last update: --:--:--</div>
+                    <div class="sensor-status offline" id="tempStatus">
+                        <i class="fas fa-circle"></i> OFFLINE
+                    </div>
+                </div>
+                
+                <!-- Humidity Card -->
+                <div class="card sensor-card">
+                    <div class="card-title">
+                        <h3><i class="fas fa-tint"></i> Humidity</h3>
+                        <span class="sensor-unit">%</span>
+                    </div>
+                    <div class="sensor-value-container">
+                        <span class="sensor-value hum-value offline" id="humidityValue">--.-</span>
+                    </div>
+                    <div class="last-update" id="humUpdate">Last update: --:--:--</div>
+                    <div class="sensor-status offline" id="humStatus">
+                        <i class="fas fa-circle"></i> OFFLINE
+                    </div>
+                </div>
+                
+                <!-- Device Status Card -->
+                <div class="card">
+                    <div class="card-title">
+                        <h3><i class="fas fa-microchip"></i> Device Status</h3>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">FAN</div>
+                            <div class="info-value offline" id="fanStatusText">OFF</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">HEAT</div>
+                            <div class="info-value offline" id="heatStatusText">OFF</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">WiFi</div>
+                            <div class="info-value offline" id="wifiStatusText">OFF</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">MQTT</div>
+                            <div class="info-value offline" id="mqttStatusText">OFF</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Info Card -->
+                <div class="card">
+                    <div class="card-title">
+                        <h3><i class="fas fa-info-circle"></i> System Information</h3>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Life Stage</div>
+                            <div class="info-value" id="stageInfo">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Age</div>
+                            <div class="info-value" id="ageInfo">-- days</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Operating Mode</div>
+                            <div class="info-value" id="modeInfo">AUTO</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Control Source</div>
+                            <div class="info-value" id="controlSource">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Control Screen -->
+        <div class="screen" id="controlScreen">
+            <div class="card">
+                <div class="card-title">
+                    <h3><i class="fas fa-gamepad"></i> Control Panel</h3>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="control-card fan-off" id="fanControl" onclick="controlDevice('fan', !currentState.fan)">
+                        <div class="control-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="control-label">FAN</div>
+                        <div class="control-value" id="fanControlValue">OFF</div>
+                    </div>
+                    
+                    <div class="control-card heat-off" id="heatControl" onclick="controlDevice('heat', !currentState.heat)">
+                        <div class="control-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="control-label">HEAT</div>
+                        <div class="control-value" id="heatControlValue">OFF</div>
+                    </div>
+                </div>
+                
+                <div class="mode-selector">
+                    <button class="mode-btn auto active" id="autoModeBtn" onclick="setMode(true)">
+                        <i class="fas fa-robot"></i> AUTO MODE
+                    </button>
+                    <button class="mode-btn manual" id="manualModeBtn" onclick="setMode(false)">
+                        <i class="fas fa-hand-pointer"></i> MANUAL MODE
+                    </button>
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="controlBoth(true)">
+                        <i class="fas fa-power-on"></i>
+                        <span>BOTH ON</span>
+                    </button>
+                    <button class="quick-btn" onclick="controlBoth(false)">
+                        <i class="fas fa-power-off"></i>
+                        <span>BOTH OFF</span>
+                    </button>
+                    <button class="quick-btn" onclick="forceAutoMode()">
+                        <i class="fas fa-undo"></i>
+                        <span>FORCE AUTO</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Screen -->
+        <div class="screen" id="settingsScreen">
+            <div class="card">
+                <div class="card-title">
+                    <h3><i class="fas fa-cogs"></i> System Settings</h3>
+                </div>
+                
+                <div class="stage-selector">
+                    <button class="stage-btn brood1" data-stage="0" onclick="setLifeStage(0)">
+                        BROOD W1<br>
+                        <small>0-7 days</small>
+                    </button>
+                    <button class="stage-btn brood2" data-stage="1" onclick="setLifeStage(1)">
+                        BROOD W2<br>
+                        <small>8-14 days</small>
+                    </button>
+                    <button class="stage-btn grower" data-stage="2" onclick="setLifeStage(2)">
+                        GROWER<br>
+                        <small>15-42 days</small>
+                    </button>
+                    <button class="stage-btn adult" data-stage="3" onclick="setLifeStage(3)">
+                        ADULT<br>
+                        <small>43+ days</small>
+                    </button>
+                </div>
+                
+                <div class="calibration-control">
+                    <div>
+                        <div class="cal-label">Temperature Calibration</div>
+                        <div class="cal-value" id="tempCalValue">0.0°C</div>
+                    </div>
+                    <div class="cal-btns">
+                        <button class="cal-btn cal-minus" onclick="changeCalibration('temp', -0.5)">-</button>
+                        <button class="cal-btn cal-plus" onclick="changeCalibration('temp', 0.5)">+</button>
+                    </div>
+                </div>
+                
+                <div class="calibration-control">
+                    <div>
+                        <div class="cal-label">Humidity Calibration</div>
+                        <div class="cal-value" id="humCalValue">0.0%</div>
+                    </div>
+                    <div class="cal-btns">
+                        <button class="cal-btn cal-minus" onclick="changeCalibration('hum', -0.5)">-</button>
+                        <button class="cal-btn cal-plus" onclick="changeCalibration('hum', 0.5)">+</button>
+                    </div>
+                </div>
+                
+                <div class="age-control calibration-control">
+                    <div>
+                        <div class="cal-label">Age (days)</div>
+                        <div class="cal-value" id="ageValue">0</div>
+                    </div>
+                    <div class="cal-btns">
+                        <button class="cal-btn cal-minus" onclick="changeAge(-1)">-</button>
+                        <button class="cal-btn cal-plus" onclick="changeAge(1)">+</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-save" onclick="saveSettings()">
+                        <i class="fas fa-save"></i>
+                        <span>SAVE SETTINGS</span>
+                    </button>
+                    <button class="action-btn btn-reboot" onclick="rebootSystem()">
+                        <i class="fas fa-redo"></i>
+                        <span>REBOOT SYSTEM</span>
+                    </button>
+                    <button class="action-btn btn-default" onclick="resetCalibration()">
+                        <i class="fas fa-undo"></i>
+                        <span>RESET ALL</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info Screen -->
+        <div class="screen" id="infoScreen">
+            <div class="card">
+                <div class="card-title">
+                    <h3><i class="fas fa-server"></i> System Information</h3>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Network Status</div>
+                        <div class="info-value offline" id="networkStatusInfo">Disconnected</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">WiFi Signal</div>
+                        <div class="info-value" id="wifiRssi">-- dBm</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">NTP Time Sync</div>
+                        <div class="info-value offline" id="ntpStatus">NO SYNC</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">SD Card Status</div>
+                        <div class="info-value offline" id="sdStatus">Not Found</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Sensor Status</div>
+                        <div class="info-value offline" id="sensorInfo">Offline</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Control Channel</div>
+                        <div class="info-value" id="channelInfo">AUTO</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><i class="fas fa-feather-alt"></i> VQuail Dual Channel Control System</p>
+            <p>Powered by HiveMQ Cloud • Real-time Web Interface</p>
+            <p id="connectionStatus"><span class="loading"></span> Connecting to system...</p>
+        </footer>
+        
+        <!-- Toast Notifications -->
+        <div class="toast" id="toast"></div>
+        
+        <!-- Floating Action Button -->
+        <div class="fab" onclick="publishControl({ refresh: true })" title="Refresh Data">
+            <i class="fas fa-sync-alt"></i>
+        </div>
     </div>
 
     <script>
-        // Performance optimization: Debounce function
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Throttle function for high-frequency events
-        function throttle(func, limit) {
-            let inThrottle;
-            return function() {
-                const args = arguments;
-                const context = this;
-                if (!inThrottle) {
-                    func.apply(context, args);
-                    inThrottle = true;
-                    setTimeout(() => inThrottle = false, limit);
-                }
-            };
-        }
-
-        // State manager to prevent race conditions
-        class StateManager {
-            constructor() {
-                this.state = {
-                    temperature: null,
-                    humidity: null,
-                    fan: false,
-                    heat: false,
-                    auto: true,
-                    stage: 0,
-                    age: 0,
-                    sensor_online: false,
-                    alarm: '',
-                    control_channel: 'AUTO',
-                    last_control_source: '--',
-                    temp_offset: 0,
-                    hum_offset: 0,
-                    wifi: false,
-                    mqtt: false,
-                    ntp: false,
-                    sd_ready: false,
-                    uptime: 0,
-                    wifi_rssi: 0
-                };
-                this.subscribers = [];
-                this.updateQueue = [];
-                this.isUpdating = false;
-            }
-
-            setState(updates) {
-                this.updateQueue.push(updates);
-                this.processQueue();
-            }
-
-            async processQueue() {
-                if (this.isUpdating) return;
-                
-                this.isUpdating = true;
-                
-                while (this.updateQueue.length > 0) {
-                    const updates = this.updateQueue.shift();
-                    const oldState = { ...this.state };
-                    this.state = { ...this.state, ...updates };
-                    
-                    // Batch DOM updates
-                    await this.batchUpdateDOM(oldState, updates);
-                }
-                
-                this.isUpdating = false;
-            }
-
-            batchUpdateDOM(oldState, updates) {
-                return new Promise(resolve => {
-                    // Use requestAnimationFrame for smooth updates
-                    requestAnimationFrame(() => {
-                        this.subscribers.forEach(callback => {
-                            callback(this.state, oldState, updates);
-                        });
-                        resolve();
-                    });
-                });
-            }
-
-            subscribe(callback) {
-                this.subscribers.push(callback);
-                return () => {
-                    this.subscribers = this.subscribers.filter(cb => cb !== callback);
-                };
-            }
-
-            getState() {
-                return { ...this.state };
-            }
-        }
-
         // MQTT Configuration
         const MQTT_CONFIG = {
             host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
@@ -447,447 +1468,780 @@
             }
         ];
 
-        // Global state
-        const stateManager = new StateManager();
+        // State variables
         let mqttClient = null;
         let isConnected = false;
-        let reconnectAttempts = 0;
-        const MAX_RECONNECT_ATTEMPTS = 5;
-        let toastTimeout = null;
+        let updateInProgress = false;
+        let currentState = {
+            temperature: null,
+            humidity: null,
+            fan: false,
+            heat: false,
+            auto: true,
+            stage: 0,
+            age: 0,
+            sensor_online: false,
+            alarm: '',
+            control_channel: 'AUTO',
+            last_control_source: '--',
+            temp_offset: 0,
+            hum_offset: 0,
+            wifi: false,
+            mqtt: false,
+            ntp: false,
+            sd_ready: false,
+            uptime: 0,
+            wifi_rssi: 0
+        };
 
-        // Initialize application
-        async function initApp() {
+        // Initialize MQTT connection
+        function initMQTT() {
+            const protocol = MQTT_CONFIG.useSSL ? 'wss' : 'ws';
+            const url = `${protocol}://${MQTT_CONFIG.host}:${MQTT_CONFIG.port}/mqtt`;
+            
+            showToast('Connecting to VQuail system...', 'info');
+            
+            mqttClient = mqtt.connect(url, {
+                username: MQTT_CONFIG.username,
+                password: MQTT_CONFIG.password,
+                clientId: MQTT_CONFIG.clientId,
+                clean: true,
+                reconnectPeriod: 5000,
+                keepalive: 60,
+                connectTimeout: 10000
+            });
+
+            mqttClient.on('connect', () => {
+                console.log('Connected to MQTT broker');
+                isConnected = true;
+                updateConnectionStatus(true);
+                showToast('Connected to VQuail system', 'success');
+                
+                // Subscribe to topics
+                mqttClient.subscribe('vquail/status/#', (err) => {
+                    if (!err) console.log('Subscribed to status topics');
+                });
+                
+                mqttClient.subscribe('vquail/control/source', (err) => {
+                    if (!err) console.log('Subscribed to control source');
+                });
+                
+                // Request initial data
+                setTimeout(() => publishControl({ refresh: true }), 1000);
+            });
+
+            mqttClient.on('message', (topic, message) => {
+                try {
+                    const data = JSON.parse(message.toString());
+                    console.log('Received:', topic, data);
+                    updateDashboard(topic, data);
+                } catch (e) {
+                    console.error('Error parsing MQTT message:', e);
+                }
+            });
+
+            mqttClient.on('error', (err) => {
+                console.error('MQTT error:', err);
+                updateConnectionStatus(false);
+                showToast('Connection error: ' + err.message, 'error');
+            });
+
+            mqttClient.on('close', () => {
+                console.log('MQTT connection closed');
+                isConnected = false;
+                updateConnectionStatus(false);
+            });
+
+            mqttClient.on('reconnect', () => {
+                console.log('Reconnecting to MQTT...');
+                showToast('Reconnecting to system...', 'warning');
+            });
+        }
+
+        // Update dashboard with received data
+        function updateDashboard(topic, data) {
+            if (updateInProgress) return;
+            
+            updateInProgress = true;
+            
             try {
-                // Hide loading overlay with fade
+                // Update current state
+                Object.assign(currentState, data);
+                
+                // Update UI based on topic
+                if (topic.includes('sensors') || topic.includes('device')) {
+                    updateSensorData(data);
+                    updateDeviceStatus(data);
+                    updateSystemInfo(data);
+                }
+                
+                if (topic === 'vquail/control/source') {
+                    updateControlSource(data);
+                }
+            } finally {
                 setTimeout(() => {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                    document.documentElement.classList.add('loaded');
-                }, 500);
-
-                // Initialize state subscriptions
-                stateManager.subscribe(updateUI);
-                
-                // Initialize MQTT
-                await initMQTT();
-                
-                // Initialize UI components
-                initNavigation();
-                initKeyboardShortcuts();
-                initTimeDisplay();
-                
-                // Start periodic updates
-                startPeriodicUpdates();
-                
-            } catch (error) {
-                console.error('App initialization failed:', error);
-                showToast('Failed to initialize application', 'error');
+                    updateInProgress = false;
+                }, 50);
             }
         }
 
-        // Optimized MQTT initialization
-        async function initMQTT() {
-            return new Promise((resolve, reject) => {
-                const protocol = MQTT_CONFIG.useSSL ? 'wss' : 'ws';
-                const url = `${protocol}://${MQTT_CONFIG.host}:${MQTT_CONFIG.port}/mqtt`;
+        // Update sensor data display
+        function updateSensorData(data) {
+            if (data.temp !== undefined) {
+                const tempEl = document.getElementById('temperatureValue');
+                const tempVal = data.temp.toFixed(1);
                 
-                showToast('Connecting to VQuail system...', 'info');
-                
-                mqttClient = mqtt.connect(url, {
-                    username: MQTT_CONFIG.username,
-                    password: MQTT_CONFIG.password,
-                    clientId: MQTT_CONFIG.clientId,
-                    clean: true,
-                    reconnectPeriod: 3000,
-                    keepalive: 30,
-                    connectTimeout: 8000,
-                    queueQoSZero: false
-                });
-
-                mqttClient.on('connect', () => {
-                    console.log('Connected to MQTT broker');
-                    isConnected = true;
-                    reconnectAttempts = 0;
-                    updateConnectionStatus(true);
-                    showToast('Connected to VQuail system', 'success');
+                if (tempEl.textContent !== tempVal) {
+                    tempEl.classList.add('updating');
+                    tempEl.textContent = tempVal;
                     
-                    // Subscribe to topics
-                    const topics = ['vquail/status/#', 'vquail/control/source'];
-                    topics.forEach(topic => {
-                        mqttClient.subscribe(topic, { qos: 1 }, (err) => {
-                            if (err) console.error(`Failed to subscribe to ${topic}:`, err);
-                        });
-                    });
-                    
-                    // Request initial data with delay to prevent overwhelming
-                    setTimeout(() => publishControl({ refresh: true }), 500);
-                    resolve();
-                });
-
-                mqttClient.on('message', throttle((topic, message) => {
-                    try {
-                        const data = JSON.parse(message.toString());
-                        stateManager.setState(data);
-                    } catch (e) {
-                        console.error('Error parsing MQTT message:', e);
-                    }
-                }, 100)); // Throttle to max 10 messages per second
-
-                mqttClient.on('error', (err) => {
-                    console.error('MQTT error:', err);
-                    updateConnectionStatus(false);
-                    
-                    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                        reconnectAttempts++;
-                        showToast(`Connection error (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`, 'warning');
-                    } else {
-                        showToast('Connection failed. Please check network.', 'error');
-                        reject(err);
-                    }
-                });
-
-                mqttClient.on('close', () => {
-                    console.log('MQTT connection closed');
-                    isConnected = false;
-                    updateConnectionStatus(false);
-                });
-
-                // Set timeout for connection
-                setTimeout(() => {
-                    if (!isConnected) {
-                        reject(new Error('Connection timeout'));
-                    }
-                }, 10000);
-            });
-        }
-
-        // Optimized UI update function
-        function updateUI(newState, oldState, updates) {
-            // Only update changed elements
-            requestAnimationFrame(() => {
-                // Update temperature if changed
-                if (updates.temp !== undefined && updates.temp !== oldState.temp) {
-                    updateTemperature(updates.temp);
+                    setTimeout(() => {
+                        tempEl.classList.remove('updating');
+                    }, 200);
                 }
                 
-                // Update humidity if changed
-                if (updates.hum !== undefined && updates.hum !== oldState.hum) {
-                    updateHumidity(updates.hum);
-                }
-                
-                // Update device status if changed
-                if (updates.fan !== undefined && updates.fan !== oldState.fan) {
-                    updateDeviceStatus('fan', updates.fan);
-                }
-                
-                if (updates.heat !== undefined && updates.heat !== oldState.heat) {
-                    updateDeviceStatus('heat', updates.heat);
-                }
-                
-                // Update sensor online status
-                if (updates.sensor_online !== undefined) {
-                    updateSensorStatus(updates.sensor_online);
-                }
-                
-                // Update alarm if changed
-                if (updates.alarm !== undefined && updates.alarm !== oldState.alarm) {
-                    updateAlarm(updates.alarm);
-                }
-                
-                // Update mode if changed
-                if (updates.auto !== undefined && updates.auto !== oldState.auto) {
-                    updateMode(updates.auto);
-                }
-                
-                // Update stage if changed
-                if (updates.stage !== undefined && updates.stage !== oldState.stage) {
-                    updateStage(updates.stage);
-                }
-                
-                // Update age if changed
-                if (updates.age !== undefined && updates.age !== oldState.age) {
-                    updateAge(updates.age);
-                }
-            });
-        }
-
-        // Optimized individual update functions
-        function updateTemperature(temp) {
-            const tempEl = document.getElementById('temperatureValue');
-            const formattedTemp = temp.toFixed(1);
-            
-            // Only update if value actually changed
-            if (tempEl.textContent !== formattedTemp) {
-                // Use opacity transition for smooth update
-                tempEl.style.opacity = '0.5';
-                tempEl.textContent = formattedTemp;
-                
-                // Determine class based on state
-                const state = stateManager.getState();
-                const currentStage = LIFE_STAGES[state.stage];
+                const currentStage = LIFE_STAGES[currentState.stage];
                 const tempRange = currentStage?.tempRange || { min: 20, max: 30 };
                 
-                let className = 'sensor-value temp-value ';
-                if (!state.sensor_online) {
-                    className += 'offline';
-                } else if (temp < tempRange.min - 5 || temp > tempRange.max + 5) {
-                    className += 'alarm';
-                } else if (temp >= tempRange.min && temp <= tempRange.max) {
-                    className += 'online';
+                // Determine temperature color based on status
+                if (!currentState.sensor_online) {
+                    tempEl.className = 'sensor-value temp-value offline';
+                } else if (data.temp < tempRange.min - 5) {
+                    tempEl.className = 'sensor-value temp-value offline';
+                } else if (data.temp > tempRange.max + 5) {
+                    tempEl.className = 'sensor-value temp-value offline';
+                } else if (data.temp < tempRange.min || data.temp > tempRange.max) {
+                    tempEl.className = 'sensor-value temp-value offline';
                 } else {
-                    className += 'warning';
+                    tempEl.className = 'sensor-value temp-value online';
                 }
-                
-                tempEl.className = className;
-                
-                // Fade back in
-                requestAnimationFrame(() => {
-                    tempEl.style.transition = 'opacity 0.3s ease';
-                    tempEl.style.opacity = '1';
-                });
                 
                 document.getElementById('tempUpdate').textContent = 'Last update: ' + getCurrentTime();
             }
-        }
-
-        function updateHumidity(hum) {
-            const humEl = document.getElementById('humidityValue');
-            const formattedHum = hum.toFixed(1);
             
-            if (humEl.textContent !== formattedHum) {
-                humEl.style.opacity = '0.5';
-                humEl.textContent = formattedHum;
+            if (data.hum !== undefined) {
+                const humEl = document.getElementById('humidityValue');
+                const humVal = data.hum.toFixed(1);
                 
-                const state = stateManager.getState();
-                const currentStage = LIFE_STAGES[state.stage];
-                const humRange = currentStage?.humRange || { min: 50, max: 70 };
-                
-                let className = 'sensor-value hum-value ';
-                if (!state.sensor_online) {
-                    className += 'offline';
-                } else if (hum < humRange.min - 10 || hum > humRange.max + 10) {
-                    className += 'alarm';
-                } else if (hum >= humRange.min && hum <= humRange.max) {
-                    className += 'online';
-                } else {
-                    className += 'warning';
+                if (humEl.textContent !== humVal) {
+                    humEl.classList.add('updating');
+                    humEl.textContent = humVal;
+                    
+                    setTimeout(() => {
+                        humEl.classList.remove('updating');
+                    }, 200);
                 }
                 
-                humEl.className = className;
+                const currentStage = LIFE_STAGES[currentState.stage];
+                const humRange = currentStage?.humRange || { min: 50, max: 70 };
                 
-                requestAnimationFrame(() => {
-                    humEl.style.transition = 'opacity 0.3s ease';
-                    humEl.style.opacity = '1';
-                });
+                // Determine humidity color based on status
+                if (!currentState.sensor_online) {
+                    humEl.className = 'sensor-value hum-value offline';
+                } else if (data.hum < humRange.min - 10 || data.hum > humRange.max + 10) {
+                    humEl.className = 'sensor-value hum-value offline';
+                } else if (data.hum < humRange.min || data.hum > humRange.max) {
+                    humEl.className = 'sensor-value hum-value offline';
+                } else {
+                    humEl.className = 'sensor-value hum-value online';
+                }
                 
                 document.getElementById('humUpdate').textContent = 'Last update: ' + getCurrentTime();
             }
-        }
-
-        function updateDeviceStatus(device, state) {
-            const deviceText = document.getElementById(device + 'StatusText');
-            const deviceControl = document.getElementById(device + 'Control');
-            const deviceValue = document.getElementById(device + 'ControlValue');
             
-            const statusText = state ? 'ON' : 'OFF';
-            
-            if (deviceText.textContent !== statusText) {
-                deviceText.textContent = statusText;
-                deviceText.className = `info-value ${state ? (device === 'heat' ? 'warning' : 'online') : 'offline'}`;
-                
-                deviceControl.className = `control-card ${device}-${state ? 'on' : 'off'} ${state ? 'active' : ''}`;
-                deviceValue.textContent = statusText;
-            }
-        }
-
-        function updateSensorStatus(online) {
+            // Update sensor status
             const tempStatus = document.getElementById('tempStatus');
             const humStatus = document.getElementById('humStatus');
-            const sensorDot = document.getElementById('sensorStatusDot');
-            const sensorInfo = document.getElementById('sensorInfo');
-            
-            const statusText = online ? 'ONLINE' : 'OFFLINE';
-            const statusClass = online ? 'online' : 'offline';
-            
-            if (tempStatus.textContent !== statusText) {
-                tempStatus.textContent = statusText;
-                tempStatus.className = `sensor-status ${statusClass}`;
-                humStatus.textContent = statusText;
-                humStatus.className = `sensor-status ${statusClass}`;
-                
-                if (online) {
-                    sensorDot.classList.add('online');
-                } else {
-                    sensorDot.classList.remove('online');
-                }
-                
-                sensorInfo.textContent = online ? 'Online' : 'Offline';
-                sensorInfo.className = `info-value ${statusClass}`;
-            }
-        }
-
-        function updateAlarm(alarm) {
-            const alarmBanner = document.getElementById('alarmBanner');
-            const alarmMessage = document.getElementById('alarmMessage');
-            
-            if (alarm && alarm !== '') {
-                if (alarmBanner.style.display !== 'flex') {
-                    alarmBanner.style.display = 'flex';
-                }
-                alarmMessage.textContent = alarm;
-                
-                const isCritical = alarm.includes('critical') || alarm.includes('Extreme') || alarm.includes('offline');
-                alarmBanner.className = isCritical ? 'alarm-banner' : 'alarm-banner warning';
+            if (currentState.sensor_online) {
+                tempStatus.textContent = 'ONLINE';
+                tempStatus.className = 'sensor-status online';
+                humStatus.textContent = 'ONLINE';
+                humStatus.className = 'sensor-status online';
+                document.getElementById('sensorStatusDot').classList.add('online');
+                document.getElementById('sensorInfo').textContent = 'Online';
+                document.getElementById('sensorInfo').className = 'info-value online';
             } else {
-                alarmBanner.style.display = 'none';
+                tempStatus.textContent = 'OFFLINE';
+                tempStatus.className = 'sensor-status offline';
+                humStatus.textContent = 'OFFLINE';
+                humStatus.className = 'sensor-status offline';
+                document.getElementById('sensorStatusDot').classList.remove('online');
+                document.getElementById('sensorInfo').textContent = 'Offline';
+                document.getElementById('sensorInfo').className = 'info-value offline';
             }
         }
 
-        function updateMode(autoMode) {
-            const modeInfo = document.getElementById('modeInfo');
-            const autoBtn = document.getElementById('autoModeBtn');
-            const manualBtn = document.getElementById('manualModeBtn');
-            
-            const modeText = autoMode ? 'AUTO' : 'MANUAL';
-            
-            if (modeInfo.textContent !== modeText) {
-                modeInfo.textContent = modeText;
+        // Update device status display
+        function updateDeviceStatus(data) {
+            // Update fan status
+            if (data.fan !== undefined) {
+                const fanText = document.getElementById('fanStatusText');
+                const fanControl = document.getElementById('fanControl');
+                const fanValue = document.getElementById('fanControlValue');
                 
-                if (autoMode) {
+                const wasOn = currentState.fan;
+                const isNowOn = data.fan;
+                
+                if (wasOn !== isNowOn) {
+                    if (isNowOn) {
+                        fanText.textContent = 'ON';
+                        fanText.className = 'info-value online';
+                        fanControl.className = 'control-card fan-on';
+                        fanValue.textContent = 'ON';
+                        fanControl.classList.add('active');
+                    } else {
+                        fanText.textContent = 'OFF';
+                        fanText.className = 'info-value offline';
+                        fanControl.className = 'control-card fan-off';
+                        fanValue.textContent = 'OFF';
+                        fanControl.classList.remove('active');
+                    }
+                    currentState.fan = isNowOn;
+                }
+            }
+            
+            // Update heat status
+            if (data.heat !== undefined) {
+                const heatText = document.getElementById('heatStatusText');
+                const heatControl = document.getElementById('heatControl');
+                const heatValue = document.getElementById('heatControlValue');
+                
+                const wasOn = currentState.heat;
+                const isNowOn = data.heat;
+                
+                if (wasOn !== isNowOn) {
+                    if (isNowOn) {
+                        heatText.textContent = 'ON';
+                        heatText.className = 'info-value warning';
+                        heatControl.className = 'control-card heat-on';
+                        heatValue.textContent = 'ON';
+                        heatControl.classList.add('active');
+                    } else {
+                        heatText.textContent = 'OFF';
+                        heatText.className = 'info-value offline';
+                        heatControl.className = 'control-card heat-off';
+                        heatValue.textContent = 'OFF';
+                        heatControl.classList.remove('active');
+                    }
+                    currentState.heat = isNowOn;
+                }
+            }
+            
+            // Update WiFi status
+            if (data.wifi !== undefined) {
+                const wifiText = document.getElementById('wifiStatusText');
+                const wasOnline = currentState.wifi;
+                const isNowOnline = data.wifi;
+                
+                if (wasOnline !== isNowOnline) {
+                    if (isNowOnline) {
+                        wifiText.textContent = 'ON';
+                        wifiText.className = 'info-value online';
+                        document.getElementById('wifiStatus').classList.add('online');
+                    } else {
+                        wifiText.textContent = 'OFF';
+                        wifiText.className = 'info-value offline';
+                        document.getElementById('wifiStatus').classList.remove('online');
+                    }
+                    currentState.wifi = isNowOnline;
+                }
+            }
+            
+            // Update MQTT status
+            if (data.mqtt !== undefined) {
+                const mqttText = document.getElementById('mqttStatusText');
+                const wasOnline = currentState.mqtt;
+                const isNowOnline = data.mqtt;
+                
+                if (wasOnline !== isNowOnline) {
+                    if (isNowOnline) {
+                        mqttText.textContent = 'ON';
+                        mqttText.className = 'info-value online';
+                        document.getElementById('mqttStatus').classList.add('online');
+                    } else {
+                        mqttText.textContent = 'OFF';
+                        mqttText.className = 'info-value offline';
+                        document.getElementById('mqttStatus').classList.remove('online');
+                    }
+                    currentState.mqtt = isNowOnline;
+                }
+            }
+            
+            // Update alarm banner
+            if (data.alarm !== undefined) {
+                const alarmBanner = document.getElementById('alarmBanner');
+                const alarmMessage = document.getElementById('alarmMessage');
+                
+                if (data.alarm && data.alarm !== '') {
+                    alarmBanner.style.display = 'flex';
+                    alarmMessage.textContent = data.alarm;
+                    
+                    if (data.alarm.includes('critical') || data.alarm.includes('Extreme') || data.alarm.includes('offline')) {
+                        alarmBanner.className = 'alarm-banner';
+                    } else {
+                        alarmBanner.className = 'alarm-banner warning';
+                    }
+                } else {
+                    alarmBanner.style.display = 'none';
+                }
+            }
+            
+            // Update control mode
+            if (data.auto !== undefined) {
+                const modeInfo = document.getElementById('modeInfo');
+                const autoBtn = document.getElementById('autoModeBtn');
+                const manualBtn = document.getElementById('manualModeBtn');
+                
+                if (data.auto) {
+                    modeInfo.textContent = 'AUTO';
                     autoBtn.classList.add('active');
                     manualBtn.classList.remove('active');
                 } else {
+                    modeInfo.textContent = 'MANUAL';
                     autoBtn.classList.remove('active');
                     manualBtn.classList.add('active');
                 }
             }
         }
 
-        function updateStage(stage) {
-            const stageInfo = document.getElementById('stageInfo');
-            const stageName = LIFE_STAGES[stage]?.name || '--';
-            
-            if (stageInfo.textContent !== stageName) {
-                stageInfo.textContent = stageName;
+        // Update system information
+        function updateSystemInfo(data) {
+            // Update stage
+            if (data.stage !== undefined) {
+                const stageInfo = document.getElementById('stageInfo');
+                stageInfo.textContent = LIFE_STAGES[data.stage]?.name || '--';
                 
+                // Update active stage button
                 document.querySelectorAll('.stage-btn').forEach(btn => {
-                    const btnStage = parseInt(btn.dataset.stage);
-                    btn.classList.toggle('active', btnStage === stage);
+                    btn.classList.remove('active');
+                    if (parseInt(btn.dataset.stage) === data.stage) {
+                        btn.classList.add('active');
+                    }
                 });
             }
-        }
-
-        function updateAge(age) {
-            const ageInfo = document.getElementById('ageInfo');
-            const ageValue = document.getElementById('ageValue');
-            const ageText = age + ' days';
             
-            if (ageInfo.textContent !== ageText) {
-                ageInfo.textContent = ageText;
-                ageValue.textContent = age.toString();
+            // Update age
+            if (data.age !== undefined) {
+                const ageVal = data.age.toString();
+                document.getElementById('ageInfo').textContent = ageVal + ' days';
+                const ageValueEl = document.getElementById('ageValue');
+                ageValueEl.textContent = ageVal;
+                ageValueEl.classList.add('updating');
+                setTimeout(() => ageValueEl.classList.remove('updating'), 300);
+            }
+            
+            // Update control source
+            if (data.last_control_source !== undefined) {
+                document.getElementById('controlSource').textContent = data.last_control_source;
+            }
+            
+            // Update control channel
+            if (data.control_channel !== undefined) {
+                updateControlChannelDisplay(data.control_channel);
+            }
+            
+            // Update calibration values
+            if (data.temp_offset !== undefined) {
+                const tempCalEl = document.getElementById('tempCalValue');
+                tempCalEl.textContent = data.temp_offset.toFixed(1) + '°C';
+                tempCalEl.classList.add('updating');
+                setTimeout(() => tempCalEl.classList.remove('updating'), 300);
+            }
+            
+            if (data.hum_offset !== undefined) {
+                const humCalEl = document.getElementById('humCalValue');
+                humCalEl.textContent = data.hum_offset.toFixed(1) + '%';
+                humCalEl.classList.add('updating');
+                setTimeout(() => humCalEl.classList.remove('updating'), 300);
+            }
+            
+            // Update network info
+            if (data.ntp !== undefined) {
+                document.getElementById('ntpStatus').textContent = data.ntp ? 'SYNC' : 'NO SYNC';
+                document.getElementById('ntpStatus').className = data.ntp ? 'info-value online' : 'info-value offline';
+            }
+            
+            if (data.sd_ready !== undefined) {
+                document.getElementById('sdStatus').textContent = data.sd_ready ? 'Available' : 'Not Found';
+                document.getElementById('sdStatus').className = data.sd_ready ? 'info-value online' : 'info-value offline';
+            }
+            
+            if (data.wifi_rssi !== undefined) {
+                document.getElementById('wifiRssi').textContent = data.wifi_rssi + ' dBm';
             }
         }
 
-        // Optimized control functions
-        const controlFunctions = {
-            controlDevice: debounce((device, state) => {
-                if (!isConnected) {
-                    showToast('Not connected to system', 'error');
-                    return;
-                }
-                const command = { [device]: state };
-                publishControl(command);
-                showToast(`${device.toUpperCase()} turned ${state ? 'ON' : 'OFF'}`, 'success');
-            }, 300),
+        // Update control source information
+        function updateControlSource(data) {
+            if (data.channel !== undefined) {
+                updateControlChannelDisplay(data.channel);
+            }
+            
+            if (data.source !== undefined) {
+                document.getElementById('controlSource').textContent = data.source;
+            }
+        }
 
-            controlBoth: debounce((state) => {
-                if (!isConnected) {
-                    showToast('Not connected to system', 'error');
-                    return;
+        // Update control channel display
+        function updateControlChannelDisplay(channel) {
+            const channelInfo = document.getElementById('channelInfo');
+            
+            if (channelInfo.textContent !== channel) {
+                channelInfo.textContent = channel;
+                
+                // Update styling based on channel
+                if (channel === 'WEB') {
+                    channelInfo.className = 'info-value warning';
+                } else if (channel === 'TFT') {
+                    channelInfo.className = 'info-value online';
+                } else {
+                    channelInfo.className = 'info-value';
                 }
-                const command = { fan: state, heat: state };
-                publishControl(command);
-                showToast(`Both devices turned ${state ? 'ON' : 'OFF'}`, 'success');
-            }, 300),
+            }
+        }
 
-            setMode: debounce((autoMode) => {
-                if (!isConnected) {
-                    showToast('Not connected to system', 'error');
-                    return;
+        // Control device function
+        function controlDevice(device, state) {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = { [device]: state };
+            publishControl(command);
+            
+            // Immediate visual feedback
+            if (device === 'fan') {
+                const fanControl = document.getElementById('fanControl');
+                const fanValue = document.getElementById('fanControlValue');
+                const fanText = document.getElementById('fanStatusText');
+                
+                if (state) {
+                    fanControl.className = 'control-card fan-on active';
+                    fanValue.textContent = 'ON';
+                    fanText.textContent = 'ON';
+                    fanText.className = 'info-value online';
+                } else {
+                    fanControl.className = 'control-card fan-off';
+                    fanValue.textContent = 'OFF';
+                    fanText.textContent = 'OFF';
+                    fanText.className = 'info-value offline';
                 }
-                const command = { auto: autoMode };
-                publishControl(command);
-                showToast(`Mode set to ${autoMode ? 'AUTO' : 'MANUAL'}`, 'success');
-            }, 300),
-
-            setLifeStage: debounce((stage) => {
-                if (!isConnected) {
-                    showToast('Not connected to system', 'error');
-                    return;
+            } else if (device === 'heat') {
+                const heatControl = document.getElementById('heatControl');
+                const heatValue = document.getElementById('heatControlValue');
+                const heatText = document.getElementById('heatStatusText');
+                
+                if (state) {
+                    heatControl.className = 'control-card heat-on active';
+                    heatValue.textContent = 'ON';
+                    heatText.textContent = 'ON';
+                    heatText.className = 'info-value warning';
+                } else {
+                    heatControl.className = 'control-card heat-off';
+                    heatValue.textContent = 'OFF';
+                    heatText.textContent = 'OFF';
+                    heatText.className = 'info-value offline';
                 }
-                const command = { stage: stage };
-                publishControl(command);
-                showToast(`Stage set to ${LIFE_STAGES[stage].name}`, 'success');
-            }, 300)
-        };
+            }
+            
+            showToast(`${device.toUpperCase()} turned ${state ? 'ON' : 'OFF'}`, 'success');
+        }
 
-        // Optimized publish control
+        // Control both devices
+        function controlBoth(state) {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = {
+                fan: state,
+                heat: state
+            };
+            publishControl(command);
+            
+            // Immediate visual feedback
+            const devices = ['fan', 'heat'];
+            devices.forEach(device => {
+                if (device === 'fan') {
+                    const fanControl = document.getElementById('fanControl');
+                    const fanValue = document.getElementById('fanControlValue');
+                    const fanText = document.getElementById('fanStatusText');
+                    
+                    if (state) {
+                        fanControl.className = 'control-card fan-on active';
+                        fanValue.textContent = 'ON';
+                        fanText.textContent = 'ON';
+                        fanText.className = 'info-value online';
+                    } else {
+                        fanControl.className = 'control-card fan-off';
+                        fanValue.textContent = 'OFF';
+                        fanText.textContent = 'OFF';
+                        fanText.className = 'info-value offline';
+                    }
+                } else if (device === 'heat') {
+                    const heatControl = document.getElementById('heatControl');
+                    const heatValue = document.getElementById('heatControlValue');
+                    const heatText = document.getElementById('heatStatusText');
+                    
+                    if (state) {
+                        heatControl.className = 'control-card heat-on active';
+                        heatValue.textContent = 'ON';
+                        heatText.textContent = 'ON';
+                        heatText.className = 'info-value warning';
+                    } else {
+                        heatControl.className = 'control-card heat-off';
+                        heatValue.textContent = 'OFF';
+                        heatText.textContent = 'OFF';
+                        heatText.className = 'info-value offline';
+                    }
+                }
+            });
+            
+            showToast(`Both devices turned ${state ? 'ON' : 'OFF'}`, 'success');
+        }
+
+        // Set operating mode
+        function setMode(autoMode) {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = { auto: autoMode };
+            publishControl(command);
+            
+            // Immediate visual feedback
+            const modeInfo = document.getElementById('modeInfo');
+            const autoBtn = document.getElementById('autoModeBtn');
+            const manualBtn = document.getElementById('manualModeBtn');
+            
+            if (autoMode) {
+                modeInfo.textContent = 'AUTO';
+                autoBtn.classList.add('active');
+                manualBtn.classList.remove('active');
+            } else {
+                modeInfo.textContent = 'MANUAL';
+                autoBtn.classList.remove('active');
+                manualBtn.classList.add('active');
+            }
+            
+            showToast(`Mode set to ${autoMode ? 'AUTO' : 'MANUAL'}`, 'success');
+        }
+
+        // Force auto mode
+        function forceAutoMode() {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = { force_auto: true };
+            publishControl(command);
+            
+            // Immediate visual feedback
+            const modeInfo = document.getElementById('modeInfo');
+            const autoBtn = document.getElementById('autoModeBtn');
+            const manualBtn = document.getElementById('manualModeBtn');
+            
+            modeInfo.textContent = 'AUTO';
+            autoBtn.classList.add('active');
+            manualBtn.classList.remove('active');
+            
+            showToast('Forcing auto mode', 'info');
+        }
+
+        // Set life stage
+        function setLifeStage(stage) {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = { stage: stage };
+            publishControl(command);
+            
+            // Immediate visual feedback
+            const stageInfo = document.getElementById('stageInfo');
+            stageInfo.textContent = LIFE_STAGES[stage]?.name || '--';
+            
+            document.querySelectorAll('.stage-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.stage) === stage) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            showToast(`Stage set to ${LIFE_STAGES[stage].name}`, 'success');
+        }
+
+        // Change age
+        function changeAge(delta) {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const newAge = currentState.age + delta;
+            const currentStage = LIFE_STAGES[currentState.stage];
+            
+            if (newAge < 0 || newAge > 999) {
+                showToast('Age out of valid range', 'warning');
+                return;
+            }
+            
+            if (currentStage && (newAge < currentStage.minAge || newAge > currentStage.maxAge)) {
+                showToast(`Age must be between ${currentStage.minAge}-${currentStage.maxAge} days for this stage`, 'warning');
+                return;
+            }
+            
+            const command = { age: newAge };
+            publishControl(command);
+            
+            // Immediate visual feedback
+            const ageInfo = document.getElementById('ageInfo');
+            const ageValueEl = document.getElementById('ageValue');
+            ageInfo.textContent = newAge + ' days';
+            ageValueEl.textContent = newAge;
+            ageValueEl.classList.add('updating');
+            setTimeout(() => ageValueEl.classList.remove('updating'), 300);
+            
+            showToast(`Age set to ${newAge} days`, 'info');
+        }
+
+        // Change calibration
+        function changeCalibration(type, delta) {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = {};
+            let newValue;
+            
+            if (type === 'temp') {
+                newValue = (currentState.temp_offset || 0) + delta;
+                command.temp_offset = newValue;
+                
+                // Immediate visual feedback
+                const tempCalEl = document.getElementById('tempCalValue');
+                tempCalEl.textContent = newValue.toFixed(1) + '°C';
+                tempCalEl.classList.add('calibrate-pulse');
+                setTimeout(() => tempCalEl.classList.remove('calibrate-pulse'), 300);
+                
+                showToast(`Temperature calibration: ${newValue.toFixed(1)}°C`, 'info');
+            } else if (type === 'hum') {
+                newValue = (currentState.hum_offset || 0) + delta;
+                command.hum_offset = newValue;
+                
+                // Immediate visual feedback
+                const humCalEl = document.getElementById('humCalValue');
+                humCalEl.textContent = newValue.toFixed(1) + '%';
+                humCalEl.classList.add('calibrate-pulse');
+                setTimeout(() => humCalEl.classList.remove('calibrate-pulse'), 300);
+                
+                showToast(`Humidity calibration: ${newValue.toFixed(1)}%`, 'info');
+            }
+            
+            publishControl(command);
+        }
+
+        // Save settings
+        function saveSettings() {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            const command = { save: true };
+            publishControl(command);
+            
+            // Visual feedback
+            const saveBtn = document.querySelector('.btn-save');
+            saveBtn.innerHTML = '<i class="fas fa-check"></i><span>SAVED!</span>';
+            saveBtn.style.background = 'linear-gradient(135deg, #3cba92, #0ba360)';
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = '<i class="fas fa-save"></i><span>SAVE SETTINGS</span>';
+                saveBtn.style.background = 'linear-gradient(135deg, var(--success-light), var(--success))';
+            }, 1500);
+            
+            showToast('Settings saved successfully', 'success');
+        }
+
+        // Reboot system
+        function rebootSystem() {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to reboot the VQuail system? This will temporarily interrupt monitoring.')) {
+                const command = { reboot: true };
+                publishControl(command);
+                
+                // Visual feedback
+                const rebootBtn = document.querySelector('.btn-reboot');
+                rebootBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>REBOOTING...</span>';
+                
+                setTimeout(() => {
+                    rebootBtn.innerHTML = '<i class="fas fa-redo"></i><span>REBOOT SYSTEM</span>';
+                }, 3000);
+                
+                showToast('System rebooting...', 'warning');
+            }
+        }
+
+        // Reset calibration
+        function resetCalibration() {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            if (confirm('Reset all calibration values to zero?')) {
+                const command = { reset_calibration: true };
+                publishControl(command);
+                
+                // Immediate visual feedback
+                const tempCalEl = document.getElementById('tempCalValue');
+                const humCalEl = document.getElementById('humCalValue');
+                
+                tempCalEl.textContent = '0.0°C';
+                humCalEl.textContent = '0.0%';
+                
+                [tempCalEl, humCalEl].forEach(el => {
+                    el.classList.add('calibrate-pulse');
+                    setTimeout(() => el.classList.remove('calibrate-pulse'), 300);
+                });
+                
+                showToast('Calibration reset to default values', 'info');
+            }
+        }
+
+        // Publish control command
         function publishControl(command) {
             if (!mqttClient || !isConnected) {
                 showToast('Not connected to MQTT broker', 'error');
-                return false;
+                return;
             }
             
             const topic = 'vquail/web/control';
             const payload = JSON.stringify({
                 ...command,
-                timestamp: Date.now(),
+                timestamp: new Date().toISOString(),
                 source: 'web'
             });
             
-            try {
-                mqttClient.publish(topic, payload, { qos: 1 }, (err) => {
-                    if (err) {
-                        console.error('Publish error:', err);
-                        showToast('Failed to send command', 'error');
-                    }
-                });
-                return true;
-            } catch (error) {
-                console.error('Publish failed:', error);
-                return false;
-            }
-        }
-
-        // Optimized toast notifications
-        function showToast(message, type = 'info') {
-            if (toastTimeout) {
-                clearTimeout(toastTimeout);
-            }
-            
-            const toast = document.getElementById('toast');
-            const icons = {
-                success: 'fas fa-check-circle',
-                error: 'fas fa-exclamation-circle',
-                warning: 'fas fa-exclamation-triangle',
-                info: 'fas fa-info-circle'
-            };
-            
-            // Update toast content
-            toast.innerHTML = `<i class="${icons[type] || icons.info}"></i><span>${message}</span>`;
-            toast.className = `toast ${type}`;
-            
-            // Show toast
-            requestAnimationFrame(() => {
-                toast.classList.remove('show');
-                void toast.offsetWidth; // Trigger reflow
-                toast.classList.add('show');
+            mqttClient.publish(topic, payload, { qos: 1 }, (err) => {
+                if (err) {
+                    console.error('Publish error:', err);
+                    showToast('Failed to send command', 'error');
+                } else {
+                    console.log('Published:', command);
+                }
             });
-            
-            // Auto-hide after delay
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-                toastTimeout = null;
-            }, 3000);
         }
 
         // Update connection status
@@ -906,144 +2260,150 @@
             }
         }
 
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="${icons[type] || icons.info}"></i>
+                <span>${message}</span>
+            `;
+            toast.className = `toast ${type}`;
+            
+            // Remove existing show class
+            toast.classList.remove('show');
+            
+            // Trigger reflow
+            void toast.offsetWidth;
+            
+            // Add show class
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
         // Get current time
         function getCurrentTime() {
-            return new Date().toLocaleTimeString([], { 
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        // Update time display
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeEl = document.getElementById('currentTime');
+            const timeStr = now.toLocaleTimeString([], { 
                 hour: '2-digit', 
                 minute: '2-digit', 
                 second: '2-digit' 
             });
-        }
-
-        // Optimized time display update
-        let lastTimeUpdate = 0;
-        function updateTimeDisplay() {
-            const now = Date.now();
-            if (now - lastTimeUpdate < 1000) return; // Update at most once per second
             
-            lastTimeUpdate = now;
-            const timeEl = document.getElementById('currentTime');
-            const timeStr = getCurrentTime();
-            
+            // Only update if value changed
             if (timeEl.textContent !== timeStr) {
-                timeEl.style.opacity = '0.5';
                 timeEl.textContent = timeStr;
-                
-                requestAnimationFrame(() => {
-                    timeEl.style.transition = 'opacity 0.3s ease';
-                    timeEl.style.opacity = '1';
-                });
             }
         }
 
-        // Optimized screen switching
+        // Switch screen
         function switchScreen(screenId) {
-            const targetScreen = document.getElementById(screenId + 'Screen');
-            const currentScreen = document.querySelector('.screen.active');
-            
-            if (currentScreen === targetScreen) return;
-            
-            // Use CSS animation for transition
-            if (currentScreen) {
-                currentScreen.style.animation = 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) reverse';
-                setTimeout(() => {
-                    currentScreen.classList.remove('active');
-                    currentScreen.style.animation = '';
-                }, 200);
-            }
-            
-            // Update navigation buttons
+            // Deactivate all nav buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.screen === screenId);
+                btn.classList.remove('active');
             });
             
-            // Show new screen
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            const targetScreen = document.getElementById(screenId + 'Screen');
             targetScreen.classList.add('active');
+            
+            // Activate corresponding nav button
+            document.querySelector(`.nav-btn[data-screen="${screenId}"]`).classList.add('active');
         }
 
-        // Initialize navigation
-        function initNavigation() {
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize navigation
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     switchScreen(btn.dataset.screen);
                 });
             });
-        }
-
-        // Initialize keyboard shortcuts
-        function initKeyboardShortcuts() {
+            
+            // Initialize MQTT
+            setTimeout(initMQTT, 1000);
+            
+            // Update time display every second
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 1000);
+            
+            // Add keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                // Prevent shortcuts in input fields
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-                
-                const state = stateManager.getState();
-                
                 if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
                     switch(e.key.toLowerCase()) {
                         case 'f':
-                            controlFunctions.controlDevice('fan', !state.fan);
+                            e.preventDefault();
+                            controlDevice('fan', !currentState.fan);
                             break;
                         case 'h':
-                            controlFunctions.controlDevice('heat', !state.heat);
+                            e.preventDefault();
+                            controlDevice('heat', !currentState.heat);
                             break;
                         case 'a':
-                            controlFunctions.setMode(true);
+                            e.preventDefault();
+                            setMode(true);
                             break;
                         case 'm':
-                            controlFunctions.setMode(false);
+                            e.preventDefault();
+                            setMode(false);
                             break;
                         case 'r':
+                            e.preventDefault();
                             publishControl({ refresh: true });
                             break;
                         case '1':
+                            e.preventDefault();
                             switchScreen('home');
                             break;
                         case '2':
+                            e.preventDefault();
                             switchScreen('control');
                             break;
                         case '3':
+                            e.preventDefault();
                             switchScreen('settings');
                             break;
                         case '4':
+                            e.preventDefault();
                             switchScreen('info');
                             break;
                     }
                 }
             });
-        }
-
-        // Initialize time display
-        function initTimeDisplay() {
-            updateTimeDisplay();
-            setInterval(updateTimeDisplay, 1000);
-        }
-
-        // Start periodic updates
-        function startPeriodicUpdates() {
-            // Refresh data every 30 seconds
-            setInterval(() => {
-                if (isConnected) {
-                    publishControl({ refresh: true });
+            
+            // Show welcome message
+            setTimeout(() => {
+                if (!isConnected) {
+                    showToast('Initializing connection to VQuail system...', 'info');
                 }
-            }, 30000);
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Use requestIdleCallback for non-critical initialization
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(() => {
-                    initApp();
-                }, { timeout: 2000 });
-            } else {
-                setTimeout(initApp, 100);
-            }
+            }, 500);
         });
 
         // Handle page visibility change
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && !isConnected) {
+                // Try to reconnect if page becomes visible
                 setTimeout(() => {
                     if (!isConnected) {
                         showToast('Reconnecting to system...', 'warning');
@@ -1052,84 +2412,6 @@
                 }, 1000);
             }
         });
-
-        // Handle window resize with debounce
-        window.addEventListener('resize', debounce(() => {
-            // Update any layout-dependent elements here
-        }, 250));
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (mqttClient) {
-                mqttClient.end();
-            }
-            if (toastTimeout) {
-                clearTimeout(toastTimeout);
-            }
-        });
-
-        // Export control functions to global scope for onclick handlers
-        window.controlDevice = controlFunctions.controlDevice;
-        window.controlBoth = controlFunctions.controlBoth;
-        window.setMode = controlFunctions.setMode;
-        window.forceAutoMode = () => controlFunctions.setMode(true);
-        window.setLifeStage = controlFunctions.setLifeStage;
-        window.changeAge = (delta) => {
-            const state = stateManager.getState();
-            const newAge = state.age + delta;
-            const currentStage = LIFE_STAGES[state.stage];
-            
-            if (newAge < 0 || newAge > 999) {
-                showToast('Age out of valid range', 'warning');
-                return;
-            }
-            
-            if (currentStage && (newAge < currentStage.minAge || newAge > currentStage.maxAge)) {
-                showToast(`Age must be between ${currentStage.minAge}-${currentStage.maxAge} days for this stage`, 'warning');
-                return;
-            }
-            
-            publishControl({ age: newAge });
-            showToast(`Age set to ${newAge} days`, 'info');
-        };
-        
-        window.changeCalibration = (type, delta) => {
-            const state = stateManager.getState();
-            const command = {};
-            
-            if (type === 'temp') {
-                const newValue = (state.temp_offset || 0) + delta;
-                command.temp_offset = newValue;
-                showToast(`Temperature calibration: ${newValue.toFixed(1)}°C`, 'info');
-            } else if (type === 'hum') {
-                const newValue = (state.hum_offset || 0) + delta;
-                command.hum_offset = newValue;
-                showToast(`Humidity calibration: ${newValue.toFixed(1)}%`, 'info');
-            }
-            
-            publishControl(command);
-        };
-        
-        window.saveSettings = () => {
-            publishControl({ save: true });
-            showToast('Settings saved successfully', 'success');
-        };
-        
-        window.rebootSystem = () => {
-            if (confirm('Are you sure you want to reboot the VQuail system?')) {
-                publishControl({ reboot: true });
-                showToast('System rebooting...', 'warning');
-            }
-        };
-        
-        window.resetCalibration = () => {
-            if (confirm('Reset all calibration values to zero?')) {
-                publishControl({ reset_calibration: true });
-                showToast('Calibration reset to default values', 'info');
-            }
-        };
-        
-        window.publishControl = publishControl;
     </script>
 </body>
 </html>
