@@ -32,11 +32,11 @@
             --gray-light: #e2e8f0;
             --gray-lighter: #f1f5f9;
             
-            /* Stage Colors */
-            --brood1: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-            --brood2: linear-gradient(135deg, #ff9e6d, #ffb88e);
-            --grower: linear-gradient(135deg, #4ecdc4, #88d3ce);
-            --adult: linear-gradient(135deg, #45b7d1, #6ec6e0);
+            /* Stage Colors (Matching ESP32 colors) */
+            --brood1: linear-gradient(135deg, #f9a6 0%, #f9a6aa 100%);
+            --brood2: linear-gradient(135deg, #fd20 0%, #fd20cc 100%);
+            --grower: linear-gradient(135deg, #2f6b 0%, #2f6bcc 100%);
+            --adult: linear-gradient(135deg, #4aff 0%, #4affcc 100%);
             
             /* Glass Effect */
             --glass-bg: rgba(255, 255, 255, 0.7);
@@ -352,8 +352,36 @@
             background-clip: text;
         }
         
+        .temp-value.warning { 
+            background: linear-gradient(135deg, var(--warning-light), var(--warning));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .temp-value.normal { 
+            background: linear-gradient(135deg, var(--success-light), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
         .hum-value.online { 
             background: linear-gradient(135deg, var(--info-light), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hum-value.warning { 
+            background: linear-gradient(135deg, var(--warning-light), var(--warning));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hum-value.normal { 
+            background: linear-gradient(135deg, var(--success-light), var(--success));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -382,6 +410,12 @@
             background: linear-gradient(135deg, rgba(11, 163, 96, 0.1), rgba(60, 186, 146, 0.1));
             color: var(--success);
             border: 1px solid rgba(11, 163, 96, 0.2);
+        }
+        
+        .sensor-status.offline {
+            background: linear-gradient(135deg, rgba(255, 8, 68, 0.1), rgba(255, 177, 153, 0.1));
+            color: var(--danger);
+            border: 1px solid rgba(255, 8, 68, 0.2);
         }
         
         .last-update {
@@ -441,12 +475,20 @@
             background: linear-gradient(90deg, var(--success), var(--success-light));
         }
         
+        .control-card.fan-off {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        }
+        
         .control-card.heat-on {
             background: linear-gradient(135deg, #ffedd5, #fed7aa);
         }
         
         .control-card.heat-on::before {
             background: linear-gradient(90deg, var(--warning), var(--warning-light));
+        }
+        
+        .control-card.heat-off {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
         }
         
         .control-icon {
@@ -459,8 +501,16 @@
             color: var(--success);
         }
         
+        .control-card.fan-off .control-icon {
+            color: var(--gray);
+        }
+        
         .control-card.heat-on .control-icon {
             color: var(--warning);
+        }
+        
+        .control-card.heat-off .control-icon {
+            color: var(--gray);
         }
         
         .control-label {
@@ -486,9 +536,19 @@
             color: var(--success);
         }
         
+        .control-card.fan-off .control-value {
+            background: rgba(113, 128, 150, 0.1);
+            color: var(--gray);
+        }
+        
         .control-card.heat-on .control-value {
             background: rgba(255, 154, 60, 0.1);
             color: var(--warning);
+        }
+        
+        .control-card.heat-off .control-value {
+            background: rgba(113, 128, 150, 0.1);
+            color: var(--gray);
         }
         
         /* Mode Selector */
@@ -751,6 +811,18 @@
             font-weight: 700;
             color: var(--darker);
             transition: color 0.3s ease;
+        }
+        
+        .info-value.online {
+            color: var(--success);
+        }
+        
+        .info-value.offline {
+            color: var(--danger);
+        }
+        
+        .info-value.warning {
+            color: var(--warning);
         }
         
         /* Action Buttons */
@@ -1102,6 +1174,33 @@
             cursor: not-allowed;
             transform: none !important;
         }
+        
+        /* Control source indicator */
+        .control-source {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+        
+        .source-web {
+            background: linear-gradient(135deg, rgba(255, 154, 60, 0.1), rgba(255, 204, 0, 0.1));
+            color: var(--warning);
+            border: 1px solid rgba(255, 154, 60, 0.2);
+        }
+        
+        .source-tft {
+            background: linear-gradient(135deg, rgba(11, 163, 96, 0.1), rgba(60, 186, 146, 0.1));
+            color: var(--success);
+            border: 1px solid rgba(11, 163, 96, 0.2);
+        }
+        
+        .source-auto {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            color: var(--info);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -1117,7 +1216,7 @@
                         <h1>VQuail Control</h1>
                         <div class="subtitle">
                             <i class="fas fa-satellite-dish"></i>
-                            Control System • Real-time Monitoring
+                            Dual Channel Control • Optimized MQTT
                         </div>
                     </div>
                 </div>
@@ -1248,6 +1347,7 @@
             <div class="card">
                 <div class="card-title">
                     <h3><i class="fas fa-gamepad"></i> Control Panel</h3>
+                    <div id="currentControlChannel" class="control-source source-auto">AUTO</div>
                 </div>
                 
                 <div class="control-panel">
@@ -1286,7 +1386,7 @@
                         <i class="fas fa-power-off"></i>
                         <span>BOTH OFF</span>
                     </button>
-                    <button class="quick-btn" onclick="forceAutoMode()">
+                    <button class="quick-btn" onclick="forceAutoControl()">
                         <i class="fas fa-undo"></i>
                         <span>FORCE AUTO</span>
                     </button>
@@ -1326,8 +1426,8 @@
                         <div class="cal-value" id="tempCalValue">0.0°C</div>
                     </div>
                     <div class="cal-btns">
-                        <button class="cal-btn cal-minus" onclick="changeCalibration('temp', -0.5)">-</button>
-                        <button class="cal-btn cal-plus" onclick="changeCalibration('temp', 0.5)">+</button>
+                        <button class="cal-btn cal-minus" onclick="adjustCalibration('temp_offset', -0.5)">-</button>
+                        <button class="cal-btn cal-plus" onclick="adjustCalibration('temp_offset', 0.5)">+</button>
                     </div>
                 </div>
                 
@@ -1337,8 +1437,8 @@
                         <div class="cal-value" id="humCalValue">0.0%</div>
                     </div>
                     <div class="cal-btns">
-                        <button class="cal-btn cal-minus" onclick="changeCalibration('hum', -0.5)">-</button>
-                        <button class="cal-btn cal-plus" onclick="changeCalibration('hum', 0.5)">+</button>
+                        <button class="cal-btn cal-minus" onclick="adjustCalibration('hum_offset', -0.5)">-</button>
+                        <button class="cal-btn cal-plus" onclick="adjustCalibration('hum_offset', 0.5)">+</button>
                     </div>
                 </div>
                 
@@ -1364,7 +1464,7 @@
                     </button>
                     <button class="action-btn btn-default" onclick="resetCalibration()">
                         <i class="fas fa-undo"></i>
-                        <span>RESET ALL</span>
+                        <span>RESET CALIBRATION</span>
                     </button>
                 </div>
             </div>
@@ -1402,13 +1502,43 @@
                         <div class="info-label">Control Channel</div>
                         <div class="info-value" id="channelInfo">AUTO</div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-label">Uptime</div>
+                        <div class="info-value" id="uptimeInfo">0s</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Sensor Online</div>
+                        <div class="info-value offline" id="sensorOnlineInfo">No</div>
+                    </div>
+                </div>
+                
+                <div class="calibration-control" style="margin-top: 1.5rem;">
+                    <div>
+                        <div class="cal-label">Temperature Calibration</div>
+                        <div class="cal-value" id="infoTempCal">0.0°C</div>
+                    </div>
+                    <div class="cal-btns">
+                        <button class="cal-btn cal-minus" onclick="adjustCalibration('temp_offset', -0.5)">-</button>
+                        <button class="cal-btn cal-plus" onclick="adjustCalibration('temp_offset', 0.5)">+</button>
+                    </div>
+                </div>
+                
+                <div class="calibration-control">
+                    <div>
+                        <div class="cal-label">Humidity Calibration</div>
+                        <div class="cal-value" id="infoHumCal">0.0%</div>
+                    </div>
+                    <div class="cal-btns">
+                        <button class="cal-btn cal-minus" onclick="adjustCalibration('hum_offset', -0.5)">-</button>
+                        <button class="cal-btn cal-plus" onclick="adjustCalibration('hum_offset', 0.5)">+</button>
+                    </div>
                 </div>
             </div>
         </div>
         
         <footer>
             <p><i class="fas fa-feather-alt"></i> VQuail Dual Channel Control System</p>
-            <p>Powered by HiveMQ Cloud • Real-time Web Interface</p>
+            <p>Powered by HiveMQ Cloud • Sensor: 10s | Data: 30s</p>
             <p id="connectionStatus"><span class="loading"></span> Connecting to system...</p>
         </footer>
         
@@ -1416,13 +1546,13 @@
         <div class="toast" id="toast"></div>
         
         <!-- Floating Action Button -->
-        <div class="fab" onclick="publishControl({ refresh: true })" title="Refresh Data">
+        <div class="fab" onclick="refreshData()" title="Refresh Data">
             <i class="fas fa-sync-alt"></i>
         </div>
     </div>
 
     <script>
-        // MQTT Configuration
+        // MQTT Configuration (matches ESP32 code)
         const MQTT_CONFIG = {
             host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
             port: 8884,
@@ -1432,39 +1562,43 @@
             useSSL: true
         };
 
-        // Life Stages Configuration
+        // Life Stages Configuration (matches ESP32 stages array)
         const LIFE_STAGES = [
             { 
                 name: 'Brood W1', 
-                color: '#ff6b6b', 
+                color: '#F9A6', 
                 minAge: 0, 
                 maxAge: 7,
-                tempRange: { min: 35, max: 37 },
-                humRange: { min: 60, max: 70 }
+                tempRange: { min: 35.0, max: 37.0 },
+                humRange: { min: 60.0, max: 70.0 },
+                needsHeat: true
             },
             { 
                 name: 'Brood W2', 
-                color: '#ff9e6d', 
+                color: '#FD20', 
                 minAge: 8, 
                 maxAge: 14,
-                tempRange: { min: 32, max: 35 },
-                humRange: { min: 60, max: 70 }
+                tempRange: { min: 32.0, max: 35.0 },
+                humRange: { min: 60.0, max: 70.0 },
+                needsHeat: true
             },
             { 
                 name: 'Grower', 
-                color: '#4ecdc4', 
+                color: '#2F6B', 
                 minAge: 15, 
                 maxAge: 42,
-                tempRange: { min: 24, max: 28 },
-                humRange: { min: 55, max: 65 }
+                tempRange: { min: 24.0, max: 28.0 },
+                humRange: { min: 55.0, max: 65.0 },
+                needsHeat: false
             },
             { 
                 name: 'Adult', 
-                color: '#45b7d1', 
+                color: '#4AFF', 
                 minAge: 43, 
                 maxAge: 999,
-                tempRange: { min: 20, max: 24 },
-                humRange: { min: 50, max: 60 }
+                tempRange: { min: 20.0, max: 24.0 },
+                humRange: { min: 50.0, max: 60.0 },
+                needsHeat: false
             }
         ];
 
@@ -1472,25 +1606,49 @@
         let mqttClient = null;
         let isConnected = false;
         let updateInProgress = false;
+        let lastDataTimestamp = 0;
         let currentState = {
-            temperature: null,
-            humidity: null,
+            // Sensor data
+            temp: null,
+            hum: null,
+            raw_temp: null,
+            raw_hum: null,
+            sensor_online: false,
+            
+            // Device state
             fan: false,
             heat: false,
             auto: true,
+            override: false,
+            
+            // System info
             stage: 0,
             age: 0,
-            sensor_online: false,
+            stage_name: '--',
+            
+            // Alarms
             alarm: '',
-            control_channel: 'AUTO',
-            last_control_source: '--',
-            temp_offset: 0,
-            hum_offset: 0,
+            alarm_active: false,
+            
+            // Network status
             wifi: false,
             mqtt: false,
             ntp: false,
+            ntpInitialized: false,
             sd_ready: false,
-            uptime: 0,
+            
+            // Control info
+            control_channel: 'AUTO',
+            last_control_source: '--',
+            
+            // Calibration
+            temp_offset: 0,
+            hum_offset: 0,
+            
+            // Misc
+            time: '--:--:--',
+            date: '--',
+            uptime: '0',
             wifi_rssi: 0
         };
 
@@ -1517,26 +1675,31 @@
                 updateConnectionStatus(true);
                 showToast('Connected to VQuail system', 'success');
                 
-                // Subscribe to topics
-                mqttClient.subscribe('vquail/status/#', (err) => {
-                    if (!err) console.log('Subscribed to status topics');
-                });
+                // Subscribe to topics (matching ESP32 publish topics)
+                const topics = [
+                    'vquail/status/device',
+                    'vquail/status/sensors',
+                    'vquail/control/source',
+                    'vquail/calibration/current'
+                ];
                 
-                mqttClient.subscribe('vquail/control/source', (err) => {
-                    if (!err) console.log('Subscribed to control source');
+                topics.forEach(topic => {
+                    mqttClient.subscribe(topic, { qos: 1 }, (err) => {
+                        if (!err) console.log(`Subscribed to ${topic}`);
+                    });
                 });
                 
                 // Request initial data
-                setTimeout(() => publishControl({ refresh: true }), 1000);
+                setTimeout(refreshData, 1000);
             });
 
             mqttClient.on('message', (topic, message) => {
                 try {
                     const data = JSON.parse(message.toString());
-                    console.log('Received:', topic, data);
-                    updateDashboard(topic, data);
+                    lastDataTimestamp = Date.now();
+                    handleMQTTMessage(topic, data);
                 } catch (e) {
-                    console.error('Error parsing MQTT message:', e);
+                    console.error('Error parsing MQTT message:', e, 'Topic:', topic, 'Message:', message.toString());
                 }
             });
 
@@ -1558,26 +1721,42 @@
             });
         }
 
-        // Update dashboard with received data
-        function updateDashboard(topic, data) {
+        // Handle MQTT messages based on topic
+        function handleMQTTMessage(topic, data) {
             if (updateInProgress) return;
             
             updateInProgress = true;
             
             try {
-                // Update current state
+                // Update current state with new data
                 Object.assign(currentState, data);
                 
-                // Update UI based on topic
-                if (topic.includes('sensors') || topic.includes('device')) {
-                    updateSensorData(data);
-                    updateDeviceStatus(data);
-                    updateSystemInfo(data);
+                // Process based on topic
+                switch (topic) {
+                    case 'vquail/status/device':
+                        updateDeviceStatus(data);
+                        updateSystemInfo(data);
+                        updateAlarmStatus(data);
+                        break;
+                        
+                    case 'vquail/status/sensors':
+                        updateSensorData(data);
+                        break;
+                        
+                    case 'vquail/control/source':
+                        updateControlSource(data);
+                        break;
+                        
+                    case 'vquail/calibration/current':
+                        updateCalibration(data);
+                        break;
                 }
                 
-                if (topic === 'vquail/control/source') {
-                    updateControlSource(data);
-                }
+                // Update UI elements
+                updateAllDisplays();
+                
+            } catch (error) {
+                console.error('Error processing MQTT message:', error);
             } finally {
                 setTimeout(() => {
                     updateInProgress = false;
@@ -1591,6 +1770,7 @@
                 const tempEl = document.getElementById('temperatureValue');
                 const tempVal = data.temp.toFixed(1);
                 
+                // Animate value change
                 if (tempEl.textContent !== tempVal) {
                     tempEl.classList.add('updating');
                     tempEl.textContent = tempVal;
@@ -1600,29 +1780,36 @@
                     }, 200);
                 }
                 
-                const currentStage = LIFE_STAGES[currentState.stage];
-                const tempRange = currentStage?.tempRange || { min: 20, max: 30 };
+                // Determine temperature color based on current stage range
+                const currentStage = LIFE_STAGES[currentState.stage] || LIFE_STAGES[0];
+                const tempRange = currentStage.tempRange;
+                const isOnline = data.sensor_online !== false;
                 
-                // Determine temperature color based on status
-                if (!currentState.sensor_online) {
+                if (!isOnline) {
                     tempEl.className = 'sensor-value temp-value offline';
                 } else if (data.temp < tempRange.min - 5) {
-                    tempEl.className = 'sensor-value temp-value offline';
+                    tempEl.className = 'sensor-value temp-value offline'; // Extreme cold
                 } else if (data.temp > tempRange.max + 5) {
-                    tempEl.className = 'sensor-value temp-value offline';
-                } else if (data.temp < tempRange.min || data.temp > tempRange.max) {
-                    tempEl.className = 'sensor-value temp-value offline';
+                    tempEl.className = 'sensor-value temp-value offline'; // Extreme heat
+                } else if (data.temp < tempRange.min) {
+                    tempEl.className = 'sensor-value temp-value warning'; // Below range
+                } else if (data.temp > tempRange.max) {
+                    tempEl.className = 'sensor-value temp-value warning'; // Above range
                 } else {
-                    tempEl.className = 'sensor-value temp-value online';
+                    tempEl.className = 'sensor-value temp-value normal'; // Within range
                 }
                 
-                document.getElementById('tempUpdate').textContent = 'Last update: ' + getCurrentTime();
+                // Update timestamp
+                if (data.time) {
+                    document.getElementById('tempUpdate').textContent = 'Last update: ' + data.time;
+                }
             }
             
             if (data.hum !== undefined) {
                 const humEl = document.getElementById('humidityValue');
                 const humVal = data.hum.toFixed(1);
                 
+                // Animate value change
                 if (humEl.textContent !== humVal) {
                     humEl.classList.add('updating');
                     humEl.textContent = humVal;
@@ -1632,42 +1819,63 @@
                     }, 200);
                 }
                 
-                const currentStage = LIFE_STAGES[currentState.stage];
-                const humRange = currentStage?.humRange || { min: 50, max: 70 };
+                // Determine humidity color based on current stage range
+                const currentStage = LIFE_STAGES[currentState.stage] || LIFE_STAGES[0];
+                const humRange = currentStage.humRange;
+                const isOnline = data.sensor_online !== false;
                 
-                // Determine humidity color based on status
-                if (!currentState.sensor_online) {
+                if (!isOnline) {
                     humEl.className = 'sensor-value hum-value offline';
-                } else if (data.hum < humRange.min - 10 || data.hum > humRange.max + 10) {
-                    humEl.className = 'sensor-value hum-value offline';
-                } else if (data.hum < humRange.min || data.hum > humRange.max) {
-                    humEl.className = 'sensor-value hum-value offline';
+                } else if (data.hum < humRange.min - 10) {
+                    humEl.className = 'sensor-value hum-value offline'; // Extreme dry
+                } else if (data.hum > humRange.max + 10) {
+                    humEl.className = 'sensor-value hum-value offline'; // Extreme humid
+                } else if (data.hum < humRange.min) {
+                    humEl.className = 'sensor-value hum-value warning'; // Below range
+                } else if (data.hum > humRange.max) {
+                    humEl.className = 'sensor-value hum-value warning'; // Above range
                 } else {
-                    humEl.className = 'sensor-value hum-value online';
+                    humEl.className = 'sensor-value hum-value normal'; // Within range
                 }
                 
-                document.getElementById('humUpdate').textContent = 'Last update: ' + getCurrentTime();
+                // Update timestamp
+                if (data.time) {
+                    document.getElementById('humUpdate').textContent = 'Last update: ' + data.time;
+                }
             }
             
-            // Update sensor status
+            // Update sensor status indicators
+            updateSensorStatus(data.sensor_online);
+        }
+
+        // Update sensor status indicators
+        function updateSensorStatus(isOnline) {
             const tempStatus = document.getElementById('tempStatus');
             const humStatus = document.getElementById('humStatus');
-            if (currentState.sensor_online) {
+            const sensorDot = document.getElementById('sensorStatusDot');
+            const sensorInfo = document.getElementById('sensorInfo');
+            const sensorOnlineInfo = document.getElementById('sensorOnlineInfo');
+            
+            if (isOnline) {
                 tempStatus.textContent = 'ONLINE';
                 tempStatus.className = 'sensor-status online';
                 humStatus.textContent = 'ONLINE';
                 humStatus.className = 'sensor-status online';
-                document.getElementById('sensorStatusDot').classList.add('online');
-                document.getElementById('sensorInfo').textContent = 'Online';
-                document.getElementById('sensorInfo').className = 'info-value online';
+                sensorDot.classList.add('online');
+                sensorInfo.textContent = 'Online';
+                sensorInfo.className = 'info-value online';
+                sensorOnlineInfo.textContent = 'Yes';
+                sensorOnlineInfo.className = 'info-value online';
             } else {
                 tempStatus.textContent = 'OFFLINE';
                 tempStatus.className = 'sensor-status offline';
                 humStatus.textContent = 'OFFLINE';
                 humStatus.className = 'sensor-status offline';
-                document.getElementById('sensorStatusDot').classList.remove('online');
-                document.getElementById('sensorInfo').textContent = 'Offline';
-                document.getElementById('sensorInfo').className = 'info-value offline';
+                sensorDot.classList.remove('online');
+                sensorInfo.textContent = 'Offline';
+                sensorInfo.className = 'info-value offline';
+                sensorOnlineInfo.textContent = 'No';
+                sensorOnlineInfo.className = 'info-value offline';
             }
         }
 
@@ -1688,13 +1896,11 @@
                         fanText.className = 'info-value online';
                         fanControl.className = 'control-card fan-on';
                         fanValue.textContent = 'ON';
-                        fanControl.classList.add('active');
                     } else {
                         fanText.textContent = 'OFF';
                         fanText.className = 'info-value offline';
                         fanControl.className = 'control-card fan-off';
                         fanValue.textContent = 'OFF';
-                        fanControl.classList.remove('active');
                     }
                     currentState.fan = isNowOn;
                 }
@@ -1715,91 +1921,49 @@
                         heatText.className = 'info-value warning';
                         heatControl.className = 'control-card heat-on';
                         heatValue.textContent = 'ON';
-                        heatControl.classList.add('active');
                     } else {
                         heatText.textContent = 'OFF';
                         heatText.className = 'info-value offline';
                         heatControl.className = 'control-card heat-off';
                         heatValue.textContent = 'OFF';
-                        heatControl.classList.remove('active');
                     }
                     currentState.heat = isNowOn;
                 }
             }
             
             // Update WiFi status
-            if (data.wifi !== undefined) {
+            if (data.wifi !== undefined || currentState.wifi !== undefined) {
                 const wifiText = document.getElementById('wifiStatusText');
-                const wasOnline = currentState.wifi;
-                const isNowOnline = data.wifi;
+                const wifiDot = document.getElementById('wifiStatus');
+                const isNowOnline = data.wifi !== undefined ? data.wifi : currentState.wifi;
                 
-                if (wasOnline !== isNowOnline) {
+                if (wifiText.textContent !== (isNowOnline ? 'ON' : 'OFF')) {
+                    wifiText.textContent = isNowOnline ? 'ON' : 'OFF';
+                    wifiText.className = isNowOnline ? 'info-value online' : 'info-value offline';
+                    
                     if (isNowOnline) {
-                        wifiText.textContent = 'ON';
-                        wifiText.className = 'info-value online';
-                        document.getElementById('wifiStatus').classList.add('online');
+                        wifiDot.classList.add('online');
                     } else {
-                        wifiText.textContent = 'OFF';
-                        wifiText.className = 'info-value offline';
-                        document.getElementById('wifiStatus').classList.remove('online');
+                        wifiDot.classList.remove('online');
                     }
-                    currentState.wifi = isNowOnline;
                 }
             }
             
             // Update MQTT status
-            if (data.mqtt !== undefined) {
+            if (data.mqtt !== undefined || currentState.mqtt !== undefined) {
                 const mqttText = document.getElementById('mqttStatusText');
-                const wasOnline = currentState.mqtt;
-                const isNowOnline = data.mqtt;
+                const mqttDot = document.getElementById('mqttStatus');
+                const isNowOnline = data.mqtt !== undefined ? data.mqtt : currentState.mqtt;
                 
-                if (wasOnline !== isNowOnline) {
-                    if (isNowOnline) {
-                        mqttText.textContent = 'ON';
-                        mqttText.className = 'info-value online';
-                        document.getElementById('mqttStatus').classList.add('online');
-                    } else {
-                        mqttText.textContent = 'OFF';
-                        mqttText.className = 'info-value offline';
-                        document.getElementById('mqttStatus').classList.remove('online');
-                    }
-                    currentState.mqtt = isNowOnline;
-                }
-            }
-            
-            // Update alarm banner
-            if (data.alarm !== undefined) {
-                const alarmBanner = document.getElementById('alarmBanner');
-                const alarmMessage = document.getElementById('alarmMessage');
-                
-                if (data.alarm && data.alarm !== '') {
-                    alarmBanner.style.display = 'flex';
-                    alarmMessage.textContent = data.alarm;
+                if (mqttText.textContent !== (isNowOnline ? 'ON' : 'OFF')) {
+                    mqttText.textContent = isNowOnline ? 'ON' : 'OFF';
+                    mqttText.className = isNowOnline ? 'info-value online' : 'info-value offline';
                     
-                    if (data.alarm.includes('critical') || data.alarm.includes('Extreme') || data.alarm.includes('offline')) {
-                        alarmBanner.className = 'alarm-banner';
+                    if (isNowOnline) {
+                        mqttDot.classList.add('online');
                     } else {
-                        alarmBanner.className = 'alarm-banner warning';
+                        mqttDot.classList.remove('online');
                     }
-                } else {
-                    alarmBanner.style.display = 'none';
-                }
-            }
-            
-            // Update control mode
-            if (data.auto !== undefined) {
-                const modeInfo = document.getElementById('modeInfo');
-                const autoBtn = document.getElementById('autoModeBtn');
-                const manualBtn = document.getElementById('manualModeBtn');
-                
-                if (data.auto) {
-                    modeInfo.textContent = 'AUTO';
-                    autoBtn.classList.add('active');
-                    manualBtn.classList.remove('active');
-                } else {
-                    modeInfo.textContent = 'MANUAL';
-                    autoBtn.classList.remove('active');
-                    manualBtn.classList.add('active');
                 }
             }
         }
@@ -1807,97 +1971,214 @@
         // Update system information
         function updateSystemInfo(data) {
             // Update stage
-            if (data.stage !== undefined) {
+            if (data.stage !== undefined || data.stage_name !== undefined) {
                 const stageInfo = document.getElementById('stageInfo');
-                stageInfo.textContent = LIFE_STAGES[data.stage]?.name || '--';
+                let stageName = '--';
                 
-                // Update active stage button
-                document.querySelectorAll('.stage-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (parseInt(btn.dataset.stage) === data.stage) {
-                        btn.classList.add('active');
-                    }
-                });
+                if (data.stage !== undefined && LIFE_STAGES[data.stage]) {
+                    stageName = LIFE_STAGES[data.stage].name;
+                } else if (data.stage_name !== undefined) {
+                    stageName = data.stage_name;
+                }
+                
+                if (stageInfo.textContent !== stageName) {
+                    stageInfo.textContent = stageName;
+                    
+                    // Update active stage button
+                    document.querySelectorAll('.stage-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        const stageIndex = parseInt(btn.dataset.stage);
+                        if (stageIndex === data.stage) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
             }
             
             // Update age
             if (data.age !== undefined) {
                 const ageVal = data.age.toString();
-                document.getElementById('ageInfo').textContent = ageVal + ' days';
+                const ageInfo = document.getElementById('ageInfo');
                 const ageValueEl = document.getElementById('ageValue');
-                ageValueEl.textContent = ageVal;
-                ageValueEl.classList.add('updating');
-                setTimeout(() => ageValueEl.classList.remove('updating'), 300);
+                
+                if (ageInfo.textContent !== ageVal + ' days') {
+                    ageInfo.textContent = ageVal + ' days';
+                }
+                
+                if (ageValueEl.textContent !== ageVal) {
+                    ageValueEl.textContent = ageVal;
+                    ageValueEl.classList.add('updating');
+                    setTimeout(() => ageValueEl.classList.remove('updating'), 300);
+                }
             }
             
-            // Update control source
-            if (data.last_control_source !== undefined) {
-                document.getElementById('controlSource').textContent = data.last_control_source;
+            // Update operating mode
+            if (data.auto !== undefined) {
+                const modeInfo = document.getElementById('modeInfo');
+                const autoBtn = document.getElementById('autoModeBtn');
+                const manualBtn = document.getElementById('manualModeBtn');
+                
+                const newMode = data.auto ? 'AUTO' : 'MANUAL';
+                if (modeInfo.textContent !== newMode) {
+                    modeInfo.textContent = newMode;
+                    
+                    if (data.auto) {
+                        autoBtn.classList.add('active');
+                        manualBtn.classList.remove('active');
+                    } else {
+                        autoBtn.classList.remove('active');
+                        manualBtn.classList.add('active');
+                    }
+                }
             }
             
-            // Update control channel
-            if (data.control_channel !== undefined) {
-                updateControlChannelDisplay(data.control_channel);
-            }
-            
-            // Update calibration values
-            if (data.temp_offset !== undefined) {
-                const tempCalEl = document.getElementById('tempCalValue');
-                tempCalEl.textContent = data.temp_offset.toFixed(1) + '°C';
-                tempCalEl.classList.add('updating');
-                setTimeout(() => tempCalEl.classList.remove('updating'), 300);
-            }
-            
-            if (data.hum_offset !== undefined) {
-                const humCalEl = document.getElementById('humCalValue');
-                humCalEl.textContent = data.hum_offset.toFixed(1) + '%';
-                humCalEl.classList.add('updating');
-                setTimeout(() => humCalEl.classList.remove('updating'), 300);
-            }
-            
-            // Update network info
+            // Update other system info
             if (data.ntp !== undefined) {
-                document.getElementById('ntpStatus').textContent = data.ntp ? 'SYNC' : 'NO SYNC';
-                document.getElementById('ntpStatus').className = data.ntp ? 'info-value online' : 'info-value offline';
+                const ntpStatus = document.getElementById('ntpStatus');
+                const newStatus = data.ntp ? 'SYNC' : 'NO SYNC';
+                if (ntpStatus.textContent !== newStatus) {
+                    ntpStatus.textContent = newStatus;
+                    ntpStatus.className = data.ntp ? 'info-value online' : 'info-value offline';
+                }
             }
             
             if (data.sd_ready !== undefined) {
-                document.getElementById('sdStatus').textContent = data.sd_ready ? 'Available' : 'Not Found';
-                document.getElementById('sdStatus').className = data.sd_ready ? 'info-value online' : 'info-value offline';
+                const sdStatus = document.getElementById('sdStatus');
+                const newStatus = data.sd_ready ? 'Available' : 'Not Found';
+                if (sdStatus.textContent !== newStatus) {
+                    sdStatus.textContent = newStatus;
+                    sdStatus.className = data.sd_ready ? 'info-value online' : 'info-value offline';
+                }
             }
             
             if (data.wifi_rssi !== undefined) {
-                document.getElementById('wifiRssi').textContent = data.wifi_rssi + ' dBm';
+                const wifiRssi = document.getElementById('wifiRssi');
+                const newRssi = data.wifi_rssi + ' dBm';
+                if (wifiRssi.textContent !== newRssi) {
+                    wifiRssi.textContent = newRssi;
+                }
+            }
+            
+            if (data.uptime !== undefined) {
+                const uptimeInfo = document.getElementById('uptimeInfo');
+                if (uptimeInfo.textContent !== data.uptime + 's') {
+                    uptimeInfo.textContent = data.uptime + 's';
+                }
             }
         }
 
         // Update control source information
         function updateControlSource(data) {
+            // Update control channel
             if (data.channel !== undefined) {
-                updateControlChannelDisplay(data.channel);
+                const channelInfo = document.getElementById('channelInfo');
+                const controlSource = document.getElementById('currentControlChannel');
+                const controlSourceText = document.getElementById('controlSource');
+                
+                if (channelInfo.textContent !== data.channel) {
+                    channelInfo.textContent = data.channel;
+                    
+                    // Update control source indicator
+                    controlSource.textContent = data.channel;
+                    controlSource.className = 'control-source ' + 
+                        (data.channel === 'WEB' ? 'source-web' : 
+                         data.channel === 'TFT' ? 'source-tft' : 'source-auto');
+                }
+                
+                if (controlSourceText.textContent !== data.channel) {
+                    controlSourceText.textContent = data.channel;
+                    controlSourceText.className = 'info-value ' + 
+                        (data.channel === 'WEB' ? 'warning' : 
+                         data.channel === 'TFT' ? 'online' : '');
+                }
             }
             
-            if (data.source !== undefined) {
-                document.getElementById('controlSource').textContent = data.source;
+            // Update last control source
+            if (data.source !== undefined && data.source !== '') {
+                const controlSourceText = document.getElementById('controlSource');
+                if (controlSourceText.textContent !== data.source) {
+                    controlSourceText.textContent = data.source;
+                }
+            }
+            
+            // Update auto mode and override
+            if (data.auto_mode !== undefined) {
+                currentState.auto = data.auto_mode;
+            }
+            
+            if (data.override !== undefined) {
+                currentState.override = data.override;
             }
         }
 
-        // Update control channel display
-        function updateControlChannelDisplay(channel) {
-            const channelInfo = document.getElementById('channelInfo');
-            
-            if (channelInfo.textContent !== channel) {
-                channelInfo.textContent = channel;
+        // Update calibration values
+        function updateCalibration(data) {
+            if (data.temp_offset !== undefined) {
+                const tempCalEl = document.getElementById('tempCalValue');
+                const infoTempCal = document.getElementById('infoTempCal');
+                const newValue = data.temp_offset.toFixed(1) + '°C';
                 
-                // Update styling based on channel
-                if (channel === 'WEB') {
-                    channelInfo.className = 'info-value warning';
-                } else if (channel === 'TFT') {
-                    channelInfo.className = 'info-value online';
-                } else {
-                    channelInfo.className = 'info-value';
+                if (tempCalEl.textContent !== newValue) {
+                    tempCalEl.textContent = newValue;
+                    tempCalEl.classList.add('calibrate-pulse');
+                    setTimeout(() => tempCalEl.classList.remove('calibrate-pulse'), 300);
+                }
+                
+                if (infoTempCal.textContent !== newValue) {
+                    infoTempCal.textContent = newValue;
                 }
             }
+            
+            if (data.hum_offset !== undefined) {
+                const humCalEl = document.getElementById('humCalValue');
+                const infoHumCal = document.getElementById('infoHumCal');
+                const newValue = data.hum_offset.toFixed(1) + '%';
+                
+                if (humCalEl.textContent !== newValue) {
+                    humCalEl.textContent = newValue;
+                    humCalEl.classList.add('calibrate-pulse');
+                    setTimeout(() => humCalEl.classList.remove('calibrate-pulse'), 300);
+                }
+                
+                if (infoHumCal.textContent !== newValue) {
+                    infoHumCal.textContent = newValue;
+                }
+            }
+        }
+
+        // Update alarm status
+        function updateAlarmStatus(data) {
+            const alarmBanner = document.getElementById('alarmBanner');
+            const alarmMessage = document.getElementById('alarmMessage');
+            
+            if (data.alarm_active && data.alarm && data.alarm !== '') {
+                alarmBanner.style.display = 'flex';
+                alarmMessage.textContent = data.alarm;
+                
+                // Determine alarm type
+                if (data.alarm.includes('critical') || data.alarm.includes('Extreme') || 
+                    data.alarm.includes('offline') || data.alarm.includes('failed')) {
+                    alarmBanner.className = 'alarm-banner';
+                } else {
+                    alarmBanner.className = 'alarm-banner warning';
+                }
+            } else {
+                alarmBanner.style.display = 'none';
+            }
+        }
+
+        // Update all displays
+        function updateAllDisplays() {
+            // Update time display with system time if available
+            if (currentState.time && currentState.time !== '--:--:--') {
+                document.getElementById('currentTime').textContent = currentState.time;
+            }
+            
+            // Update network status
+            const networkStatusInfo = document.getElementById('networkStatusInfo');
+            const isNetworkOnline = currentState.wifi && currentState.mqtt;
+            networkStatusInfo.textContent = isNetworkOnline ? 'Connected' : 'Disconnected';
+            networkStatusInfo.className = isNetworkOnline ? 'info-value online' : 'info-value offline';
         }
 
         // Control device function
@@ -1907,17 +2188,34 @@
                 return;
             }
             
-            const command = { [device]: state };
+            // Check if we're in manual mode or can take control
+            if (currentState.auto && !currentState.override) {
+                showToast('System is in AUTO mode. Switch to MANUAL to control devices.', 'warning');
+                return;
+            }
+            
+            const command = { 
+                [device]: state,
+                source: 'web'
+            };
+            
             publishControl(command);
             
             // Immediate visual feedback
+            updateDeviceControlUI(device, state);
+            
+            showToast(`${device.toUpperCase()} turned ${state ? 'ON' : 'OFF'}`, 'success');
+        }
+
+        // Update device control UI
+        function updateDeviceControlUI(device, state) {
             if (device === 'fan') {
                 const fanControl = document.getElementById('fanControl');
                 const fanValue = document.getElementById('fanControlValue');
                 const fanText = document.getElementById('fanStatusText');
                 
                 if (state) {
-                    fanControl.className = 'control-card fan-on active';
+                    fanControl.className = 'control-card fan-on';
                     fanValue.textContent = 'ON';
                     fanText.textContent = 'ON';
                     fanText.className = 'info-value online';
@@ -1933,7 +2231,7 @@
                 const heatText = document.getElementById('heatStatusText');
                 
                 if (state) {
-                    heatControl.className = 'control-card heat-on active';
+                    heatControl.className = 'control-card heat-on';
                     heatValue.textContent = 'ON';
                     heatText.textContent = 'ON';
                     heatText.className = 'info-value warning';
@@ -1944,8 +2242,6 @@
                     heatText.className = 'info-value offline';
                 }
             }
-            
-            showToast(`${device.toUpperCase()} turned ${state ? 'ON' : 'OFF'}`, 'success');
         }
 
         // Control both devices
@@ -1955,49 +2251,23 @@
                 return;
             }
             
+            // Check if we're in manual mode or can take control
+            if (currentState.auto && !currentState.override) {
+                showToast('System is in AUTO mode. Switch to MANUAL to control devices.', 'warning');
+                return;
+            }
+            
             const command = {
                 fan: state,
-                heat: state
+                heat: state,
+                source: 'web'
             };
+            
             publishControl(command);
             
             // Immediate visual feedback
-            const devices = ['fan', 'heat'];
-            devices.forEach(device => {
-                if (device === 'fan') {
-                    const fanControl = document.getElementById('fanControl');
-                    const fanValue = document.getElementById('fanControlValue');
-                    const fanText = document.getElementById('fanStatusText');
-                    
-                    if (state) {
-                        fanControl.className = 'control-card fan-on active';
-                        fanValue.textContent = 'ON';
-                        fanText.textContent = 'ON';
-                        fanText.className = 'info-value online';
-                    } else {
-                        fanControl.className = 'control-card fan-off';
-                        fanValue.textContent = 'OFF';
-                        fanText.textContent = 'OFF';
-                        fanText.className = 'info-value offline';
-                    }
-                } else if (device === 'heat') {
-                    const heatControl = document.getElementById('heatControl');
-                    const heatValue = document.getElementById('heatControlValue');
-                    const heatText = document.getElementById('heatStatusText');
-                    
-                    if (state) {
-                        heatControl.className = 'control-card heat-on active';
-                        heatValue.textContent = 'ON';
-                        heatText.textContent = 'ON';
-                        heatText.className = 'info-value warning';
-                    } else {
-                        heatControl.className = 'control-card heat-off';
-                        heatValue.textContent = 'OFF';
-                        heatText.textContent = 'OFF';
-                        heatText.className = 'info-value offline';
-                    }
-                }
-            });
+            updateDeviceControlUI('fan', state);
+            updateDeviceControlUI('heat', state);
             
             showToast(`Both devices turned ${state ? 'ON' : 'OFF'}`, 'success');
         }
@@ -2009,7 +2279,11 @@
                 return;
             }
             
-            const command = { auto: autoMode };
+            const command = { 
+                auto: autoMode,
+                source: 'web'
+            };
+            
             publishControl(command);
             
             // Immediate visual feedback
@@ -2030,14 +2304,19 @@
             showToast(`Mode set to ${autoMode ? 'AUTO' : 'MANUAL'}`, 'success');
         }
 
-        // Force auto mode
-        function forceAutoMode() {
+        // Force auto control
+        function forceAutoControl() {
             if (!isConnected) {
                 showToast('Not connected to system', 'error');
                 return;
             }
             
-            const command = { force_auto: true };
+            const command = { 
+                auto: true,
+                override: false,
+                source: 'web'
+            };
+            
             publishControl(command);
             
             // Immediate visual feedback
@@ -2059,7 +2338,11 @@
                 return;
             }
             
-            const command = { stage: stage };
+            const command = { 
+                stage: stage,
+                source: 'web'
+            };
+            
             publishControl(command);
             
             // Immediate visual feedback
@@ -2083,20 +2366,25 @@
                 return;
             }
             
-            const newAge = currentState.age + delta;
-            const currentStage = LIFE_STAGES[currentState.stage];
+            const newAge = (currentState.age || 0) + delta;
+            const currentStage = LIFE_STAGES[currentState.stage] || LIFE_STAGES[0];
             
+            // Validate age range
             if (newAge < 0 || newAge > 999) {
-                showToast('Age out of valid range', 'warning');
+                showToast('Age out of valid range (0-999 days)', 'warning');
                 return;
             }
             
-            if (currentStage && (newAge < currentStage.minAge || newAge > currentStage.maxAge)) {
-                showToast(`Age must be between ${currentStage.minAge}-${currentStage.maxAge} days for this stage`, 'warning');
+            if (newAge < currentStage.minAge || newAge > currentStage.maxAge) {
+                showToast(`Age must be between ${currentStage.minAge}-${currentStage.maxAge} days for ${currentStage.name}`, 'warning');
                 return;
             }
             
-            const command = { age: newAge };
+            const command = { 
+                age: newAge,
+                source: 'web'
+            };
+            
             publishControl(command);
             
             // Immediate visual feedback
@@ -2110,36 +2398,50 @@
             showToast(`Age set to ${newAge} days`, 'info');
         }
 
-        // Change calibration
-        function changeCalibration(type, delta) {
+        // Adjust calibration
+        function adjustCalibration(type, delta) {
             if (!isConnected) {
                 showToast('Not connected to system', 'error');
                 return;
             }
             
-            const command = {};
             let newValue;
+            const command = { source: 'web' };
             
-            if (type === 'temp') {
+            if (type === 'temp_offset') {
                 newValue = (currentState.temp_offset || 0) + delta;
-                command.temp_offset = newValue;
+                command.adjust_temp = delta;
                 
                 // Immediate visual feedback
                 const tempCalEl = document.getElementById('tempCalValue');
-                tempCalEl.textContent = newValue.toFixed(1) + '°C';
+                const infoTempCal = document.getElementById('infoTempCal');
+                const newText = newValue.toFixed(1) + '°C';
+                
+                tempCalEl.textContent = newText;
                 tempCalEl.classList.add('calibrate-pulse');
-                setTimeout(() => tempCalEl.classList.remove('calibrate-pulse'), 300);
+                infoTempCal.textContent = newText;
+                
+                setTimeout(() => {
+                    tempCalEl.classList.remove('calibrate-pulse');
+                }, 300);
                 
                 showToast(`Temperature calibration: ${newValue.toFixed(1)}°C`, 'info');
-            } else if (type === 'hum') {
+            } else if (type === 'hum_offset') {
                 newValue = (currentState.hum_offset || 0) + delta;
-                command.hum_offset = newValue;
+                command.adjust_hum = delta;
                 
                 // Immediate visual feedback
                 const humCalEl = document.getElementById('humCalValue');
-                humCalEl.textContent = newValue.toFixed(1) + '%';
+                const infoHumCal = document.getElementById('infoHumCal');
+                const newText = newValue.toFixed(1) + '%';
+                
+                humCalEl.textContent = newText;
                 humCalEl.classList.add('calibrate-pulse');
-                setTimeout(() => humCalEl.classList.remove('calibrate-pulse'), 300);
+                infoHumCal.textContent = newText;
+                
+                setTimeout(() => {
+                    humCalEl.classList.remove('calibrate-pulse');
+                }, 300);
                 
                 showToast(`Humidity calibration: ${newValue.toFixed(1)}%`, 'info');
             }
@@ -2154,17 +2456,25 @@
                 return;
             }
             
-            const command = { save: true };
+            // Send save command
+            const command = { 
+                save: true,
+                source: 'web'
+            };
+            
             publishControl(command);
             
             // Visual feedback
             const saveBtn = document.querySelector('.btn-save');
+            const originalHTML = saveBtn.innerHTML;
+            const originalBg = saveBtn.style.background;
+            
             saveBtn.innerHTML = '<i class="fas fa-check"></i><span>SAVED!</span>';
             saveBtn.style.background = 'linear-gradient(135deg, #3cba92, #0ba360)';
             
             setTimeout(() => {
-                saveBtn.innerHTML = '<i class="fas fa-save"></i><span>SAVE SETTINGS</span>';
-                saveBtn.style.background = 'linear-gradient(135deg, var(--success-light), var(--success))';
+                saveBtn.innerHTML = originalHTML;
+                saveBtn.style.background = originalBg;
             }, 1500);
             
             showToast('Settings saved successfully', 'success');
@@ -2178,15 +2488,21 @@
             }
             
             if (confirm('Are you sure you want to reboot the VQuail system? This will temporarily interrupt monitoring.')) {
-                const command = { reboot: true };
+                const command = { 
+                    reboot: true,
+                    source: 'web'
+                };
+                
                 publishControl(command);
                 
                 // Visual feedback
                 const rebootBtn = document.querySelector('.btn-reboot');
+                const originalHTML = rebootBtn.innerHTML;
+                
                 rebootBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>REBOOTING...</span>';
                 
                 setTimeout(() => {
-                    rebootBtn.innerHTML = '<i class="fas fa-redo"></i><span>REBOOT SYSTEM</span>';
+                    rebootBtn.innerHTML = originalHTML;
                 }, 3000);
                 
                 showToast('System rebooting...', 'warning');
@@ -2201,23 +2517,57 @@
             }
             
             if (confirm('Reset all calibration values to zero?')) {
-                const command = { reset_calibration: true };
+                const command = { 
+                    reset_calibration: true,
+                    source: 'web'
+                };
+                
                 publishControl(command);
                 
                 // Immediate visual feedback
                 const tempCalEl = document.getElementById('tempCalValue');
                 const humCalEl = document.getElementById('humCalValue');
+                const infoTempCal = document.getElementById('infoTempCal');
+                const infoHumCal = document.getElementById('infoHumCal');
                 
                 tempCalEl.textContent = '0.0°C';
                 humCalEl.textContent = '0.0%';
+                infoTempCal.textContent = '0.0°C';
+                infoHumCal.textContent = '0.0%';
                 
-                [tempCalEl, humCalEl].forEach(el => {
+                [tempCalEl, humCalEl, infoTempCal, infoHumCal].forEach(el => {
                     el.classList.add('calibrate-pulse');
                     setTimeout(() => el.classList.remove('calibrate-pulse'), 300);
                 });
                 
                 showToast('Calibration reset to default values', 'info');
             }
+        }
+
+        // Refresh data
+        function refreshData() {
+            if (!isConnected) {
+                showToast('Not connected to system', 'error');
+                return;
+            }
+            
+            // Send refresh command to trigger data publish
+            const command = { 
+                refresh: true,
+                source: 'web'
+            };
+            
+            publishControl(command);
+            
+            // Visual feedback
+            const fab = document.querySelector('.fab');
+            fab.style.transform = 'rotate(180deg)';
+            
+            setTimeout(() => {
+                fab.style.transform = '';
+            }, 500);
+            
+            showToast('Refreshing data...', 'info');
         }
 
         // Publish control command
@@ -2230,8 +2580,7 @@
             const topic = 'vquail/web/control';
             const payload = JSON.stringify({
                 ...command,
-                timestamp: new Date().toISOString(),
-                source: 'web'
+                timestamp: new Date().toISOString()
             });
             
             mqttClient.publish(topic, payload, { qos: 1 }, (err) => {
@@ -2239,7 +2588,7 @@
                     console.error('Publish error:', err);
                     showToast('Failed to send command', 'error');
                 } else {
-                    console.log('Published:', command);
+                    console.log('Published to', topic, ':', command);
                 }
             });
         }
@@ -2247,16 +2596,11 @@
         // Update connection status
         function updateConnectionStatus(connected) {
             const connectionInfo = document.getElementById('connectionStatus');
-            const networkStatusInfo = document.getElementById('networkStatusInfo');
             
             if (connected) {
                 connectionInfo.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Connected to VQuail system';
-                networkStatusInfo.textContent = 'Connected';
-                networkStatusInfo.className = 'info-value online';
             } else {
                 connectionInfo.innerHTML = '<span class="loading"></span> Connecting to system...';
-                networkStatusInfo.textContent = 'Disconnected';
-                networkStatusInfo.className = 'info-value offline';
             }
         }
 
@@ -2290,28 +2634,6 @@
             }, 3000);
         }
 
-        // Get current time
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-
-        // Update time display
-        function updateTimeDisplay() {
-            const now = new Date();
-            const timeEl = document.getElementById('currentTime');
-            const timeStr = now.toLocaleTimeString([], { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-            });
-            
-            // Only update if value changed
-            if (timeEl.textContent !== timeStr) {
-                timeEl.textContent = timeStr;
-            }
-        }
-
         // Switch screen
         function switchScreen(screenId) {
             // Deactivate all nav buttons
@@ -2330,6 +2652,25 @@
             
             // Activate corresponding nav button
             document.querySelector(`.nav-btn[data-screen="${screenId}"]`).classList.add('active');
+        }
+
+        // Update time display
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeEl = document.getElementById('currentTime');
+            
+            // Only update if we don't have system time or it's stale
+            if (!currentState.time || currentState.time === '--:--:--' || Date.now() - lastDataTimestamp > 30000) {
+                const timeStr = now.toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                
+                if (timeEl.textContent !== timeStr) {
+                    timeEl.textContent = timeStr;
+                }
+            }
         }
 
         // Initialize on page load
@@ -2370,7 +2711,7 @@
                             break;
                         case 'r':
                             e.preventDefault();
-                            publishControl({ refresh: true });
+                            refreshData();
                             break;
                         case '1':
                             e.preventDefault();
@@ -2410,6 +2751,13 @@
                         initMQTT();
                     }
                 }, 1000);
+            }
+        });
+
+        // Handle beforeunload to clean up
+        window.addEventListener('beforeunload', () => {
+            if (mqttClient && isConnected) {
+                mqttClient.end();
             }
         });
     </script>
