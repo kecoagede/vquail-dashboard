@@ -444,6 +444,49 @@
             font-weight: 600;
         }
         
+        /* Connection Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .modal-content {
+            margin: 1.5rem 0;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
         /* Footer */
         .footer {
             text-align: center;
@@ -567,6 +610,44 @@
     </style>
 </head>
 <body>
+    <!-- Connection Modal -->
+    <div class="modal-overlay" id="connectionModal">
+        <div class="modal">
+            <div class="modal-title">
+                <i class="fas fa-plug"></i>
+                <span>MQTT Connection Setup</span>
+            </div>
+            <div class="modal-content">
+                <p>Please check your connection settings:</p>
+                <div class="status-item mt-2">
+                    <div class="status-icon" style="background: rgba(245, 101, 101, 0.2); color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">MQTT Status</div>
+                        <div class="status-value" id="modalMqttStatus">Disconnected</div>
+                    </div>
+                </div>
+                <div class="connection-details mt-2">
+                    <p><strong>Host:</strong> 514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud</p>
+                    <p><strong>Port:</strong> 8884 (WebSocket)</p>
+                    <p><strong>Protocol:</strong> wss:// (Secure WebSocket)</p>
+                </div>
+                <div class="mt-3">
+                    <p><small>Note: This page uses WebSocket protocol, not regular MQTT port 8883.</small></p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="retryConnection()">
+                    <i class="fas fa-redo"></i> Retry Connection
+                </button>
+                <button class="btn btn-warning" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -580,11 +661,11 @@
             <div class="header-info">
                 <div class="time-display" id="currentTime">--:--:--</div>
                 <div class="connection-status">
-                    <div class="status-indicator">
+                    <div class="status-indicator" onclick="showConnectionModal()" style="cursor: pointer;">
                         <div class="status-dot" id="wifiStatus"></div>
                         <span id="wifiText">WiFi</span>
                     </div>
-                    <div class="status-indicator">
+                    <div class="status-indicator" onclick="showConnectionModal()" style="cursor: pointer;">
                         <div class="status-dot" id="mqttStatus"></div>
                         <span id="mqttText">MQTT</span>
                     </div>
@@ -902,7 +983,7 @@
         <!-- Footer -->
         <footer class="footer">
             <p>VQuail Professional Monitoring System v8.0 | ESP32-S3 with TFT Display</p>
-            <p>MQTT Broker: 514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8883</p>
+            <p>MQTT Broker: wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884/mqtt</p>
             <p>© 2024 VQuail System. All rights reserved.</p>
         </footer>
     </div>
@@ -911,13 +992,15 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        // MQTT Configuration
+        // MQTT Configuration for WebSocket
         const MQTT_CONFIG = {
             host: "514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud",
-            port: 8883,
+            port: 8884, // WebSocket port for browsers
+            path: "/mqtt", // HiveMQ WebSocket path
             username: "vquail",
             password: "Vquail12345",
-            clientId: "vquail-web-" + Math.random().toString(16).substr(2, 8)
+            clientId: "vquail-web-" + Math.random().toString(16).substr(2, 8),
+            useSSL: true
         };
 
         // MQTT Topics
@@ -958,71 +1041,151 @@
             tempOffset: 0,
             humOffset: 0,
             controlChannel: '--',
-            lastSource: '--'
+            lastSource: '--',
+            lastUpdate: null
         };
+
+        // Show Connection Modal
+        function showConnectionModal() {
+            document.getElementById('connectionModal').classList.remove('hidden');
+            updateModalStatus();
+        }
+
+        // Close Connection Modal
+        function closeModal() {
+            document.getElementById('connectionModal').classList.add('hidden');
+        }
+
+        // Update Modal Status
+        function updateModalStatus() {
+            const modalStatus = document.getElementById('modalMqttStatus');
+            if (isConnected) {
+                modalStatus.textContent = 'Connected';
+                modalStatus.style.color = 'var(--success)';
+            } else {
+                modalStatus.textContent = 'Disconnected';
+                modalStatus.style.color = 'var(--danger)';
+            }
+        }
+
+        // Retry Connection
+        function retryConnection() {
+            closeModal();
+            showToast("Attempting to reconnect...", "info");
+            setTimeout(() => {
+                if (!isConnected) {
+                    initMQTT();
+                }
+            }, 1000);
+        }
 
         // Initialize MQTT Connection
         function initMQTT() {
-            console.log("Connecting to MQTT broker...");
+            console.log("Connecting to MQTT broker via WebSocket...");
+            
+            // Create client with WebSocket URL
+            const clientId = MQTT_CONFIG.clientId;
+            const wsUrl = `wss://${MQTT_CONFIG.host}:${MQTT_CONFIG.port}${MQTT_CONFIG.path}`;
+            
+            console.log("WebSocket URL:", wsUrl);
             
             mqttClient = new Paho.MQTT.Client(
                 MQTT_CONFIG.host,
-                MQTT_CONFIG.port,
-                MQTT_CONFIG.clientId
+                Number(MQTT_CONFIG.port),
+                MQTT_CONFIG.path,
+                clientId
             );
 
+            // Set callback handlers
             mqttClient.onConnectionLost = onConnectionLost;
             mqttClient.onMessageArrived = onMessageArrived;
 
+            // Connection options
             const connectOptions = {
                 userName: MQTT_CONFIG.username,
                 password: MQTT_CONFIG.password,
                 useSSL: true,
+                cleanSession: true,
                 onSuccess: onConnect,
                 onFailure: onConnectFailure,
-                reconnect: true,
                 keepAliveInterval: 30,
-                cleanSession: false
+                reconnect: true,
+                mqttVersion: 4
             };
 
+            // Connect the client
             mqttClient.connect(connectOptions);
         }
 
         // MQTT Connection Success
         function onConnect() {
-            console.log("MQTT Connected successfully!");
+            console.log("MQTT Connected successfully via WebSocket!");
             isConnected = true;
             
             // Subscribe to topics
-            Object.values(TOPICS).forEach(topic => {
-                mqttClient.subscribe(topic);
+            Object.entries(TOPICS).forEach(([key, topic]) => {
+                mqttClient.subscribe(topic, { qos: 1 });
                 console.log(`Subscribed to: ${topic}`);
             });
 
-            // Request full status update
-            publishControlMessage({ request: "full" }, "vquail/status/request");
+            // Update UI
+            updateConnectionStatus();
+            updateModalStatus();
             
             showToast("Connected to MQTT broker", "success");
-            updateConnectionStatus();
+            
+            // Request full status update
+            setTimeout(() => {
+                publishControlMessage({ request: "full" }, "vquail/status/request");
+            }, 1000);
         }
 
         // MQTT Connection Failure
         function onConnectFailure(error) {
             console.error("MQTT Connection failed:", error);
             isConnected = false;
-            showToast("MQTT connection failed. Retrying...", "error");
-            updateConnectionStatus();
             
-            // Retry connection after 5 seconds
-            setTimeout(initMQTT, 5000);
+            updateConnectionStatus();
+            updateModalStatus();
+            
+            // Show detailed error
+            let errorMsg = "MQTT connection failed";
+            if (error.errorCode === 7) {
+                errorMsg = "Connection refused - check credentials";
+            } else if (error.errorCode === 1) {
+                errorMsg = "Cannot connect to broker";
+            }
+            
+            showToast(errorMsg + ". Retrying...", "error");
+            
+            // Auto-retry after 10 seconds
+            setTimeout(() => {
+                if (!isConnected) {
+                    console.log("Auto-retrying connection...");
+                    initMQTT();
+                }
+            }, 10000);
         }
 
         // MQTT Connection Lost
         function onConnectionLost(response) {
             console.error("MQTT Connection lost:", response);
             isConnected = false;
-            showToast("MQTT connection lost. Reconnecting...", "warning");
+            
             updateConnectionStatus();
+            updateModalStatus();
+            
+            if (response.errorCode !== 0) {
+                showToast("MQTT connection lost. Reconnecting...", "warning");
+            }
+            
+            // Auto-reconnect after 5 seconds
+            setTimeout(() => {
+                if (!isConnected) {
+                    console.log("Auto-reconnecting...");
+                    initMQTT();
+                }
+            }, 5000);
         }
 
         // Handle Incoming MQTT Messages
@@ -1032,6 +1195,10 @@
             
             try {
                 const data = JSON.parse(payload);
+                console.log(`Received on ${topic}:`, data);
+                
+                // Update last update time
+                appState.lastUpdate = new Date();
                 
                 switch(topic) {
                     case TOPICS.status:
@@ -1047,27 +1214,28 @@
                         console.log(`Received message on ${topic}:`, data);
                 }
             } catch (error) {
-                console.error("Error parsing MQTT message:", error);
+                console.error("Error parsing MQTT message:", error, "Payload:", payload);
             }
         }
 
         // Update Device Status
         function updateDeviceStatus(data) {
-            appState.temperature = data.temp || appState.temperature;
-            appState.humidity = data.hum || appState.humidity;
-            appState.fan = data.fan || false;
-            appState.heat = data.heat || false;
+            appState.temperature = data.temp !== undefined ? data.temp : appState.temperature;
+            appState.humidity = data.hum !== undefined ? data.hum : appState.humidity;
+            appState.fan = data.fan !== undefined ? data.fan : appState.fan;
+            appState.heat = data.heat !== undefined ? data.heat : appState.heat;
             appState.autoMode = data.auto !== undefined ? data.auto : appState.autoMode;
             appState.stage = data.stage || appState.stage;
-            appState.age = data.age || appState.age;
-            appState.sensorOnline = data.sensor_online || false;
-            appState.sensorDisconnected = data.sensor_disconnected || false;
+            appState.age = data.age !== undefined ? data.age : appState.age;
+            appState.sensorOnline = data.sensor_online !== undefined ? data.sensor_online : appState.sensorOnline;
+            appState.sensorDisconnected = data.sensor_disconnected !== undefined ? data.sensor_disconnected : appState.sensorDisconnected;
             appState.alarm = data.alarm || null;
             appState.controlChannel = data.control_channel || '--';
             appState.lastSource = data.last_control_source || '--';
-            appState.tempOffset = data.temp_offset || 0;
-            appState.humOffset = data.hum_offset || 0;
+            appState.tempOffset = data.temp_offset !== undefined ? data.temp_offset : appState.tempOffset;
+            appState.humOffset = data.hum_offset !== undefined ? data.hum_offset : appState.humOffset;
             appState.uptime = data.uptime || 0;
+            appState.wifi = data.wifi !== undefined ? data.wifi : appState.wifi;
 
             // Update UI
             updateUI();
@@ -1083,6 +1251,10 @@
                 addChartData(newTemp, newHum);
             }
             
+            if (newHum !== undefined) {
+                appState.humidity = newHum;
+            }
+            
             if (data.raw_temp !== undefined) {
                 document.getElementById('rawTemp').textContent = data.raw_temp.toFixed(1);
             }
@@ -1096,12 +1268,24 @@
 
         // Update System Status
         function updateSystemStatus(data) {
-            appState.wifi = data.wifi || false;
-            appState.mqtt = data.mqtt || false;
-            appState.sensorOnline = data.dht || false;
-            appState.sdCard = data.sd_card || false;
+            appState.wifi = data.wifi !== undefined ? data.wifi : appState.wifi;
+            appState.mqtt = data.mqtt !== undefined ? data.mqtt : appState.mqtt;
+            appState.sensorOnline = data.dht !== undefined ? data.dht : appState.sensorOnline;
+            appState.sdCard = data.sd_card !== undefined ? data.sd_card : appState.sdCard;
             
             updateConnectionStatus();
+            
+            // Update detailed status
+            if (data.wifi_rssi !== undefined) {
+                document.getElementById('wifiSignal').textContent = data.wifi_rssi + ' dBm';
+            }
+            
+            document.getElementById('sdStatus').textContent = appState.sdCard ? 'OK' : 'ERROR';
+            document.getElementById('mqttBroker').textContent = MQTT_CONFIG.host;
+            document.getElementById('ntpStatus').textContent = data.ntp ? 'SYNC' : 'NO SYNC';
+            document.getElementById('espStatus').textContent = data.esp32 ? 'OK' : 'ERROR';
+            document.getElementById('tftStatus').textContent = data.tft ? 'OK' : 'ERROR';
+            document.getElementById('touchStatus').textContent = data.touch ? 'OK' : 'ERROR';
         }
 
         // Update UI Elements
@@ -1193,7 +1377,8 @@
             if (appState.uptime) {
                 const hours = Math.floor(appState.uptime / 3600);
                 const minutes = Math.floor((appState.uptime % 3600) / 60);
-                document.getElementById('uptime').textContent = `${hours}h ${minutes}m`;
+                const seconds = appState.uptime % 60;
+                document.getElementById('uptime').textContent = `${hours}h ${minutes}m ${seconds}s`;
             }
 
             // Update chart
@@ -1227,6 +1412,9 @@
             } else if (value < min || value > max) {
                 status = 'warning';
                 color = 'var(--warning)';
+            } else {
+                status = 'normal';
+                color = 'var(--success)';
             }
             
             // Update target ranges
@@ -1295,6 +1483,7 @@
         function controlDevice(device, state) {
             if (!isConnected) {
                 showToast("Not connected to MQTT", "error");
+                showConnectionModal();
                 return;
             }
 
@@ -1311,6 +1500,7 @@
         function setMode(auto) {
             if (!isConnected) {
                 showToast("Not connected to MQTT", "error");
+                showConnectionModal();
                 return;
             }
 
@@ -1327,6 +1517,7 @@
         function quickAction(action) {
             if (!isConnected) {
                 showToast("Not connected to MQTT", "error");
+                showConnectionModal();
                 return;
             }
 
@@ -1354,6 +1545,7 @@
         function adjustCalibration(type, adjustment) {
             if (!isConnected) {
                 showToast("Not connected to MQTT", "error");
+                showConnectionModal();
                 return;
             }
 
@@ -1373,6 +1565,7 @@
         function resetCalibration() {
             if (!isConnected) {
                 showToast("Not connected to MQTT", "error");
+                showConnectionModal();
                 return;
             }
 
@@ -1389,6 +1582,7 @@
         function publishStatus() {
             if (!isConnected) {
                 showToast("Not connected to MQTT", "error");
+                showConnectionModal();
                 return;
             }
 
@@ -1400,6 +1594,7 @@
         function publishControlMessage(message, topic = TOPICS.control) {
             if (!mqttClient || !isConnected) {
                 console.error("MQTT client not connected");
+                showToast("Not connected to MQTT", "error");
                 return;
             }
 
@@ -1408,8 +1603,13 @@
             mqttMessage.destinationName = topic;
             mqttMessage.qos = 1;
             
-            mqttClient.send(mqttMessage);
-            console.log(`Published to ${topic}:`, message);
+            try {
+                mqttClient.send(mqttMessage);
+                console.log(`Published to ${topic}:`, message);
+            } catch (error) {
+                console.error("Failed to publish message:", error);
+                showToast("Failed to send command", "error");
+            }
         }
 
         // Chart Functions
@@ -1427,7 +1627,8 @@
                             borderColor: 'rgb(237, 137, 54)',
                             backgroundColor: 'rgba(237, 137, 54, 0.1)',
                             tension: 0.4,
-                            fill: true
+                            fill: true,
+                            yAxisID: 'y'
                         },
                         {
                             label: 'Humidity (%)',
@@ -1491,8 +1692,8 @@
                             ticks: {
                                 color: 'var(--text-dim)'
                             },
-                            min: 0,
-                            max: 50
+                            suggestedMin: 0,
+                            suggestedMax: 50
                         },
                         y1: {
                             type: 'linear',
@@ -1509,8 +1710,8 @@
                             ticks: {
                                 color: 'var(--text-dim)'
                             },
-                            min: 0,
-                            max: 100
+                            suggestedMin: 0,
+                            suggestedMax: 100
                         }
                     }
                 }
@@ -1519,7 +1720,7 @@
 
         function addChartData(temp, hum) {
             const now = new Date();
-            const timeLabel = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const timeLabel = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
             
             chartData.labels.push(timeLabel);
             chartData.temp.push(temp);
@@ -1583,16 +1784,20 @@
             
             // Update last update time
             const lastUpdateElem = document.getElementById('lastUpdate');
-            if (lastUpdateElem) {
-                lastUpdateElem.textContent = `${timeString}`;
+            if (lastUpdateElem && appState.lastUpdate) {
+                const diff = Math.floor((new Date() - appState.lastUpdate) / 1000);
+                if (diff < 60) {
+                    lastUpdateElem.textContent = `${diff}s ago`;
+                } else if (diff < 3600) {
+                    lastUpdateElem.textContent = `${Math.floor(diff/60)}m ago`;
+                } else {
+                    lastUpdateElem.textContent = `${Math.floor(diff/3600)}h ago`;
+                }
             }
         }
 
         // Initialize Application
         function initApp() {
-            // Initialize MQTT
-            initMQTT();
-            
             // Initialize Chart
             initChart();
             
@@ -1604,10 +1809,15 @@
             updateUI();
             updateConnectionStatus();
             
+            // Initialize MQTT connection
+            setTimeout(() => {
+                initMQTT();
+            }, 1000);
+            
             // Show welcome message
             setTimeout(() => {
-                showToast("VQuail Monitoring System Ready", "success");
-            }, 1000);
+                showToast("VQuail Monitoring System Loading...", "info");
+            }, 500);
             
             // Handle page visibility
             document.addEventListener('visibilitychange', function() {
@@ -1615,6 +1825,13 @@
                     publishStatus();
                 }
             });
+            
+            // Auto-refresh data every 30 seconds
+            setInterval(() => {
+                if (isConnected) {
+                    publishStatus();
+                }
+            }, 30000);
         }
 
         // Start the application when page loads
@@ -1627,6 +1844,9 @@
         window.adjustCalibration = adjustCalibration;
         window.resetCalibration = resetCalibration;
         window.publishStatus = publishStatus;
+        window.showConnectionModal = showConnectionModal;
+        window.closeModal = closeModal;
+        window.retryConnection = retryConnection;
     </script>
 </body>
 </html>
