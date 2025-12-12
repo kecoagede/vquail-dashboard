@@ -443,6 +443,7 @@
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .debug-btn {
@@ -492,7 +493,7 @@
                 <i class="fas fa-dove logo-icon"></i>
                 <div class="logo-text">
                     <h1>VQuail Control Dashboard</h1>
-                    <p>HiveMQ Cloud Connection - Port 8883/8884</p>
+                    <p>HiveMQ Cloud Connection - WebSocket Port 8884</p>
                 </div>
             </div>
             <div class="connection-status">
@@ -636,33 +637,42 @@
                             <span style="font-family: monospace;">514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span><strong>Port 8883:</strong></span>
-                            <span>MQTT over TLS (WebSocket Secure)</span>
+                            <span><strong>Port 8884:</strong></span>
+                            <span>WebSocket (Browser MQTT)</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span><strong>Port 8884:</strong></span>
-                            <span>MQTT over WebSocket (Plain)</span>
+                            <span><strong>Username:</strong></span>
+                            <span style="font-family: monospace;">vquail</span>
                         </div>
                     </div>
                     
                     <div class="debug-buttons">
-                        <button class="debug-btn" onclick="connectWithPort8883()" style="background: var(--success);">
-                            <i class="fas fa-shield-alt"></i> Connect Port 8883 (TLS)
+                        <button class="debug-btn" onclick="connectMQTT()" style="background: var(--success);">
+                            <i class="fas fa-wifi"></i> Connect to MQTT
                         </button>
-                        <button class="debug-btn" onclick="connectWithPort8884()" style="background: var(--primary);">
-                            <i class="fas fa-wifi"></i> Connect Port 8884 (WS)
+                        <button class="debug-btn" onclick="testConnection()" style="background: var(--primary);">
+                            <i class="fas fa-bolt"></i> Test Connection
                         </button>
-                        <button class="debug-btn" onclick="testBothPorts()" style="background: var(--warning);">
-                            <i class="fas fa-bolt"></i> Test Both Ports
+                        <button class="debug-btn" onclick="checkSubscriptions()" style="background: var(--info);">
+                            <i class="fas fa-list-check"></i> Check Subscriptions
+                        </button>
+                        <button class="debug-btn" onclick="testPublish()" style="background: var(--warning);">
+                            <i class="fas fa-paper-plane"></i> Test Publish
                         </button>
                         <button class="debug-btn" onclick="disconnectMQTT()" style="background: var(--danger);">
                             <i class="fas fa-power-off"></i> Disconnect
                         </button>
                     </div>
                     
-                    <div style="margin-top: 15px;">
-                        <strong>Current Connection:</strong>
-                        <span id="currentConnection" style="color: var(--danger);">Not connected</span>
+                    <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <strong>Current Connection:</strong>
+                            <span id="currentConnection" style="color: var(--danger);">Not connected</span>
+                        </div>
+                        <div>
+                            <strong>Last Update:</strong>
+                            <span id="lastUpdate">Never</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -784,16 +794,16 @@
                 <div class="log-container" id="logContainer">
                     <div class="log-entry">
                         <span class="log-time">00:00:00</span>
-                        <span class="log-info">VQuail Dashboard initialized. Ready to connect...</span>
+                        <span class="log-info">VQuail Dashboard initialized. Click "Connect to MQTT" to start...</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>VQuail Control Dashboard | HiveMQ Cloud: Port 8883/8884 | <span id="connectionStatus">Disconnected</span></p>
+            <p>VQuail Control Dashboard | HiveMQ Cloud: WebSocket Port 8884 | <span id="connectionStatus">Disconnected</span></p>
             <p style="margin-top: 5px; font-size: 0.8rem; opacity: 0.7;">
-                Host: 514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud
+                Host: 514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud | Client: <span id="clientId">--</span>
             </p>
         </div>
     </div>
@@ -805,15 +815,16 @@
         const HIVEMQ_CONFIG = {
             host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
             username: 'vquail',
-            password: 'Vquail12345',
-            clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9)
+            password: 'Vquail12345'
         };
+
+        // WebSocket URL (Port 8884 for WebSocket)
+        const WS_URL = 'wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884/mqtt';
 
         // ================= GLOBAL STATE =================
         let mqttClient = null;
         let isConnected = false;
-        let currentPort = null;
-        let lastUpdateTime = null;
+        let clientId = 'web-' + Math.random().toString(36).substr(2, 9);
         
         const systemState = {
             temp: 0,
@@ -841,31 +852,7 @@
         };
 
         // ================= CONNECTION FUNCTIONS =================
-        function connectWithPort8883() {
-            connectMQTT(8883, 'wss');
-        }
-
-        function connectWithPort8884() {
-            connectMQTT(8884, 'ws');
-        }
-
-        function testBothPorts() {
-            logMessage('Testing both ports...', 'info');
-            
-            // First try Port 8883 (TLS)
-            logMessage('Testing Port 8883 (TLS)...', 'info');
-            connectMQTT(8883, 'wss');
-            
-            // If not connected after 5 seconds, try Port 8884
-            setTimeout(() => {
-                if (!isConnected) {
-                    logMessage('Port 8883 failed, trying Port 8884...', 'warning');
-                    connectMQTT(8884, 'ws');
-                }
-            }, 5000);
-        }
-
-        function connectMQTT(port, protocol) {
+        function connectMQTT() {
             // Disconnect existing connection
             if (mqttClient) {
                 mqttClient.end();
@@ -874,43 +861,48 @@
             updateStatus('mqtt', 'connecting');
             document.getElementById('connectionStatus').textContent = 'Connecting...';
             document.getElementById('connectionStatus').style.color = 'var(--warning)';
-            
-            const url = `${protocol}://${HIVEMQ_CONFIG.host}:${port}/mqtt`;
-            currentPort = port;
+            document.getElementById('clientId').textContent = clientId;
             
             const options = {
                 username: HIVEMQ_CONFIG.username,
                 password: HIVEMQ_CONFIG.password,
-                clientId: HIVEMQ_CONFIG.clientId,
+                clientId: clientId,
                 clean: true,
                 reconnectPeriod: 5000,
                 connectTimeout: 10000,
                 rejectUnauthorized: false,
-                protocol: protocol
+                protocolVersion: 4, // MQTT v3.1.1
+                keepalive: 60
             };
             
-            logMessage(`Connecting to ${url}...`, 'info');
-            document.getElementById('currentConnection').textContent = `Connecting to Port ${port}...`;
+            logMessage(`Connecting to ${HIVEMQ_CONFIG.host}...`, 'info');
+            document.getElementById('currentConnection').textContent = `Connecting...`;
             document.getElementById('currentConnection').style.color = 'var(--warning)';
             
             try {
-                mqttClient = mqtt.connect(url, options);
+                console.log('Attempting MQTT connection with options:', options);
+                mqttClient = mqtt.connect(WS_URL, options);
                 
                 mqttClient.on('connect', () => {
+                    console.log('MQTT Connected!');
                     isConnected = true;
                     updateStatus('mqtt', 'connected');
                     document.getElementById('connectionStatus').textContent = 'Connected ✓';
                     document.getElementById('connectionStatus').style.color = 'var(--success)';
-                    document.getElementById('currentConnection').textContent = `Connected via Port ${port} (${protocol.toUpperCase()})`;
+                    document.getElementById('currentConnection').textContent = `Connected (WebSocket)`;
                     document.getElementById('currentConnection').style.color = 'var(--success)';
                     
-                    logMessage(`✓ Connected to HiveMQ Cloud via Port ${port}`, 'success');
-                    showNotification(`Connected via Port ${port}`, 'success');
+                    logMessage(`✓ Connected to HiveMQ Cloud via WebSocket`, 'success');
+                    showNotification('Connected to MQTT broker', 'success');
                     
-                    // Subscribe to topics
+                    // Subscribe to ALL vquail topics
                     mqttClient.subscribe('vquail/#', { qos: 1 }, (err) => {
-                        if (!err) {
-                            logMessage('Subscribed to vquail/#', 'success');
+                        if (err) {
+                            console.error('Subscription error:', err);
+                            logMessage(`Subscription error: ${err.message}`, 'error');
+                        } else {
+                            console.log('Subscribed to vquail/#');
+                            logMessage('Subscribed to all vquail topics', 'success');
                             
                             // Request full status
                             setTimeout(() => {
@@ -921,6 +913,7 @@
                 });
                 
                 mqttClient.on('message', (topic, message) => {
+                    console.log('MQTT Message received:', topic, message.toString());
                     const msg = message.toString();
                     handleMQTTMessage(topic, msg);
                 });
@@ -931,10 +924,11 @@
                     updateStatus('mqtt', 'disconnected');
                     document.getElementById('currentConnection').textContent = `Error: ${error.message}`;
                     document.getElementById('currentConnection').style.color = 'var(--danger)';
-                    showNotification(`Port ${port} failed: ${error.message}`, 'error');
+                    showNotification(`Connection failed: ${error.message}`, 'error');
                 });
                 
                 mqttClient.on('close', () => {
+                    console.log('MQTT Connection closed');
                     if (isConnected) {
                         isConnected = false;
                         logMessage('Disconnected from MQTT broker', 'warning');
@@ -947,10 +941,17 @@
                 });
                 
                 mqttClient.on('reconnect', () => {
+                    console.log('MQTT Reconnecting...');
                     logMessage('Reconnecting...', 'info');
                     updateStatus('mqtt', 'connecting');
-                    document.getElementById('currentConnection').textContent = `Reconnecting to Port ${port}...`;
+                    document.getElementById('currentConnection').textContent = `Reconnecting...`;
                     document.getElementById('currentConnection').style.color = 'var(--warning)';
+                });
+                
+                mqttClient.on('offline', () => {
+                    console.log('MQTT Offline');
+                    logMessage('Connection offline', 'warning');
+                    updateStatus('mqtt', 'disconnected');
                 });
                 
             } catch (error) {
@@ -959,12 +960,14 @@
                 updateStatus('mqtt', 'disconnected');
                 document.getElementById('currentConnection').textContent = `Failed: ${error.message}`;
                 document.getElementById('currentConnection').style.color = 'var(--danger)';
+                showNotification(`Connection error: ${error.message}`, 'error');
             }
         }
 
         function disconnectMQTT() {
             if (mqttClient) {
                 mqttClient.end();
+                isConnected = false;
                 logMessage('Disconnected manually', 'info');
                 showNotification('Disconnected', 'info');
             }
@@ -974,30 +977,49 @@
         function handleMQTTMessage(topic, message) {
             try {
                 const data = JSON.parse(message);
-                updateSystemState(data);
-                lastUpdateTime = new Date();
+                console.log('Parsed MQTT data:', data);
+                
+                updateSystemState(data, topic);
+                updateLastUpdateTime();
                 
             } catch (error) {
-                logMessage(`Error parsing message: ${error.message}`, 'error');
+                console.error('JSON Parse Error:', error);
+                logMessage(`Error parsing message from ${topic}: ${error.message}`, 'error');
+                logMessage(`Raw message: ${message.substring(0, 100)}...`, 'debug');
             }
         }
 
-        function updateSystemState(data) {
+        function updateSystemState(data, topic) {
             const now = new Date();
             
-            // Update all state variables
-            Object.keys(data).forEach(key => {
-                if (systemState[key] !== undefined && data[key] !== undefined) {
-                    systemState[key] = data[key];
-                }
-            });
-            
-            // Always update critical fields
-            if (data.temp !== undefined) systemState.temp = data.temp;
-            if (data.hum !== undefined) systemState.hum = data.hum;
-            if (data.fan !== undefined) systemState.fan = data.fan;
-            if (data.heat !== undefined) systemState.heat = data.heat;
-            if (data.auto !== undefined) systemState.autoMode = data.auto;
+            // Update based on topic
+            if (topic.includes('vquail/status/device') || topic.includes('vquail/status/sensors')) {
+                // Update all state variables from device status
+                Object.keys(data).forEach(key => {
+                    if (systemState[key] !== undefined && data[key] !== undefined) {
+                        systemState[key] = data[key];
+                    }
+                });
+                
+                // Always update critical fields
+                if (data.temp !== undefined) systemState.temp = data.temp;
+                if (data.hum !== undefined) systemState.hum = data.hum;
+                if (data.fan !== undefined) systemState.fan = data.fan;
+                if (data.heat !== undefined) systemState.heat = data.heat;
+                if (data.auto !== undefined) systemState.autoMode = data.auto;
+                if (data.stage !== undefined) systemState.stage = data.stage;
+                if (data.age !== undefined) systemState.age = data.age;
+                if (data.control_channel !== undefined) systemState.controlChannel = data.control_channel;
+                if (data.temp_offset !== undefined) systemState.tempOffset = data.temp_offset;
+                if (data.hum_offset !== undefined) systemState.humOffset = data.hum_offset;
+                if (data.wifi_rssi !== undefined) systemState.wifiRSSI = data.wifi_rssi;
+                if (data.uptime !== undefined) systemState.uptime = parseInt(data.uptime);
+                if (data.alarm_active !== undefined) systemState.alarm = data.alarm_active;
+                if (data.alarm_message !== undefined) systemState.alarmMessage = data.alarm_message;
+                if (data.alarm_source !== undefined) systemState.alarmSource = data.alarm_source;
+                
+                logMessage(`Data update from ${topic}`, 'success');
+            }
             
             systemState.lastUpdated = now.toLocaleTimeString();
             
@@ -1016,6 +1038,7 @@
             document.getElementById('tempOffset').textContent = 
                 (systemState.tempOffset > 0 ? '+' : '') + systemState.tempOffset.toFixed(1) + '°C';
             document.getElementById('tempUpdated').textContent = systemState.lastUpdated;
+            document.getElementById('tempCalValue').textContent = systemState.tempOffset.toFixed(1) + '°C';
             
             // Humidity
             document.getElementById('humidityValue').textContent = systemState.hum.toFixed(1) + '%';
@@ -1023,6 +1046,7 @@
             document.getElementById('humOffset').textContent = 
                 (systemState.humOffset > 0 ? '+' : '') + systemState.humOffset.toFixed(1) + '%';
             document.getElementById('humUpdated').textContent = systemState.lastUpdated;
+            document.getElementById('humCalValue').textContent = systemState.humOffset.toFixed(1) + '%';
             
             // Device states
             document.getElementById('fanState').textContent = systemState.fan ? 'ON' : 'OFF';
@@ -1044,6 +1068,13 @@
             document.getElementById('wifiRSSI').textContent = systemState.wifiRSSI + ' dBm';
             document.getElementById('systemUptime').textContent = formatUptime(systemState.uptime);
             
+            // Control channel
+            document.getElementById('currentControl').textContent = systemState.controlChannel;
+            document.getElementById('currentControl').style.color = 
+                systemState.controlChannel === 'WEB' ? 'var(--warning)' :
+                systemState.controlChannel === 'TFT' ? 'var(--success)' :
+                systemState.controlChannel === 'AUTO' ? 'var(--info)' : 'inherit';
+            
             // Alarm display
             if (systemState.alarm && systemState.alarmMessage) {
                 document.getElementById('alarmContainer').style.display = 'block';
@@ -1056,13 +1087,12 @@
             // Status indicators
             updateStatus('wifi', systemState.wifi ? 'connected' : 'disconnected');
             updateStatus('sensor', systemState.sensor ? 'connected' : 'disconnected');
-            
-            // Control channel
-            document.getElementById('currentControl').textContent = systemState.controlChannel;
-            document.getElementById('currentControl').style.color = 
-                systemState.controlChannel === 'WEB' ? 'var(--warning)' :
-                systemState.controlChannel === 'TFT' ? 'var(--success)' :
-                systemState.controlChannel === 'AUTO' ? 'var(--info)' : 'inherit';
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastUpdate').textContent = timeString;
         }
 
         // ================= CONTROL FUNCTIONS =================
@@ -1221,19 +1251,97 @@
             logMessage('Status update requested', 'info');
         }
 
+        function requestFullStatus() {
+            publishStatus();
+        }
+
+        // ================= DEBUG FUNCTIONS =================
+        function testConnection() {
+            if (!isConnected) {
+                showNotification('Not connected', 'error');
+                return;
+            }
+            
+            logMessage('Testing connection...', 'info');
+            
+            // Test publish to vquail/test topic
+            const testMessage = {
+                test: true,
+                timestamp: Date.now(),
+                message: "Connection test from web dashboard",
+                source: 'web-debug'
+            };
+            
+            mqttClient.publish('vquail/test', JSON.stringify(testMessage), { qos: 1 }, (err) => {
+                if (err) {
+                    console.error('Test publish error:', err);
+                    logMessage(`Test publish failed: ${err.message}`, 'error');
+                    showNotification('Test failed', 'error');
+                } else {
+                    logMessage('Test message sent to vquail/test', 'success');
+                    showNotification('Test message sent', 'success');
+                }
+            });
+        }
+
+        function testPublish() {
+            if (!isConnected) {
+                showNotification('Not connected', 'error');
+                return;
+            }
+            
+            // Test publish to control topic
+            const message = {
+                command: "test",
+                fan: true,
+                heat: false,
+                auto: true,
+                timestamp: Date.now(),
+                source: "web-debug"
+            };
+            
+            mqttClient.publish('vquail/web/control', JSON.stringify(message), { qos: 1 }, (err) => {
+                if (err) {
+                    console.error('Publish error:', err);
+                    logMessage('Publish failed: ' + err.message, 'error');
+                    showNotification('Publish failed', 'error');
+                } else {
+                    logMessage('Test publish to vquail/web/control successful', 'success');
+                    showNotification('Test publish successful', 'success');
+                }
+            });
+        }
+
+        function checkSubscriptions() {
+            if (!isConnected) {
+                showNotification('Not connected', 'error');
+                return;
+            }
+            
+            logMessage('Checking subscriptions...', 'info');
+            
+            // Try to subscribe again
+            mqttClient.subscribe('vquail/#', { qos: 1 }, (err) => {
+                if (err) {
+                    logMessage(`Subscription error: ${err.message}`, 'error');
+                    showNotification('Subscription failed', 'error');
+                } else {
+                    logMessage('Subscribed to vquail/#', 'success');
+                    showNotification('Subscribed to all topics', 'success');
+                }
+            });
+        }
+
         function clearAlarm() {
             if (!isConnected) {
                 showNotification('Not connected to MQTT', 'error');
                 return;
             }
             
+            // Send a test command to trigger status update
             sendTestCommand();
             showNotification('Alarm clear requested', 'info');
             logMessage('Alarm clear requested', 'info');
-        }
-
-        function requestFullStatus() {
-            publishStatus();
         }
 
         // ================= HELPER FUNCTIONS =================
@@ -1249,11 +1357,16 @@
             }
             
             const payload = JSON.stringify(message);
+            console.log('Publishing to', topic, ':', payload);
+            
             mqttClient.publish(topic, payload, { qos: 1, retain: false }, (error) => {
                 if (error) {
                     console.error('Publish error:', error);
                     logMessage(`Publish failed: ${error.message}`, 'error');
                     showNotification('Command failed to send', 'error');
+                } else {
+                    console.log('Publish successful');
+                    logMessage(`Published to ${topic}`, 'success');
                 }
             });
         }
@@ -1317,6 +1430,9 @@
             if (entries.length > 50) {
                 container.removeChild(entries[0]);
             }
+            
+            // Also log to console
+            console.log(`[${time}] ${type.toUpperCase()}: ${message}`);
         }
 
         function showNotification(message, type = 'info') {
@@ -1332,26 +1448,30 @@
 
         // ================= INITIALIZATION =================
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('VQuail Dashboard initialized');
             logMessage('VQuail Dashboard initialized', 'info');
             logMessage(`Host: ${HIVEMQ_CONFIG.host}`, 'info');
-            logMessage('Click "Test Both Ports" to connect', 'info');
+            logMessage('Click "Connect to MQTT" to start', 'info');
             
             // Initialize mode
             toggleMode(true);
             
-            // Auto-connect after 2 seconds
+            // Auto-connect after 1 second
             setTimeout(() => {
-                testBothPorts();
-            }, 2000);
+                connectMQTT();
+            }, 1000);
         });
 
         // Auto-reconnect if disconnected
         setInterval(() => {
             if (!isConnected) {
                 logMessage('Auto-reconnecting...', 'info');
-                testBothPorts();
+                connectMQTT();
             }
         }, 30000); // Every 30 seconds
+
+        // Update time every second
+        setInterval(updateLastUpdateTime, 1000);
     </script>
 </body>
 </html>
