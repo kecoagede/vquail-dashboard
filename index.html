@@ -459,6 +459,15 @@
             gap: 5px;
         }
 
+        .mode-warning {
+            background: var(--warning);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
@@ -585,6 +594,12 @@
                     </div>
                 </div>
 
+                <!-- Mode Warning -->
+                <div class="mode-warning" id="modeWarning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    System is in AUTO mode. Switch to MANUAL mode to control devices.
+                </div>
+
                 <!-- Mode Toggle -->
                 <div class="mode-toggle">
                     <div class="mode-btn active" id="autoMode" onclick="toggleMode(true)">AUTO MODE</div>
@@ -656,8 +671,8 @@
                         <button class="debug-btn" onclick="checkSubscriptions()" style="background: var(--info);">
                             <i class="fas fa-list-check"></i> Check Subscriptions
                         </button>
-                        <button class="debug-btn" onclick="testPublish()" style="background: var(--warning);">
-                            <i class="fas fa-paper-plane"></i> Test Publish
+                        <button class="debug-btn" onclick="testControlCommand()" style="background: var(--warning);">
+                            <i class="fas fa-gamepad"></i> Test Control
                         </button>
                         <button class="debug-btn" onclick="disconnectMQTT()" style="background: var(--danger);">
                             <i class="fas fa-power-off"></i> Disconnect
@@ -723,6 +738,10 @@
                     <div style="display: flex; justify-content: space-between;">
                         <span>Auto Mode: <strong id="autoState">--</strong></span>
                         <span>Override: <strong id="overrideState">--</strong></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <span>Control Channel: <strong id="controlChannel">--</strong></span>
+                        <span>Last Source: <strong id="lastSource">--</strong></span>
                     </div>
                 </div>
             </div>
@@ -825,6 +844,7 @@
         let mqttClient = null;
         let isConnected = false;
         let clientId = 'web-' + Math.random().toString(36).substr(2, 9);
+        let isAutoMode = true; // Track local mode state
         
         const systemState = {
             temp: 0,
@@ -977,7 +997,7 @@
         function handleMQTTMessage(topic, message) {
             try {
                 const data = JSON.parse(message);
-                console.log('Parsed MQTT data:', data);
+                console.log('Parsed MQTT data from', topic, ':', data);
                 
                 updateSystemState(data, topic);
                 updateLastUpdateTime();
@@ -1006,7 +1026,11 @@
                 if (data.hum !== undefined) systemState.hum = data.hum;
                 if (data.fan !== undefined) systemState.fan = data.fan;
                 if (data.heat !== undefined) systemState.heat = data.heat;
-                if (data.auto !== undefined) systemState.autoMode = data.auto;
+                if (data.auto !== undefined) {
+                    systemState.autoMode = data.auto;
+                    isAutoMode = data.auto; // Update local mode state
+                    updateModeUI(data.auto);
+                }
                 if (data.stage !== undefined) systemState.stage = data.stage;
                 if (data.age !== undefined) systemState.age = data.age;
                 if (data.control_channel !== undefined) systemState.controlChannel = data.control_channel;
@@ -1017,6 +1041,7 @@
                 if (data.alarm_active !== undefined) systemState.alarm = data.alarm_active;
                 if (data.alarm_message !== undefined) systemState.alarmMessage = data.alarm_message;
                 if (data.alarm_source !== undefined) systemState.alarmSource = data.alarm_source;
+                if (data.last_control_source !== undefined) systemState.lastSource = data.last_control_source;
                 
                 logMessage(`Data update from ${topic}`, 'success');
             }
@@ -1062,18 +1087,20 @@
             document.getElementById('overrideState').textContent = systemState.override ? 'YES' : 'NO';
             document.getElementById('overrideState').style.color = systemState.override ? 'var(--warning)' : 'var(--info)';
             
-            // System info
-            document.getElementById('lifeStage').textContent = systemState.stage;
-            document.getElementById('quailAge').textContent = systemState.age + ' days';
-            document.getElementById('wifiRSSI').textContent = systemState.wifiRSSI + ' dBm';
-            document.getElementById('systemUptime').textContent = formatUptime(systemState.uptime);
-            
-            // Control channel
+            // Control info
+            document.getElementById('controlChannel').textContent = systemState.controlChannel;
+            document.getElementById('lastSource').textContent = systemState.lastSource || '--';
             document.getElementById('currentControl').textContent = systemState.controlChannel;
             document.getElementById('currentControl').style.color = 
                 systemState.controlChannel === 'WEB' ? 'var(--warning)' :
                 systemState.controlChannel === 'TFT' ? 'var(--success)' :
                 systemState.controlChannel === 'AUTO' ? 'var(--info)' : 'inherit';
+            
+            // System info
+            document.getElementById('lifeStage').textContent = systemState.stage;
+            document.getElementById('quailAge').textContent = systemState.age + ' days';
+            document.getElementById('wifiRSSI').textContent = systemState.wifiRSSI + ' dBm';
+            document.getElementById('systemUptime').textContent = formatUptime(systemState.uptime);
             
             // Alarm display
             if (systemState.alarm && systemState.alarmMessage) {
@@ -1087,6 +1114,26 @@
             // Status indicators
             updateStatus('wifi', systemState.wifi ? 'connected' : 'disconnected');
             updateStatus('sensor', systemState.sensor ? 'connected' : 'disconnected');
+            
+            // Show/hide mode warning
+            if (systemState.autoMode) {
+                document.getElementById('modeWarning').style.display = 'block';
+            } else {
+                document.getElementById('modeWarning').style.display = 'none';
+            }
+        }
+
+        function updateModeUI(isAuto) {
+            document.getElementById('autoMode').classList.toggle('active', isAuto);
+            document.getElementById('manualMode').classList.toggle('active', !isAuto);
+            document.getElementById('autoControls').style.display = isAuto ? 'grid' : 'none';
+            document.getElementById('manualControls').style.display = isAuto ? 'none' : 'grid';
+            
+            if (isAuto) {
+                document.getElementById('modeWarning').style.display = 'block';
+            } else {
+                document.getElementById('modeWarning').style.display = 'none';
+            }
         }
 
         function updateLastUpdateTime() {
@@ -1102,12 +1149,18 @@
                 return;
             }
             
+            if (systemState.autoMode) {
+                showNotification('Cannot control in AUTO mode. Switch to MANUAL mode first.', 'warning');
+                return;
+            }
+            
             const command = {
                 [device]: state,
                 timestamp: Date.now(),
                 source: 'web'
             };
             
+            console.log('Sending control command:', command);
             publishCommand(command);
             showNotification(`${device.toUpperCase()} ${state ? 'ON' : 'OFF'}`, 'success');
             logMessage(`Control: ${device} → ${state ? 'ON' : 'OFF'}`, 'info');
@@ -1131,15 +1184,11 @@
             };
             
             publishCommand(command);
-            
-            // Update UI
-            document.getElementById('autoMode').classList.toggle('active', auto);
-            document.getElementById('manualMode').classList.toggle('active', !auto);
-            document.getElementById('autoControls').style.display = auto ? 'grid' : 'none';
-            document.getElementById('manualControls').style.display = auto ? 'none' : 'grid';
-            
             showNotification(`${auto ? 'AUTO' : 'MANUAL'} mode activated`, 'success');
             logMessage(`Mode: ${auto ? 'AUTO' : 'MANUAL'}`, 'info');
+            
+            // Update local UI immediately
+            updateModeUI(auto);
         }
 
         function adjustCalibration(type, adjustment) {
@@ -1284,30 +1333,32 @@
             });
         }
 
-        function testPublish() {
+        function testControlCommand() {
             if (!isConnected) {
                 showNotification('Not connected', 'error');
                 return;
             }
             
-            // Test publish to control topic
+            logMessage('Testing control command...', 'info');
+            
+            // Test control command
             const message = {
-                command: "test",
                 fan: true,
                 heat: false,
-                auto: true,
+                auto: false,
                 timestamp: Date.now(),
-                source: "web-debug"
+                source: "web-debug",
+                test: true
             };
             
             mqttClient.publish('vquail/web/control', JSON.stringify(message), { qos: 1 }, (err) => {
                 if (err) {
-                    console.error('Publish error:', err);
-                    logMessage('Publish failed: ' + err.message, 'error');
-                    showNotification('Publish failed', 'error');
+                    console.error('Control test error:', err);
+                    logMessage('Control test failed: ' + err.message, 'error');
+                    showNotification('Control test failed', 'error');
                 } else {
-                    logMessage('Test publish to vquail/web/control successful', 'success');
-                    showNotification('Test publish successful', 'success');
+                    logMessage('Control test sent to vquail/web/control', 'success');
+                    showNotification('Control test sent - check ESP32 serial monitor', 'success');
                 }
             });
         }
@@ -1365,7 +1416,7 @@
                     logMessage(`Publish failed: ${error.message}`, 'error');
                     showNotification('Command failed to send', 'error');
                 } else {
-                    console.log('Publish successful');
+                    console.log('Publish successful to', topic);
                     logMessage(`Published to ${topic}`, 'success');
                 }
             });
