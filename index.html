@@ -439,13 +439,6 @@
             border-radius: 10px;
         }
 
-        .debug-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
         .debug-buttons {
             display: flex;
             gap: 10px;
@@ -463,53 +456,6 @@
             display: flex;
             align-items: center;
             gap: 5px;
-        }
-
-        .connection-methods {
-            margin-top: 15px;
-        }
-
-        .method-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-        }
-
-        .method-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--gray);
-        }
-
-        .method-status.pending { background: var(--warning); animation: pulse 1s infinite; }
-        .method-status.success { background: var(--success); }
-        .method-status.failed { background: var(--danger); }
-        .method-status.active { background: var(--primary); box-shadow: 0 0 5px var(--primary); }
-
-        .method-details {
-            flex: 1;
-            font-size: 0.9rem;
-        }
-
-        .method-name {
-            font-weight: 600;
-        }
-
-        .method-url {
-            font-size: 0.8rem;
-            color: var(--gray);
-            word-break: break-all;
-        }
-
-        .current-method {
-            background: #e3f2fd;
-            border-color: var(--primary);
         }
 
         @media (max-width: 768px) {
@@ -546,7 +492,7 @@
                 <i class="fas fa-dove logo-icon"></i>
                 <div class="logo-text">
                     <h1>VQuail Control Dashboard</h1>
-                    <p>Multi-Connection Web Interface v3.0</p>
+                    <p>HiveMQ Cloud Connection - Port 8883/8884</p>
                 </div>
             </div>
             <div class="connection-status">
@@ -678,36 +624,45 @@
                     </button>
                 </div>
 
-                <!-- Multi-Connection Debug Panel -->
+                <!-- Connection Panel -->
                 <div class="connection-debug">
-                    <div class="debug-header">
-                        <h3 style="margin: 0; color: var(--dark);">
-                            <i class="fas fa-plug"></i> Multi-Connection Tester
-                        </h3>
-                        <div style="display: flex; gap: 5px;">
-                            <span id="currentMethod" style="font-size: 0.9rem; color: var(--info); font-weight: 600;">
-                                No active connection
-                            </span>
+                    <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--dark);">
+                        <i class="fas fa-plug"></i> Connection Settings
+                    </h4>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span><strong>Host:</strong></span>
+                            <span style="font-family: monospace;">514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span><strong>Port 8883:</strong></span>
+                            <span>MQTT over TLS (WebSocket Secure)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span><strong>Port 8884:</strong></span>
+                            <span>MQTT over WebSocket (Plain)</span>
                         </div>
                     </div>
                     
                     <div class="debug-buttons">
-                        <button class="debug-btn" onclick="startMultiConnect()" id="connectAllBtn">
-                            <i class="fas fa-bolt"></i> Test All Connections
+                        <button class="debug-btn" onclick="connectWithPort8883()" style="background: var(--success);">
+                            <i class="fas fa-shield-alt"></i> Connect Port 8883 (TLS)
                         </button>
-                        <button class="debug-btn" onclick="forceReconnect()" style="background: var(--warning);">
-                            <i class="fas fa-redo"></i> Reconnect
+                        <button class="debug-btn" onclick="connectWithPort8884()" style="background: var(--primary);">
+                            <i class="fas fa-wifi"></i> Connect Port 8884 (WS)
                         </button>
-                        <button class="debug-btn" onclick="testWebSocket()" style="background: var(--primary);">
-                            <i class="fas fa-wifi"></i> Test WebSocket
+                        <button class="debug-btn" onclick="testBothPorts()" style="background: var(--warning);">
+                            <i class="fas fa-bolt"></i> Test Both Ports
                         </button>
-                        <button class="debug-btn" onclick="showConnectionDetails()" style="background: var(--dark);">
-                            <i class="fas fa-info-circle"></i> Details
+                        <button class="debug-btn" onclick="disconnectMQTT()" style="background: var(--danger);">
+                            <i class="fas fa-power-off"></i> Disconnect
                         </button>
                     </div>
                     
-                    <div class="connection-methods" id="connectionMethods">
-                        <!-- Methods will be dynamically added here -->
+                    <div style="margin-top: 15px;">
+                        <strong>Current Connection:</strong>
+                        <span id="currentConnection" style="color: var(--danger);">Not connected</span>
                     </div>
                 </div>
             </div>
@@ -829,16 +784,16 @@
                 <div class="log-container" id="logContainer">
                     <div class="log-entry">
                         <span class="log-time">00:00:00</span>
-                        <span class="log-info">VQuail Dashboard v3.0 initialized. Ready to connect...</span>
+                        <span class="log-info">VQuail Dashboard initialized. Ready to connect...</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>VQuail Control Dashboard v3.0 | ESP32-S3 with HiveMQ Multi-Connection | Active: <span id="activeConnection">None</span></p>
+            <p>VQuail Control Dashboard | HiveMQ Cloud: Port 8883/8884 | <span id="connectionStatus">Disconnected</span></p>
             <p style="margin-top: 5px; font-size: 0.8rem; opacity: 0.7;">
-                Temperature Range: Brooding (35-37°C) → Adult (20-24°C) | Humidity Range: 50-70%
+                Host: 514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud
             </p>
         </div>
     </div>
@@ -846,11 +801,18 @@
     <div id="notification" class="notification"></div>
 
     <script>
+        // ================= CONFIGURATION =================
+        const HIVEMQ_CONFIG = {
+            host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
+            username: 'vquail',
+            password: 'Vquail12345',
+            clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9)
+        };
+
         // ================= GLOBAL STATE =================
         let mqttClient = null;
         let isConnected = false;
-        let currentMethodIndex = -1;
-        let connectionTestInProgress = false;
+        let currentPort = null;
         let lastUpdateTime = null;
         
         const systemState = {
@@ -878,431 +840,142 @@
             lastUpdated: '--:--'
         };
 
-        // ================= ALL CONNECTION METHODS =================
-        const CONNECTION_METHODS = [
-            // Method 1: MQTT over TLS (Port 8883) - Standard
-            {
-                id: 'mqtt_tls_8883',
-                name: 'MQTT over TLS (Port 8883)',
-                description: 'Standard MQTT with TLS encryption',
-                host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
-                port: 8883,
-                protocol: 'wss',
-                path: '/mqtt',
-                options: {
-                    username: 'vquail',
-                    password: 'Vquail12345',
-                    clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9),
-                    clean: true,
-                    reconnectPeriod: 5000,
-                    connectTimeout: 10000,
-                    rejectUnauthorized: false,
-                    resubscribe: true
-                },
-                url: 'wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8883/mqtt',
-                status: 'pending',
-                lastTested: null
-            },
-            // Method 2: WebSocket (Port 8884) - Plain WebSocket
-            {
-                id: 'websocket_8884',
-                name: 'WebSocket (Port 8884)',
-                description: 'Plain WebSocket without TLS',
-                host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
-                port: 8884,
-                protocol: 'ws',
-                path: '/mqtt',
-                options: {
-                    username: 'vquail',
-                    password: 'Vquail12345',
-                    clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9),
-                    clean: true,
-                    reconnectPeriod: 5000,
-                    connectTimeout: 10000,
-                    resubscribe: true
-                },
-                url: 'ws://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884/mqtt',
-                status: 'pending',
-                lastTested: null
-            },
-            // Method 3: MQTT over TLS (Port 8883) - Alternative URL
-            {
-                id: 'mqtt_tls_alt',
-                name: 'MQTT TLS (Direct URL)',
-                description: 'Direct MQTT TLS connection',
-                host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
-                port: 8883,
-                protocol: 'wss',
-                path: '',
-                options: {
-                    username: 'vquail',
-                    password: 'Vquail12345',
-                    clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9),
-                    clean: true,
-                    reconnectPeriod: 5000,
-                    connectTimeout: 10000,
-                    rejectUnauthorized: false,
-                    resubscribe: true
-                },
-                url: 'wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8883',
-                status: 'pending',
-                lastTested: null
-            },
-            // Method 4: WebSocket (Port 8884) - Alternative URL
-            {
-                id: 'websocket_alt',
-                name: 'WebSocket (Direct URL)',
-                description: 'Direct WebSocket connection',
-                host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
-                port: 8884,
-                protocol: 'ws',
-                path: '',
-                options: {
-                    username: 'vquail',
-                    password: 'Vquail12345',
-                    clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9),
-                    clean: true,
-                    reconnectPeriod: 5000,
-                    connectTimeout: 10000,
-                    resubscribe: true
-                },
-                url: 'ws://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884',
-                status: 'pending',
-                lastTested: null
-            },
-            // Method 5: MQTT over WebSocket Secure (Port 443)
-            {
-                id: 'wss_443',
-                name: 'WSS (Port 443)',
-                description: 'WebSocket Secure on HTTPS port',
-                host: '514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud',
-                port: 443,
-                protocol: 'wss',
-                path: '/mqtt',
-                options: {
-                    username: 'vquail',
-                    password: 'Vquail12345',
-                    clientId: 'vquail-web-' + Math.random().toString(36).substr(2, 9),
-                    clean: true,
-                    reconnectPeriod: 5000,
-                    connectTimeout: 10000,
-                    rejectUnauthorized: false,
-                    resubscribe: true
-                },
-                url: 'wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:443/mqtt',
-                status: 'pending',
-                lastTested: null
-            }
-        ];
+        // ================= CONNECTION FUNCTIONS =================
+        function connectWithPort8883() {
+            connectMQTT(8883, 'wss');
+        }
 
-        // ================= INITIALIZATION =================
-        document.addEventListener('DOMContentLoaded', () => {
-            logMessage('VQuail Dashboard v3.0 initialized', 'info');
-            logMessage('Testing all available HiveMQ connection methods...', 'info');
+        function connectWithPort8884() {
+            connectMQTT(8884, 'ws');
+        }
+
+        function testBothPorts() {
+            logMessage('Testing both ports...', 'info');
             
-            // Render connection methods UI
-            renderConnectionMethods();
+            // First try Port 8883 (TLS)
+            logMessage('Testing Port 8883 (TLS)...', 'info');
+            connectMQTT(8883, 'wss');
             
-            // Initialize mode
-            toggleMode(true);
-            
-            // Start testing all connections
+            // If not connected after 5 seconds, try Port 8884
             setTimeout(() => {
-                startMultiConnect();
-            }, 1000);
-        });
-
-        // ================= CONNECTION METHODS UI =================
-        function renderConnectionMethods() {
-            const container = document.getElementById('connectionMethods');
-            container.innerHTML = '';
-            
-            CONNECTION_METHODS.forEach((method, index) => {
-                const methodElement = document.createElement('div');
-                methodElement.className = `method-item ${currentMethodIndex === index ? 'current-method' : ''}`;
-                methodElement.id = `method-${method.id}`;
-                
-                const statusClass = method.status || 'pending';
-                
-                methodElement.innerHTML = `
-                    <div class="method-status ${statusClass}"></div>
-                    <div class="method-details">
-                        <div class="method-name">${method.name}</div>
-                        <div class="method-url">${method.url}</div>
-                    </div>
-                    <button onclick="testSingleMethod(${index})" style="background: none; border: 1px solid var(--gray); border-radius: 3px; padding: 2px 8px; font-size: 0.8rem; cursor: pointer;">
-                        Test
-                    </button>
-                `;
-                
-                container.appendChild(methodElement);
-            });
-        }
-
-        function updateMethodStatus(index, status, message = '') {
-            if (index >= 0 && index < CONNECTION_METHODS.length) {
-                CONNECTION_METHODS[index].status = status;
-                CONNECTION_METHODS[index].lastTested = new Date();
-                
-                const methodElement = document.getElementById(`method-${CONNECTION_METHODS[index].id}`);
-                if (methodElement) {
-                    const statusDot = methodElement.querySelector('.method-status');
-                    statusDot.className = `method-status ${status}`;
-                    
-                    if (status === 'active') {
-                        methodElement.classList.add('current-method');
-                    } else {
-                        methodElement.classList.remove('current-method');
-                    }
+                if (!isConnected) {
+                    logMessage('Port 8883 failed, trying Port 8884...', 'warning');
+                    connectMQTT(8884, 'ws');
                 }
-                
-                if (message) {
-                    logMessage(`${CONNECTION_METHODS[index].name}: ${message}`, 
-                              status === 'success' || status === 'active' ? 'success' : 
-                              status === 'failed' ? 'error' : 'info');
-                }
-            }
-        }
-
-        // ================= MULTI-CONNECTION TESTER =================
-        function startMultiConnect() {
-            if (connectionTestInProgress) {
-                logMessage('Connection test already in progress', 'warning');
-                return;
-            }
-            
-            connectionTestInProgress = true;
-            document.getElementById('connectAllBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
-            document.getElementById('connectAllBtn').disabled = true;
-            
-            logMessage('=== Starting multi-connection test ===', 'info');
-            
-            // Reset all methods to pending
-            CONNECTION_METHODS.forEach((method, index) => {
-                updateMethodStatus(index, 'pending');
-            });
-            
-            // Test methods sequentially
-            testMethodSequence(0);
-        }
-
-        function testMethodSequence(index) {
-            if (index >= CONNECTION_METHODS.length) {
-                // All methods tested
-                connectionTestInProgress = false;
-                document.getElementById('connectAllBtn').innerHTML = '<i class="fas fa-bolt"></i> Test All Connections';
-                document.getElementById('connectAllBtn').disabled = false;
-                
-                if (currentMethodIndex === -1) {
-                    logMessage('=== All connection methods failed ===', 'error');
-                    showNotification('All connection methods failed. Check HiveMQ settings.', 'error');
-                } else {
-                    logMessage('=== Connection test complete ===', 'success');
-                    showNotification(`Connected via ${CONNECTION_METHODS[currentMethodIndex].name}`, 'success');
-                }
-                return;
-            }
-            
-            logMessage(`Testing method ${index + 1}/${CONNECTION_METHODS.length}: ${CONNECTION_METHODS[index].name}`, 'info');
-            updateMethodStatus(index, 'pending', 'Testing...');
-            
-            // Test this method
-            testSingleMethod(index, () => {
-                // Move to next method after delay
-                setTimeout(() => {
-                    testMethodSequence(index + 1);
-                }, 1000);
-            });
-        }
-
-        function testSingleMethod(index, callback) {
-            const method = CONNECTION_METHODS[index];
-            
-            // Create a test client for this method
-            const testClient = mqtt.connect(method.url, method.options);
-            
-            const timeout = setTimeout(() => {
-                testClient.end();
-                updateMethodStatus(index, 'failed', 'Timeout');
-                if (callback) callback();
             }, 5000);
-            
-            testClient.on('connect', () => {
-                clearTimeout(timeout);
-                
-                // Check if we should use this method
-                if (currentMethodIndex === -1 || index < currentMethodIndex) {
-                    // This is a better (or first successful) method
-                    if (currentMethodIndex >= 0) {
-                        // Disconnect from current method
-                        if (mqttClient) {
-                            mqttClient.end();
-                        }
-                    }
-                    
-                    currentMethodIndex = index;
-                    updateMethodStatus(index, 'active', 'Connected and selected');
-                    document.getElementById('currentMethod').textContent = method.name;
-                    document.getElementById('activeConnection').textContent = method.name;
-                    
-                    // Use this client as our main connection
-                    mqttClient = testClient;
-                    setupMainClientHandlers();
-                    isConnected = true;
-                    updateStatus('mqtt', 'connected');
-                    
-                    // Request status update
-                    setTimeout(() => {
-                        requestFullStatus();
-                    }, 1000);
-                    
-                } else {
-                    // We already have a working connection, just note this method works
-                    updateMethodStatus(index, 'success', 'Works (but using better method)');
-                    testClient.end();
-                }
-                
-                if (callback) callback();
-            });
-            
-            testClient.on('error', (error) => {
-                clearTimeout(timeout);
-                updateMethodStatus(index, 'failed', `Error: ${error.message}`);
-                testClient.end();
-                if (callback) callback();
-            });
         }
 
-        function setupMainClientHandlers() {
-            if (!mqttClient) return;
-            
-            mqttClient.on('message', (topic, message) => {
-                const msg = message.toString();
-                handleMQTTMessage(topic, msg);
-            });
-            
-            mqttClient.on('error', (error) => {
-                console.error('Main client error:', error);
-                logMessage(`Main connection error: ${error.message}`, 'error');
-                isConnected = false;
-                updateStatus('mqtt', 'disconnected');
-                updateMethodStatus(currentMethodIndex, 'failed', `Error: ${error.message}`);
-                currentMethodIndex = -1;
-                
-                // Try to reconnect with another method
-                setTimeout(() => {
-                    startMultiConnect();
-                }, 3000);
-            });
-            
-            mqttClient.on('close', () => {
-                if (isConnected) {
-                    isConnected = false;
-                    logMessage('Main connection closed', 'warning');
-                    updateStatus('mqtt', 'disconnected');
-                }
-            });
-            
-            mqttClient.on('reconnect', () => {
-                logMessage('Main client reconnecting...', 'info');
-                updateStatus('mqtt', 'connecting');
-            });
-            
-            // Subscribe to topics
-            mqttClient.subscribe('vquail/#', { qos: 1 }, (err) => {
-                if (!err) {
-                    logMessage('Subscribed to vquail/#', 'success');
-                }
-            });
-        }
-
-        // ================= WEB SOCKET TEST =================
-        function testWebSocket() {
-            logMessage('Testing raw WebSocket connections...', 'info');
-            
-            const testUrls = [
-                'wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8883/mqtt',
-                'ws://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884/mqtt',
-                'wss://514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:443/mqtt'
-            ];
-            
-            testUrls.forEach(url => {
-                try {
-                    const ws = new WebSocket(url);
-                    
-                    ws.onopen = () => {
-                        logMessage(`✓ WebSocket OK: ${url}`, 'success');
-                        ws.close();
-                    };
-                    
-                    ws.onerror = (error) => {
-                        logMessage(`✗ WebSocket Error: ${url}`, 'error');
-                    };
-                    
-                    ws.onclose = () => {
-                        logMessage(`WebSocket closed: ${url}`, 'debug');
-                    };
-                    
-                    setTimeout(() => {
-                        if (ws.readyState === WebSocket.CONNECTING) {
-                            logMessage(`✗ WebSocket Timeout: ${url}`, 'warning');
-                            ws.close();
-                        }
-                    }, 5000);
-                    
-                } catch (error) {
-                    logMessage(`✗ WebSocket Exception: ${url} - ${error.message}`, 'error');
-                }
-            });
-        }
-
-        // ================= FORCE RECONNECT =================
-        function forceReconnect() {
-            logMessage('Forcing reconnection...', 'info');
-            
+        function connectMQTT(port, protocol) {
+            // Disconnect existing connection
             if (mqttClient) {
                 mqttClient.end();
             }
             
-            isConnected = false;
-            currentMethodIndex = -1;
-            updateStatus('mqtt', 'disconnected');
+            updateStatus('mqtt', 'connecting');
+            document.getElementById('connectionStatus').textContent = 'Connecting...';
+            document.getElementById('connectionStatus').style.color = 'var(--warning)';
             
-            // Reset all methods
-            CONNECTION_METHODS.forEach((method, index) => {
-                updateMethodStatus(index, 'pending');
-            });
+            const url = `${protocol}://${HIVEMQ_CONFIG.host}:${port}/mqtt`;
+            currentPort = port;
             
-            // Start new connection test
-            setTimeout(() => {
-                startMultiConnect();
-            }, 1000);
+            const options = {
+                username: HIVEMQ_CONFIG.username,
+                password: HIVEMQ_CONFIG.password,
+                clientId: HIVEMQ_CONFIG.clientId,
+                clean: true,
+                reconnectPeriod: 5000,
+                connectTimeout: 10000,
+                rejectUnauthorized: false,
+                protocol: protocol
+            };
+            
+            logMessage(`Connecting to ${url}...`, 'info');
+            document.getElementById('currentConnection').textContent = `Connecting to Port ${port}...`;
+            document.getElementById('currentConnection').style.color = 'var(--warning)';
+            
+            try {
+                mqttClient = mqtt.connect(url, options);
+                
+                mqttClient.on('connect', () => {
+                    isConnected = true;
+                    updateStatus('mqtt', 'connected');
+                    document.getElementById('connectionStatus').textContent = 'Connected ✓';
+                    document.getElementById('connectionStatus').style.color = 'var(--success)';
+                    document.getElementById('currentConnection').textContent = `Connected via Port ${port} (${protocol.toUpperCase()})`;
+                    document.getElementById('currentConnection').style.color = 'var(--success)';
+                    
+                    logMessage(`✓ Connected to HiveMQ Cloud via Port ${port}`, 'success');
+                    showNotification(`Connected via Port ${port}`, 'success');
+                    
+                    // Subscribe to topics
+                    mqttClient.subscribe('vquail/#', { qos: 1 }, (err) => {
+                        if (!err) {
+                            logMessage('Subscribed to vquail/#', 'success');
+                            
+                            // Request full status
+                            setTimeout(() => {
+                                requestFullStatus();
+                            }, 1000);
+                        }
+                    });
+                });
+                
+                mqttClient.on('message', (topic, message) => {
+                    const msg = message.toString();
+                    handleMQTTMessage(topic, msg);
+                });
+                
+                mqttClient.on('error', (error) => {
+                    console.error('MQTT Error:', error);
+                    logMessage(`✗ Connection error: ${error.message}`, 'error');
+                    updateStatus('mqtt', 'disconnected');
+                    document.getElementById('currentConnection').textContent = `Error: ${error.message}`;
+                    document.getElementById('currentConnection').style.color = 'var(--danger)';
+                    showNotification(`Port ${port} failed: ${error.message}`, 'error');
+                });
+                
+                mqttClient.on('close', () => {
+                    if (isConnected) {
+                        isConnected = false;
+                        logMessage('Disconnected from MQTT broker', 'warning');
+                        updateStatus('mqtt', 'disconnected');
+                        document.getElementById('connectionStatus').textContent = 'Disconnected';
+                        document.getElementById('connectionStatus').style.color = 'var(--danger)';
+                        document.getElementById('currentConnection').textContent = 'Disconnected';
+                        document.getElementById('currentConnection').style.color = 'var(--danger)';
+                    }
+                });
+                
+                mqttClient.on('reconnect', () => {
+                    logMessage('Reconnecting...', 'info');
+                    updateStatus('mqtt', 'connecting');
+                    document.getElementById('currentConnection').textContent = `Reconnecting to Port ${port}...`;
+                    document.getElementById('currentConnection').style.color = 'var(--warning)';
+                });
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                logMessage(`✗ Connection failed: ${error.message}`, 'error');
+                updateStatus('mqtt', 'disconnected');
+                document.getElementById('currentConnection').textContent = `Failed: ${error.message}`;
+                document.getElementById('currentConnection').style.color = 'var(--danger)';
+            }
         }
 
-        // ================= CONNECTION DETAILS =================
-        function showConnectionDetails() {
-            logMessage('=== Connection Details ===', 'info');
-            logMessage(`Active method: ${currentMethodIndex >= 0 ? CONNECTION_METHODS[currentMethodIndex].name : 'None'}`, 'info');
-            logMessage(`Connected: ${isConnected ? 'Yes' : 'No'}`, 'info');
-            logMessage(`Client ID: ${mqttClient ? mqttClient.options.clientId : 'None'}`, 'info');
-            
-            CONNECTION_METHODS.forEach((method, index) => {
-                const status = method.status || 'not tested';
-                logMessage(`${index + 1}. ${method.name}: ${status}`, 'debug');
-            });
+        function disconnectMQTT() {
+            if (mqttClient) {
+                mqttClient.end();
+                logMessage('Disconnected manually', 'info');
+                showNotification('Disconnected', 'info');
+            }
         }
 
         // ================= MESSAGE HANDLING =================
         function handleMQTTMessage(topic, message) {
             try {
                 const data = JSON.parse(message);
-                const now = new Date();
-                
-                // Update system state
                 updateSystemState(data);
-                
-                // Update last update time
-                lastUpdateTime = now;
+                lastUpdateTime = new Date();
                 
             } catch (error) {
                 logMessage(`Error parsing message: ${error.message}`, 'error');
@@ -1311,7 +984,6 @@
 
         function updateSystemState(data) {
             const now = new Date();
-            lastUpdateTime = now;
             
             // Update all state variables
             Object.keys(data).forEach(key => {
@@ -1353,8 +1025,11 @@
             document.getElementById('humUpdated').textContent = systemState.lastUpdated;
             
             // Device states
-            updateDeviceState('fan', systemState.fan);
-            updateDeviceState('heat', systemState.heat);
+            document.getElementById('fanState').textContent = systemState.fan ? 'ON' : 'OFF';
+            document.getElementById('fanState').style.color = systemState.fan ? 'var(--success)' : 'var(--danger)';
+            
+            document.getElementById('heatState').textContent = systemState.heat ? 'ON' : 'OFF';
+            document.getElementById('heatState').style.color = systemState.heat ? 'var(--success)' : 'var(--danger)';
             
             // Mode states
             document.getElementById('autoState').textContent = systemState.autoMode ? 'ON' : 'OFF';
@@ -1368,99 +1043,26 @@
             document.getElementById('quailAge').textContent = systemState.age + ' days';
             document.getElementById('wifiRSSI').textContent = systemState.wifiRSSI + ' dBm';
             document.getElementById('systemUptime').textContent = formatUptime(systemState.uptime);
-            document.getElementById('lastUpdated').textContent = systemState.lastUpdated;
             
             // Alarm display
-            updateAlarmDisplay();
+            if (systemState.alarm && systemState.alarmMessage) {
+                document.getElementById('alarmContainer').style.display = 'block';
+                document.getElementById('alarmMessage').textContent = systemState.alarmMessage;
+                document.getElementById('alarmSource').textContent = 'Source: ' + systemState.alarmSource;
+            } else {
+                document.getElementById('alarmContainer').style.display = 'none';
+            }
             
             // Status indicators
             updateStatus('wifi', systemState.wifi ? 'connected' : 'disconnected');
             updateStatus('sensor', systemState.sensor ? 'connected' : 'disconnected');
             
-            // Stage indicators
-            updateTemperatureStage(systemState.temp);
-            updateHumidityStage(systemState.hum);
-            
-            // Calibration values
-            document.getElementById('tempCalValue').textContent = 
-                (systemState.tempOffset > 0 ? '+' : '') + systemState.tempOffset.toFixed(1) + '°C';
-            document.getElementById('humCalValue').textContent = 
-                (systemState.humOffset > 0 ? '+' : '') + systemState.humOffset.toFixed(1) + '%';
-        }
-
-        function updateDeviceState(device, state) {
-            const element = document.getElementById(device + 'State');
-            element.textContent = state ? 'ON' : 'OFF';
-            element.style.color = state ? 'var(--success)' : 'var(--danger)';
-        }
-
-        function updateAlarmDisplay() {
-            const container = document.getElementById('alarmContainer');
-            
-            if (systemState.alarm && systemState.alarmMessage) {
-                container.style.display = 'block';
-                document.getElementById('alarmMessage').textContent = systemState.alarmMessage;
-                document.getElementById('alarmSource').textContent = 'Source: ' + systemState.alarmSource;
-                
-                if (systemState.alarmMessage.toLowerCase().includes('critical')) {
-                    container.style.animation = 'pulse 1s infinite';
-                }
-            } else {
-                container.style.display = 'none';
-            }
-        }
-
-        function updateTemperatureStage(temp) {
-            let stage = 'Normal';
-            let color = 'var(--success)';
-            
-            if (temp < 20) {
-                stage = 'Too Cold';
-                color = 'var(--info)';
-            } else if (temp < 24) {
-                stage = 'Adult Range';
-                color = 'var(--success)';
-            } else if (temp < 28) {
-                stage = 'Grower Range';
-                color = 'var(--success)';
-            } else if (temp < 32) {
-                stage = 'Brood Warm';
-                color = 'var(--warning)';
-            } else if (temp < 35) {
-                stage = 'Brood Hot';
-                color = 'var(--warning)';
-            } else {
-                stage = 'Too Hot';
-                color = 'var(--danger)';
-            }
-            
-            document.getElementById('tempStage').textContent = stage;
-            document.getElementById('tempStage').style.color = color;
-        }
-
-        function updateHumidityStage(hum) {
-            let stage = 'Normal';
-            let color = 'var(--success)';
-            
-            if (hum < 50) {
-                stage = 'Too Dry';
-                color = 'var(--warning)';
-            } else if (hum < 60) {
-                stage = 'Adult Range';
-                color = 'var(--success)';
-            } else if (hum < 65) {
-                stage = 'Grower Range';
-                color = 'var(--success)';
-            } else if (hum < 70) {
-                stage = 'Brood Range';
-                color = 'var(--success)';
-            } else {
-                stage = 'Too Humid';
-                color = 'var(--warning)';
-            }
-            
-            document.getElementById('humStage').textContent = stage;
-            document.getElementById('humStage').style.color = color;
+            // Control channel
+            document.getElementById('currentControl').textContent = systemState.controlChannel;
+            document.getElementById('currentControl').style.color = 
+                systemState.controlChannel === 'WEB' ? 'var(--warning)' :
+                systemState.controlChannel === 'TFT' ? 'var(--success)' :
+                systemState.controlChannel === 'AUTO' ? 'var(--info)' : 'inherit';
         }
 
         // ================= CONTROL FUNCTIONS =================
@@ -1728,13 +1330,28 @@
             }, 3000);
         }
 
+        // ================= INITIALIZATION =================
+        document.addEventListener('DOMContentLoaded', () => {
+            logMessage('VQuail Dashboard initialized', 'info');
+            logMessage(`Host: ${HIVEMQ_CONFIG.host}`, 'info');
+            logMessage('Click "Test Both Ports" to connect', 'info');
+            
+            // Initialize mode
+            toggleMode(true);
+            
+            // Auto-connect after 2 seconds
+            setTimeout(() => {
+                testBothPorts();
+            }, 2000);
+        });
+
         // Auto-reconnect if disconnected
         setInterval(() => {
-            if (!isConnected && !connectionTestInProgress) {
+            if (!isConnected) {
                 logMessage('Auto-reconnecting...', 'info');
-                forceReconnect();
+                testBothPorts();
             }
-        }, 60000); // Every 60 seconds
+        }, 30000); // Every 30 seconds
     </script>
 </body>
 </html>
