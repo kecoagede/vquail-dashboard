@@ -5,38 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VQuail Monitoring Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         :root {
-            --primary: #2A6BFF;
-            --primary-light: #4A8AFF;
-            --primary-dark: #1A4FC7;
-            --secondary: #6C63FF;
-            --secondary-light: #837BFF;
-            --success: #00C9A7;
-            --success-light: #2FE4C6;
-            --danger: #FF4D7C;
-            --danger-light: #FF6D98;
-            --warning: #FFB74D;
-            --warning-light: #FFC97A;
-            --info: #7B61FF;
-            --info-light: #937DFF;
-            --dark: #121826;
-            --dark-light: #1E2538;
-            --light: #F8FAFC;
-            --gray: #94A3B8;
-            --gray-light: #CBD5E1;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            --border-radius: 20px;
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --success: #4cc9f0;
+            --success-light: #38b9e0;
+            --danger: #f72585;
+            --danger-light: #f557a1;
+            --warning: #f8961e;
+            --warning-light: #f9b458;
+            --info: #7209b7;
+            --info-light: #9d4edd;
+            --dark: #1a1a2e;
+            --dark-light: #16213e;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #adb5bd;
+            --card-bg: #ffffff;
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --border-radius: 16px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary));
-            --gradient-success: linear-gradient(135deg, var(--success), #00D4B4);
-            --gradient-danger: linear-gradient(135deg, var(--danger), #FF6B9D);
-            --gradient-warning: linear-gradient(135deg, var(--warning), #FFCA67);
-            --gradient-info: linear-gradient(135deg, var(--info), #8A74FF);
         }
 
         * {
@@ -47,26 +39,10 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             min-height: 100vh;
-            color: var(--light);
+            color: var(--dark);
             overflow-x: hidden;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(42, 107, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(0, 201, 167, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
         }
 
         /* Login Page Styles */
@@ -76,207 +52,130 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 0% 0%, rgba(42, 107, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(108, 99, 255, 0.2) 0%, transparent 50%);
-            animation: gradientShift 20s ease infinite alternate;
-        }
-
-        @keyframes gradientShift {
-            0% { transform: translate(0%, 0%); }
-            100% { transform: translate(-10%, -10%); }
         }
 
         .login-card {
-            background: rgba(18, 24, 38, 0.8);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 60px 50px;
+            border-radius: var(--border-radius);
+            padding: 50px 40px;
             width: 100%;
-            max-width: 480px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            position: relative;
-            z-index: 1;
-            transform: translateY(0);
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .login-card:hover {
-            transform: translateY(-5px);
         }
 
         .login-logo {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
-        .logo-circle {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 25px;
-            position: relative;
-        }
-
-        .logo-circle-inner {
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 50%;
+        .login-logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: 40px;
             color: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(42, 107, 255, 0.4);
-        }
-
-        .logo-circle-inner::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.4);
         }
 
         .login-logo h1 {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
+            color: var(--dark);
             margin-bottom: 8px;
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, var(--primary), var(--info));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-family: 'Poppins', sans-serif;
         }
 
         .login-logo p {
             font-size: 14px;
             color: var(--gray);
             font-weight: 300;
-            letter-spacing: 0.5px;
         }
 
         .login-form {
-            margin-top: 40px;
+            margin-top: 30px;
         }
 
         .form-group {
-            margin-bottom: 28px;
+            margin-bottom: 25px;
             text-align: left;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-size: 14px;
             font-weight: 500;
-            color: var(--light);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            color: var(--dark);
         }
 
-        .input-group {
+        .input-with-icon {
             position: relative;
         }
 
-        .input-group i {
+        .input-with-icon i {
             position: absolute;
-            left: 20px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray);
-            font-size: 20px;
-            z-index: 1;
-            transition: var(--transition);
+            font-size: 18px;
         }
 
         .form-control {
             width: 100%;
-            padding: 18px 20px 18px 55px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            border-radius: 14px;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 16px;
             font-family: 'Inter', sans-serif;
             transition: var(--transition);
-            color: var(--light);
-            backdrop-filter: blur(10px);
-        }
-
-        .form-control::placeholder {
-            color: rgba(148, 163, 184, 0.6);
+            background: white;
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(42, 107, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
 
-        .form-control:focus + i {
-            color: var(--primary);
+        .form-control.error {
+            border-color: var(--danger);
         }
 
         .error-message {
             color: var(--danger);
             font-size: 13px;
-            margin-top: 8px;
+            margin-top: 5px;
             display: none;
-            font-weight: 500;
         }
 
         .login-btn {
             width: 100%;
-            padding: 20px;
-            background: var(--gradient-primary);
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
             border: none;
-            border-radius: 14px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            font-family: 'Poppins', sans-serif;
-            margin-top: 15px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s;
+            font-family: 'Inter', sans-serif;
+            margin-top: 10px;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(42, 107, 255, 0.3);
-        }
-
-        .login-btn:hover::before {
-            left: 100%;
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.3);
         }
 
         .login-btn:active {
@@ -284,7 +183,7 @@
         }
 
         .login-footer {
-            margin-top: 30px;
+            margin-top: 25px;
             font-size: 13px;
             color: var(--gray);
         }
@@ -293,55 +192,52 @@
             color: var(--primary);
             text-decoration: none;
             font-weight: 500;
-            transition: var(--transition);
         }
 
         .login-footer a:hover {
-            color: var(--primary-light);
             text-decoration: underline;
         }
 
         .security-info {
-            background: linear-gradient(135deg, rgba(42, 107, 255, 0.1), rgba(108, 99, 255, 0.1));
-            padding: 20px;
-            border-radius: 14px;
-            margin-top: 30px;
-            border-left: 4px solid var(--primary);
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.1), rgba(114, 9, 183, 0.1));
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border-left: 4px solid var(--info);
         }
 
         .security-info p {
-            font-size: 13px;
-            color: var(--gray-light);
-            line-height: 1.6;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 12px;
+            color: var(--gray);
+            line-height: 1.5;
         }
 
-        /* Dashboard Container */
+        .security-info i {
+            color: var(--info);
+            margin-right: 8px;
+        }
+
+        /* Hide dashboard initially */
         .app-container {
             display: none;
             max-width: 1600px;
             margin: 0 auto;
-            padding: 25px;
-            position: relative;
+            padding: 20px;
         }
 
-        /* Header */
+        /* Dashboard Styles */
         .app-header {
-            background: linear-gradient(135deg, rgba(30, 37, 56, 0.9), rgba(18, 24, 38, 0.9));
-            backdrop-filter: blur(20px);
+            background: linear-gradient(135deg, var(--dark-light) 0%, var(--dark) 100%);
             color: white;
-            padding: 30px 40px;
-            border-radius: 24px;
-            margin-bottom: 30px;
+            padding: 25px 35px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
-            border: 1px solid var(--card-border);
         }
 
         .app-header::before {
@@ -349,65 +245,48 @@
             position: absolute;
             top: 0;
             right: 0;
-            width: 300px;
+            width: 200px;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03));
-            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05));
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
             z-index: 1;
         }
 
-        .brand-logo {
-            width: 70px;
-            height: 70px;
-            background: var(--gradient-primary);
-            border-radius: 18px;
+        .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            box-shadow: 0 10px 25px rgba(42, 107, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .brand-logo::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
+            font-size: 28px;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
         }
 
         .brand-text h1 {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 8px;
-            background: var(--gradient-primary);
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-family: 'Poppins', sans-serif;
         }
 
         .brand-text p {
             font-size: 14px;
-            color: var(--gray);
+            opacity: 0.8;
             font-weight: 300;
-            letter-spacing: 0.5px;
         }
 
-        /* Connection Panel */
         .connection-panel {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             align-items: center;
             z-index: 1;
         }
@@ -415,54 +294,37 @@
         .connection-status {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px 25px;
-            background: rgba(255, 255, 255, 0.05);
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            min-width: 200px;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             position: relative;
-            flex-shrink: 0;
         }
 
         .status-dot::after {
             content: '';
             position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
 
-        .status-dot.connected { 
-            background: var(--success); 
-            box-shadow: 0 0 20px rgba(0, 201, 167, 0.5);
-        }
+        .status-dot.connected { background: var(--success); }
         .status-dot.connected::after { border: 2px solid var(--success); }
-        .status-dot.connecting { 
-            background: var(--warning);
-            box-shadow: 0 0 20px rgba(255, 183, 77, 0.5);
-        }
+        .status-dot.connecting { background: var(--warning); }
         .status-dot.connecting::after { border: 2px solid var(--warning); }
-        .status-dot.disconnected { 
-            background: var(--danger);
-            box-shadow: 0 0 20px rgba(255, 77, 124, 0.5);
-        }
+        .status-dot.disconnected { background: var(--danger); }
         .status-dot.disconnected::after { border: 2px solid var(--danger); }
 
         @keyframes pulse {
@@ -470,174 +332,126 @@
             100% { opacity: 0; transform: scale(1.5); }
         }
 
-        .status-text {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--light);
-        }
-
         .action-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
 
         .btn {
-            padding: 14px 28px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             letter-spacing: 0.3px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
         }
 
         .btn-primary {
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(42, 107, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.3);
         }
 
         .btn-success {
-            background: var(--gradient-success);
+            background: linear-gradient(135deg, var(--success), var(--success-light));
             color: white;
         }
 
         .btn-danger {
-            background: var(--gradient-danger);
+            background: linear-gradient(135deg, var(--danger), var(--danger-light));
             color: white;
         }
 
         .btn-warning {
-            background: var(--gradient-warning);
-            color: white;
-        }
-
-        .btn-info {
-            background: var(--gradient-info);
+            background: linear-gradient(135deg, var(--warning), var(--warning-light));
             color: white;
         }
 
         .btn-outline {
             background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             color: white;
         }
 
         .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
         }
 
         /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 25px;
+            margin-bottom: 25px;
         }
 
-        /* Card Styles */
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 30px;
+            border-radius: var(--border-radius);
+            padding: 25px;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
-            border: 1px solid var(--card-border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--gradient-primary);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
-            color: var(--light);
+            color: var(--dark);
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-family: 'Poppins', sans-serif;
+            gap: 12px;
         }
 
         .card-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 18px;
             color: white;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .card-icon.primary { background: var(--gradient-primary); }
-        .card-icon.success { background: var(--gradient-success); }
-        .card-icon.danger { background: var(--gradient-danger); }
-        .card-icon.warning { background: var(--gradient-warning); }
-        .card-icon.info { background: var(--gradient-info); }
+        .card-icon.primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+        .card-icon.success { background: linear-gradient(135deg, var(--success), var(--success-light)); }
+        .card-icon.danger { background: linear-gradient(135deg, var(--danger), var(--danger-light)); }
+        .card-icon.warning { background: linear-gradient(135deg, var(--warning), var(--warning-light)); }
+        .card-icon.info { background: linear-gradient(135deg, var(--info), var(--info-light)); }
 
         .card-badge {
-            padding: 8px 18px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--light);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--light);
+            color: var(--gray);
         }
 
         /* Sensor Cards */
@@ -650,35 +464,19 @@
         .sensor-value-container {
             display: flex;
             align-items: baseline;
-            gap: 12px;
-            margin: 25px 0;
-            position: relative;
+            gap: 10px;
+            margin: 15px 0;
         }
 
         .sensor-value {
-            font-size: 64px;
+            font-size: 48px;
             font-weight: 700;
             line-height: 1;
-            font-family: 'Poppins', sans-serif;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
-        }
-
-        .sensor-value::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: var(--gradient-primary);
-            border-radius: 2px;
+            font-family: 'Roboto', sans-serif;
         }
 
         .sensor-unit {
-            font-size: 28px;
+            font-size: 24px;
             color: var(--gray);
             font-weight: 500;
         }
@@ -686,21 +484,14 @@
         .sensor-details {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 15px;
             margin-top: auto;
         }
 
         .detail-item {
-            padding: 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: var(--transition);
-        }
-
-        .detail-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
+            padding: 12px;
+            background: var(--light);
+            border-radius: 10px;
         }
 
         .detail-label {
@@ -708,52 +499,13 @@
             color: var(--gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: 5px;
         }
 
         .detail-value {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 600;
-            color: var(--light);
-            font-family: 'Inter', monospace;
-        }
-
-        /* Temperature Gauge */
-        .gauge-container {
-            position: relative;
-            width: 220px;
-            height: 220px;
-            margin: 20px auto;
-        }
-
-        .gauge-background {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(
-                var(--success) 0% 25%,
-                var(--info) 25% 50%,
-                var(--warning) 50% 75%,
-                var(--danger) 75% 100%
-            );
-            mask: radial-gradient(transparent 85px, black 86px);
-            -webkit-mask: radial-gradient(transparent 85px, black 86px);
-            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.3));
-        }
-
-        .gauge-value {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: 700;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #fff, #e0e7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Roboto', monospace;
         }
 
         /* Control Panel */
@@ -763,55 +515,42 @@
 
         .mode-toggle {
             display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 8px;
-            margin: 25px 0;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            gap: 8px;
+            background: var(--light);
+            border-radius: 12px;
+            padding: 6px;
+            margin: 20px 0;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .mode-btn {
             flex: 1;
-            padding: 18px;
+            padding: 15px;
             text-align: center;
             cursor: pointer;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             transition: var(--transition);
             background: transparent;
             border: none;
-            font-family: 'Poppins', sans-serif;
-            font-size: 15px;
-            color: var(--gray);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
         }
 
         .mode-btn.active {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 8px 25px rgba(42, 107, 255, 0.3);
-        }
-
-        .mode-btn:not(.active):hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .mode-warning {
-            background: linear-gradient(135deg, rgba(255, 183, 77, 0.15), rgba(255, 183, 77, 0.25));
+            background: linear-gradient(135deg, var(--warning-light), var(--warning));
             color: white;
-            padding: 20px;
-            border-radius: 14px;
-            margin: 25px 0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
             display: none;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             animation: slideDown 0.3s ease;
-            border: 1px solid rgba(255, 183, 77, 0.3);
         }
 
         @keyframes slideDown {
@@ -821,61 +560,39 @@
 
         .control-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
         }
 
         .control-btn {
-            height: 120px;
+            height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             cursor: pointer;
             transition: var(--transition);
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            font-family: 'Poppins', sans-serif;
+            background: var(--light);
+            font-family: 'Inter', sans-serif;
             font-weight: 600;
-            color: var(--light);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .control-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s;
-        }
-
-        .control-btn:hover::before {
-            left: 100%;
         }
 
         .control-btn:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
         }
 
         .control-btn.active {
-            background: var(--gradient-success);
+            background: linear-gradient(135deg, var(--success), var(--success-light));
             color: white;
-            box-shadow: 0 10px 30px rgba(0, 201, 167, 0.3);
-            border-color: transparent;
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.3);
         }
 
         .control-btn.inactive {
-            background: rgba(255, 255, 255, 0.03);
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
             color: var(--gray);
         }
 
@@ -889,14 +606,161 @@
         }
 
         .control-btn-icon {
-            font-size: 36px;
+            font-size: 28px;
         }
 
         .control-quick-buttons {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Life Stage Controls */
+        .stage-controls {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stage-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stage-title i {
+            color: var(--info);
+        }
+
+        .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .stage-btn {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            text-align: center;
+            background: white;
+            border: 2px solid transparent;
+            color: var(--dark);
+        }
+
+        .stage-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stage-btn.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(67, 97, 238, 0.05));
+            color: var(--primary);
+        }
+
+        .stage-btn.brood1 { background: linear-gradient(135deg, rgba(248, 166, 102, 0.1), rgba(248, 166, 102, 0.2)); }
+        .stage-btn.brood2 { background: linear-gradient(135deg, rgba(253, 32, 140, 0.1), rgba(253, 32, 140, 0.2)); }
+        .stage-btn.grower { background: linear-gradient(135deg, rgba(47, 107, 220, 0.1), rgba(47, 107, 220, 0.2)); }
+        .stage-btn.adult { background: linear-gradient(135deg, rgba(74, 255, 200, 0.1), rgba(74, 255, 200, 0.2)); }
+
+        .stage-btn.brood1.active { background: linear-gradient(135deg, #F9A666, #F9B458); color: white; }
+        .stage-btn.brood2.active { background: linear-gradient(135deg, #FD208C, #F557A1); color: white; }
+        .stage-btn.grower.active { background: linear-gradient(135deg, #2F6BDC, #4895EF); color: white; }
+        .stage-btn.adult.active { background: linear-gradient(135deg, #4AFFC8, #38B9E0); color: white; }
+
+        .age-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .age-label {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .age-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .age-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .age-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .age-btn.decrease {
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
+            color: white;
+        }
+
+        .age-btn.increase {
+            background: linear-gradient(135deg, var(--success-light), var(--success));
+            color: white;
+        }
+
+        .age-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .stage-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(76, 201, 240, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--info);
+        }
+
+        .stage-info p {
+            font-size: 12px;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+
+        .stage-info strong {
+            color: var(--primary);
         }
 
         /* System Status */
@@ -907,37 +771,33 @@
         .status-grid-items {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .status-item {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 15px;
             transition: var(--transition);
-            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .status-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-3px);
+            background: #f1f3f9;
         }
 
         .status-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            flex-shrink: 0;
+            font-size: 18px;
+            background: white;
         }
 
         .status-content h4 {
@@ -945,401 +805,235 @@
             color: var(--gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
-            font-weight: 500;
+            margin-bottom: 4px;
         }
 
         .status-content p {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            color: var(--light);
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Life Stage Controls */
-        .stage-controls {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 25px;
-            margin-top: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stage-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .stage-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--light);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .stage-title i {
-            color: var(--info);
-        }
-
-        .stage-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-        }
-
-        .stage-btn {
-            padding: 20px 15px;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            font-size: 14px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            color: var(--light);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stage-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s;
-        }
-
-        .stage-btn:hover::before {
-            left: 100%;
-        }
-
-        .stage-btn:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .stage-btn.active {
-            border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(42, 107, 255, 0.2), rgba(42, 107, 255, 0.1));
-            color: var(--primary-light);
-        }
-
-        .stage-btn i {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .age-control {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .age-label {
-            font-size: 15px;
-            color: var(--gray);
-            font-weight: 500;
-        }
-
-        .age-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-            min-width: 50px;
-            text-align: center;
-            background: rgba(42, 107, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 12px;
-        }
-
-        .age-buttons {
-            display: flex;
-            gap: 12px;
-            margin-left: auto;
-        }
-
-        .age-btn {
-            width: 44px;
-            height: 44px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .age-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s;
-        }
-
-        .age-btn:hover::before {
-            left: 100%;
-        }
-
-        .age-btn.decrease {
-            background: var(--gradient-danger);
-            color: white;
-        }
-
-        .age-btn.increase {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .age-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .stage-info {
-            margin-top: 20px;
-            padding: 18px;
-            background: rgba(42, 107, 255, 0.1);
-            border-radius: 14px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .stage-info p {
-            font-size: 13px;
-            color: var(--light);
-            line-height: 1.6;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stage-info strong {
-            color: var(--primary-light);
+            font-family: 'Roboto', sans-serif;
         }
 
         /* Calibration Panel */
+        .calibration-panel {
+            grid-column: span 6;
+        }
+
         .calibration-controls {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-top: 25px;
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .calibration-item {
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
         }
 
         .calibration-item h4 {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--gray);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-weight: 500;
         }
 
         .calibration-control {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            gap: 15px;
         }
 
         .calibration-value {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
-            font-family: 'Poppins', sans-serif;
-            min-width: 100px;
+            font-family: 'Roboto', monospace;
+            min-width: 80px;
             text-align: center;
-            color: var(--light);
         }
 
         .btn-small {
-            padding: 14px 24px;
-            font-size: 14px;
-            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 13px;
+            border-radius: 8px;
         }
 
-        /* Alarm & Log Panel */
+        .calibration-btn {
+            position: relative;
+        }
+
+        .calibration-btn.sending::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Alarm & Log */
         .alarm-log-panel {
             grid-column: span 6;
         }
 
         .alarm-container {
-            padding: 25px;
-            background: var(--gradient-danger);
+            padding: 20px;
+            background: linear-gradient(135deg, var(--danger-light), var(--danger));
             color: white;
-            border-radius: 16px;
-            margin-bottom: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             display: none;
             animation: slideDown 0.3s ease;
-            box-shadow: 0 10px 30px rgba(255, 77, 124, 0.3);
         }
 
         .alarm-header {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
         .alarm-content h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            margin-bottom: 5px;
         }
 
         .alarm-content p {
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0.9;
         }
 
         .log-container {
-            height: 350px;
-            background: rgba(18, 24, 38, 0.8);
-            border-radius: 16px;
-            padding: 25px;
+            height: 300px;
+            background: var(--dark);
+            border-radius: 12px;
+            padding: 20px;
             overflow-y: auto;
-            font-family: 'Inter', monospace;
-            font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 13px;
         }
 
         .log-entry {
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: flex-start;
-            transition: var(--transition);
-        }
-
-        .log-entry:hover {
-            background: rgba(255, 255, 255, 0.03);
-            padding-left: 10px;
-            padding-right: 10px;
-            margin: 0 -10px;
-            border-radius: 8px;
         }
 
         .log-time {
-            color: var(--gray);
-            min-width: 80px;
-            font-size: 13px;
-            font-family: 'Inter', monospace;
+            color: var(--gray-light);
+            min-width: 70px;
+            font-size: 12px;
         }
 
         .log-message {
             flex: 1;
             word-break: break-word;
-            line-height: 1.5;
         }
 
-        .log-info { color: var(--success-light); }
-        .log-error { color: var(--danger-light); }
-        .log-warning { color: var(--warning-light); }
+        .log-info { color: var(--success); }
+        .log-error { color: var(--danger); }
+        .log-warning { color: var(--warning); }
         .log-debug { color: var(--info-light); }
-        .log-success { color: var(--success-light); }
+        .log-success { color: var(--success); }
 
         /* Connection Debug */
         .connection-debug-panel {
             grid-column: span 12;
-            margin-top: 30px;
+            margin-top: 25px;
         }
 
         .debug-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .debug-card {
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: var(--transition);
-        }
-
-        .debug-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-3px);
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
         }
 
         .debug-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .debug-info {
             display: grid;
-            gap: 15px;
-            font-size: 14px;
+            gap: 10px;
+            font-size: 13px;
         }
 
         .debug-info-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Temperature Gauge */
+        .gauge-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+        }
+
+        .gauge-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #4cc9f0 0% 20%,
+                #38b9e0 20% 40%,
+                #f8961e 40% 70%,
+                #f72585 70% 100%
+            );
+            mask: radial-gradient(transparent 70px, black 71px);
+            -webkit-mask: radial-gradient(transparent 70px, black 71px);
+        }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Roboto', sans-serif;
         }
 
         /* Footer */
         .app-footer {
             text-align: center;
-            padding: 30px;
-            color: var(--gray);
+            padding: 25px;
+            color: white;
             font-size: 14px;
-            margin-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            opacity: 0.8;
+            margin-top: 25px;
         }
 
         .footer-info {
             display: flex;
             justify-content: center;
-            gap: 40px;
-            margin-top: 20px;
-            font-size: 13px;
-            flex-wrap: wrap;
-        }
-
-        .footer-info span {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 30px;
+            margin-top: 15px;
+            font-size: 12px;
         }
 
         /* Notification */
@@ -1347,21 +1041,20 @@
             position: fixed;
             top: 30px;
             right: 30px;
-            padding: 20px 30px;
-            border-radius: 16px;
+            padding: 18px 25px;
+            border-radius: 12px;
             color: white;
             font-weight: 600;
             z-index: 1000;
             animation: slideInRight 0.3s ease;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
-            gap: 15px;
-            max-width: 450px;
-            backdrop-filter: blur(20px);
-            background: rgba(18, 24, 38, 0.9);
+            gap: 12px;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: 'Poppins', sans-serif;
         }
 
         @keyframes slideInRight {
@@ -1369,76 +1062,47 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .notification.success { 
-            border-left: 4px solid var(--success);
-            background: rgba(18, 24, 38, 0.95);
-        }
-        .notification.error { 
-            border-left: 4px solid var(--danger);
-            background: rgba(18, 24, 38, 0.95);
-        }
-        .notification.warning { 
-            border-left: 4px solid var(--warning);
-            background: rgba(18, 24, 38, 0.95);
-        }
-        .notification.info { 
-            border-left: 4px solid var(--info);
-            background: rgba(18, 24, 38, 0.95);
-        }
+        .notification.success { border-left: 4px solid var(--success); }
+        .notification.error { border-left: 4px solid var(--danger); }
+        .notification.warning { border-left: 4px solid var(--warning); }
+        .notification.info { border-left: 4px solid var(--info); }
 
         /* Progress Bar */
         .progress-bar {
-            height: 8px;
+            height: 6px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .progress-fill {
             height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 4px;
+            background: linear-gradient(90deg, var(--success), var(--info));
+            border-radius: 3px;
             transition: width 0.3s ease;
         }
 
         /* Logout Button */
         .logout-btn {
-            background: var(--gradient-danger);
+            background: linear-gradient(135deg, var(--danger), var(--danger-light));
             color: white;
             border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-weight: 600;
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .logout-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s;
-        }
-
-        .logout-btn:hover::before {
-            left: 100%;
         }
 
         .logout-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 77, 124, 0.3);
+            box-shadow: 0 8px 25px rgba(247, 37, 133, 0.3);
         }
 
         /* Responsive */
@@ -1456,26 +1120,18 @@
             }
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1024px) {
             .app-header {
                 flex-direction: column;
-                gap: 25px;
-                text-align: center;
-            }
-            
-            .brand {
-                flex-direction: column;
-                text-align: center;
                 gap: 20px;
+                text-align: center;
             }
             
             .connection-panel {
                 flex-wrap: wrap;
                 justify-content: center;
             }
-        }
-
-        @media (max-width: 1024px) {
+            
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -1487,20 +1143,15 @@
             .alarm-log-panel {
                 grid-column: span 2;
             }
-            
-            .gauge-container {
-                width: 180px;
-                height: 180px;
-            }
         }
 
         @media (max-width: 768px) {
-            .app-container {
-                padding: 15px;
+            .login-card {
+                padding: 40px 25px;
             }
             
-            .login-card {
-                padding: 40px 30px;
+            .app-container {
+                padding: 15px;
             }
             
             .dashboard-grid {
@@ -1515,10 +1166,6 @@
                 grid-column: span 1;
             }
             
-            .sensor-value {
-                font-size: 48px;
-            }
-            
             .control-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -1530,54 +1177,44 @@
             .stage-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
-            .debug-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .footer-info {
-                flex-direction: column;
-                gap: 15px;
-                align-items: center;
-            }
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 12px;
+            width: 10px;
         }
 
         ::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.1);
-            border-radius: 6px;
+            border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--gradient-primary);
-            border-radius: 6px;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+            background: linear-gradient(135deg, var(--primary-light), var(--info-light));
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         /* Loading Spinner */
         .spinner {
             display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,.2);
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
@@ -1600,49 +1237,13 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.2);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
-        /* Glow effect for important elements */
-        .glow {
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 10px rgba(42, 107, 255, 0.5); }
-            to { box-shadow: 0 0 20px rgba(42, 107, 255, 0.8), 0 0 30px rgba(42, 107, 255, 0.4); }
-        }
-
-        /* Card entrance animation */
-        .card {
-            animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-        }
-
-        @keyframes cardEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Stagger animations for cards */
-        .dashboard-grid > *:nth-child(1) { animation-delay: 0.1s; }
-        .dashboard-grid > *:nth-child(2) { animation-delay: 0.2s; }
-        .dashboard-grid > *:nth-child(3) { animation-delay: 0.3s; }
-        .dashboard-grid > *:nth-child(4) { animation-delay: 0.4s; }
-        .dashboard-grid > *:nth-child(5) { animation-delay: 0.5s; }
-        .dashboard-grid > *:nth-child(6) { animation-delay: 0.6s; }
-        .dashboard-grid > *:nth-child(7) { animation-delay: 0.7s; }
-        .dashboard-grid > *:nth-child(8) { animation-delay: 0.8s; }
     </style>
 </head>
 <body>
@@ -1650,19 +1251,17 @@
     <div class="login-container" id="loginContainer">
         <div class="login-card">
             <div class="login-logo">
-                <div class="logo-circle">
-                    <div class="logo-circle-inner">
-                        <i class="fas fa-dove"></i>
-                    </div>
+                <div class="login-logo-icon">
+                    <i class="fas fa-dove"></i>
                 </div>
-                <h1>VQuail Pro</h1>
-                <p>Professional Monitoring & Control System</p>
+                <h1>VQuail</h1>
+                <p>Smart Monitoring System</p>
             </div>
             
             <div class="login-form">
                 <div class="form-group">
                     <label for="username"><i class="fas fa-user"></i> Username</label>
-                    <div class="input-group">
+                    <div class="input-with-icon">
                         <i class="fas fa-user-circle"></i>
                         <input type="text" id="username" class="form-control" placeholder="Enter username" autocomplete="username">
                     </div>
@@ -1671,7 +1270,7 @@
                 
                 <div class="form-group">
                     <label for="password"><i class="fas fa-lock"></i> Password</label>
-                    <div class="input-group">
+                    <div class="input-with-icon">
                         <i class="fas fa-key"></i>
                         <input type="password" id="password" class="form-control" placeholder="Enter password" autocomplete="current-password">
                     </div>
@@ -1683,7 +1282,7 @@
                 </button>
                 
                 <div class="security-info">
-                    <p><i class="fas fa-shield-alt"></i> Secure TLS encrypted connection required</p>
+                    <p><i class="fas fa-shield-alt"></i> Secure login required.</p>
                 </div>
                 
             </div>
@@ -1695,21 +1294,19 @@
         <!-- Header -->
         <header class="app-header">
             <div class="brand">
-                <div class="brand-logo">
+                <div class="brand-icon">
                     <i class="fas fa-dove"></i>
                 </div>
                 <div class="brand-text">
-                    <h1>VQuail Pro Control</h1>
-                    <p>Advanced Farming Automation Platform</p>
+                    <h1>VQuail Smart Control</h1>
+                    <p>Professional Quail Farming Automation System</p>
                 </div>
             </div>
             
             <div class="connection-panel">
                 <div class="connection-status">
-                    <div class="status-indicator">
-                        <div class="status-dot disconnected" id="mqttStatusDot"></div>
-                        <span class="status-text" id="mqttStatusText">Disconnected</span>
-                    </div>
+                    <div class="status-dot disconnected" id="mqttStatusDot"></div>
+                    <span id="mqttStatusText">MQTT: Disconnected</span>
                 </div>
                 
                 <div class="action-buttons">
@@ -1720,7 +1317,7 @@
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
                     <button class="btn btn-outline" onclick="toggleTheme()">
-                        <i class="fas fa-palette"></i> Theme
+                        <i class="fas fa-moon"></i> Theme
                     </button>
                 </div>
             </div>
@@ -1874,7 +1471,7 @@
 
                 <div class="status-grid-items">
                     <div class="status-item">
-                        <div class="status-icon" style="background: var(--gradient-success);">
+                        <div class="status-icon" style="background: linear-gradient(135deg, #4cc9f0, #38b9e0); color: white;">
                             <i class="fas fa-feather-alt"></i>
                         </div>
                         <div class="status-content">
@@ -1883,7 +1480,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon" style="background: var(--gradient-info);">
+                        <div class="status-icon" style="background: linear-gradient(135deg, #7209b7, #9d4edd); color: white;">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
                         <div class="status-content">
@@ -1892,7 +1489,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon" style="background: var(--gradient-primary);">
+                        <div class="status-icon" style="background: linear-gradient(135deg, #4361ee, #4895ef); color: white;">
                             <i class="fas fa-wifi"></i>
                         </div>
                         <div class="status-content">
@@ -1901,7 +1498,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon" style="background: var(--gradient-warning);">
+                        <div class="status-icon" style="background: linear-gradient(135deg, #f8961e, #f9b458); color: white;">
                             <i class="fas fa-clock"></i>
                         </div>
                         <div class="status-content">
@@ -1910,7 +1507,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon" style="background: var(--gradient-success);">
+                        <div class="status-icon" style="background: linear-gradient(135deg, #4cc9f0, #38b9e0); color: white;">
                             <i class="fas fa-microchip"></i>
                         </div>
                         <div class="status-content">
@@ -1919,7 +1516,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon" style="background: var(--gradient-info);">
+                        <div class="status-icon" style="background: linear-gradient(135deg, #7209b7, #9d4edd); color: white;">
                             <i class="fas fa-sync-alt"></i>
                         </div>
                         <div class="status-content">
@@ -1929,8 +1526,8 @@
                     </div>
                 </div>
 
-                <div class="status-item" style="margin-top: 20px; grid-column: span 2;">
-                    <div class="status-icon" style="background: var(--gradient-danger);">
+                <div class="status-item" style="margin-top: 15px; grid-column: span 2;">
+                    <div class="status-icon" style="background: linear-gradient(135deg, #f72585, #f557a1); color: white;">
                         <i class="fas fa-satellite"></i>
                     </div>
                     <div class="status-content" style="flex: 1;">
@@ -2004,12 +1601,12 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 20px; margin-top: 30px;">
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
                     <button class="btn btn-outline" style="flex: 1;" onclick="resetToAutoStage()">
                         <i class="fas fa-robot"></i> Auto Detect
                     </button>
                     <button class="btn btn-primary" style="flex: 1;" onclick="saveStageConfig()">
-                        <i class="fas fa-save"></i> Save Config
+                        <i class="fas fa-save"></i> Save Configuration
                     </button>
                     <button class="btn btn-warning" style="flex: 1;" onclick="getStageInfo()">
                         <i class="fas fa-info-circle"></i> Stage Info
@@ -2063,15 +1660,15 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 20px; margin-top: 30px;">
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
                     <button class="btn btn-outline" style="flex: 1;" onclick="resetCalibration()">
-                        <i class="fas fa-undo"></i> Reset
+                        <i class="fas fa-undo"></i> Reset Calibration
                     </button>
                     <button class="btn btn-primary" style="flex: 1;" onclick="saveCalibration()">
-                        <i class="fas fa-save"></i> Save
+                        <i class="fas fa-save"></i> Save to Device
                     </button>
                     <button class="btn btn-warning" style="flex: 1;" onclick="autoCalibrate()">
-                        <i class="fas fa-magic"></i> Auto
+                        <i class="fas fa-magic"></i> Auto Calibrate
                     </button>
                 </div>
             </div>
@@ -2104,7 +1701,7 @@
                 <div class="log-container" id="logContainer">
                     <div class="log-entry">
                         <span class="log-time">--:--:--</span>
-                        <span class="log-info log-message">VQuail Pro Dashboard initialized. Connect to start monitoring...</span>
+                        <span class="log-info log-message">VQuail Dashboard initialized. Connect to start monitoring...</span>
                     </div>
                 </div>
             </div>
@@ -2124,25 +1721,25 @@
 
             <div class="debug-grid">
                 <div class="debug-card">
-                    <h4 style="margin-bottom: 20px; color: var(--light); font-family: 'Poppins', sans-serif;">
+                    <h4 style="margin-bottom: 15px; color: var(--dark);">
                         <i class="fas fa-cloud"></i> MQTT Connection
                     </h4>
                     <div class="debug-info">
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Status:</span>
+                            <span>Status:</span>
                             <span id="mqttConnectionStatus" style="color: var(--danger); font-weight: 600;">Disconnected</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Broker:</span>
-                            <span style="font-family: monospace; color: var(--primary-light);">514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884</span>
+                            <span>Broker:</span>
+                            <span style="font-family: monospace; color: var(--primary);">514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Protocol:</span>
+                            <span>Protocol:</span>
                             <span>WebSocket (WSS)</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Client ID:</span>
-                            <span id="clientId" style="font-family: monospace; color: var(--light);">--</span>
+                            <span>Client ID:</span>
+                            <span id="clientId" style="font-family: monospace;">--</span>
                         </div>
                     </div>
                     
@@ -2160,34 +1757,34 @@
                 </div>
 
                 <div class="debug-card">
-                    <h4 style="margin-bottom: 20px; color: var(--light); font-family: 'Poppins', sans-serif;">
+                    <h4 style="margin-bottom: 15px; color: var(--dark);">
                         <i class="fas fa-broadcast-tower"></i> System Commands
                     </h4>
                     <div class="debug-info">
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Last Command:</span>
-                            <span id="lastCommand" style="color: var(--light);">--</span>
+                            <span>Last Command:</span>
+                            <span id="lastCommand">--</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Last Response:</span>
-                            <span id="lastResponse" style="color: var(--light);">--</span>
+                            <span>Last Response:</span>
+                            <span id="lastResponse">--</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Message Rate:</span>
-                            <span id="messageRate" style="color: var(--light);">0/min</span>
+                            <span>Message Rate:</span>
+                            <span id="messageRate">0/min</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Reconnect Count:</span>
-                            <span id="reconnectCount" style="color: var(--light);">0</span>
+                            <span>Reconnect Count:</span>
+                            <span id="reconnectCount">0</span>
                         </div>
                     </div>
                     
                     <div class="debug-buttons">
                         <button class="btn btn-primary btn-small" onclick="publishStatus()">
-                            <i class="fas fa-sync-alt"></i> Refresh
+                            <i class="fas fa-sync-alt"></i> Refresh Status
                         </button>
                         <button class="btn btn-warning btn-small" onclick="sendReboot()">
-                            <i class="fas fa-redo"></i> Reboot
+                            <i class="fas fa-redo"></i> Reboot System
                         </button>
                         <button class="btn btn-info btn-small" onclick="clearLogs()">
                             <i class="fas fa-trash"></i> Clear Logs
@@ -2196,29 +1793,29 @@
                 </div>
 
                 <div class="debug-card">
-                    <h4 style="margin-bottom: 20px; color: var(--light); font-family: 'Poppins', sans-serif;">
+                    <h4 style="margin-bottom: 15px; color: var(--dark);">
                         <i class="fas fa-chart-line"></i> Performance
                     </h4>
                     <div class="debug-info">
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Uptime:</span>
-                            <span id="performanceUptime" style="color: var(--light);">--</span>
+                            <span>Uptime:</span>
+                            <span id="performanceUptime">--</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Messages Sent:</span>
-                            <span id="messagesSent" style="color: var(--light);">0</span>
+                            <span>Messages Sent:</span>
+                            <span id="messagesSent">0</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Messages Received:</span>
-                            <span id="messagesReceived" style="color: var(--light);">0</span>
+                            <span>Messages Received:</span>
+                            <span id="messagesReceived">0</span>
                         </div>
                         <div class="debug-info-row">
-                            <span style="color: var(--gray);">Latency:</span>
-                            <span id="mqttLatency" style="color: var(--light);">-- ms</span>
+                            <span>Latency:</span>
+                            <span id="mqttLatency">-- ms</span>
                         </div>
                     </div>
                     
-                    <div class="progress-bar" style="margin-top: 20px;">
+                    <div class="progress-bar" style="margin-top: 15px;">
                         <div class="progress-fill" id="performanceBar" style="width: 0%;"></div>
                     </div>
                 </div>
@@ -2227,12 +1824,12 @@
 
         <!-- Footer -->
         <footer class="app-footer">
-            <p>VQuail Pro Control System | Advanced Farming Automation Platform</p>
+            <p>VQuail Smart Control System | Professional Farming Automation</p>
             <div class="footer-info">
-                <span><i class="fas fa-shield-alt"></i> Secured TLS Connection</span>
-                <span><i class="fas fa-sync-alt"></i> Real-time Monitoring</span>
-                <span><i class="fas fa-mobile-alt"></i> Responsive Interface</span>
-                <span><i class="fas fa-history"></i> Version 3.0.0</span>
+                <span><i class="fas fa-shield-alt"></i> Secured Connection (TLS)</span>
+                <span><i class="fas fa-sync-alt"></i> Real-time Updates</span>
+                <span><i class="fas fa-mobile-alt"></i> Responsive Design</span>
+                <span><i class="fas fa-history"></i> Version 2.2.0</span>
             </div>
         </footer>
     </div>
@@ -3152,6 +2749,7 @@
             // Temperature
             const tempElement = document.getElementById('temperatureValue');
             tempElement.textContent = systemState.temp.toFixed(1) + '°C';
+            tempElement.style.color = getTemperatureColor(systemState.temp);
             
             // Update gauge value
             const temp = systemState.temp;
@@ -3270,17 +2868,17 @@
             
             switch(status) {
                 case 'connected':
-                    text.textContent = 'Connected';
+                    text.textContent = 'MQTT: Connected';
                     statusElement.textContent = 'Connected ✓';
                     statusElement.style.color = 'var(--success)';
                     break;
                 case 'connecting':
-                    text.textContent = 'Connecting...';
+                    text.textContent = 'MQTT: Connecting...';
                     statusElement.textContent = 'Connecting...';
                     statusElement.style.color = 'var(--warning)';
                     break;
                 case 'disconnected':
-                    text.textContent = 'Disconnected';
+                    text.textContent = 'MQTT: Disconnected';
                     statusElement.textContent = 'Disconnected ✗';
                     statusElement.style.color = 'var(--danger)';
                     break;
