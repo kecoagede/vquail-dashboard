@@ -5,30 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VQuail Monitoring Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         :root {
-            --primary: #2E5BFF;
-            --primary-light: #EDF2FF;
-            --primary-dark: #1A3FC0;
-            --success: #00C853;
-            --success-light: #E8F5E9;
-            --danger: #FF3B30;
-            --danger-light: #FFEBEE;
-            --warning: #FF9500;
-            --warning-light: #FFF4E5;
-            --info: #5AC8FA;
-            --info-light: #E3F2FD;
-            --dark: #1A1A2E;
-            --dark-light: #2D2D44;
-            --light: #F8F9FA;
-            --gray: #8E8E93;
-            --gray-light: #C7C7CC;
-            --card-bg: #FFFFFF;
-            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            --border-radius: 12px;
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #2A6BFF;
+            --primary-light: #4A8AFF;
+            --primary-dark: #1A4FC7;
+            --secondary: #6C63FF;
+            --secondary-light: #837BFF;
+            --success: #00C9A7;
+            --success-light: #2FE4C6;
+            --danger: #FF4D7C;
+            --danger-light: #FF6D98;
+            --warning: #FFB74D;
+            --warning-light: #FFC97A;
+            --info: #7B61FF;
+            --info-light: #937DFF;
+            --dark: #121826;
+            --dark-light: #1E2538;
+            --light: #F8FAFC;
+            --gray: #94A3B8;
+            --gray-light: #CBD5E1;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --border-radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-success: linear-gradient(135deg, var(--success), #00D4B4);
+            --gradient-danger: linear-gradient(135deg, var(--danger), #FF6B9D);
+            --gradient-warning: linear-gradient(135deg, var(--warning), #FFCA67);
+            --gradient-info: linear-gradient(135deg, var(--info), #8A74FF);
         }
 
         * {
@@ -39,141 +47,275 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
             min-height: 100vh;
-            color: var(--dark);
+            color: var(--light);
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* Login Page Styles - Cleaner */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(42, 107, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 201, 167, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Login Page Styles */
         .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(42, 107, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(108, 99, 255, 0.2) 0%, transparent 50%);
+            animation: gradientShift 20s ease infinite alternate;
+        }
+
+        @keyframes gradientShift {
+            0% { transform: translate(0%, 0%); }
+            100% { transform: translate(-10%, -10%); }
         }
 
         .login-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 40px;
+            background: rgba(18, 24, 38, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 60px 50px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            max-width: 480px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transform: translateY(0);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
         }
 
         .login-logo {
-            margin-bottom: 30px;
-            text-align: center;
+            margin-bottom: 40px;
         }
 
-        .login-logo-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 16px;
+        .logo-circle {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .logo-circle-inner {
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 48px;
             color: white;
-            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(42, 107, 255, 0.4);
+        }
+
+        .logo-circle-inner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
         }
 
         .login-logo h1 {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 700;
-            color: var(--dark);
             margin-bottom: 8px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Poppins', sans-serif;
         }
 
         .login-logo p {
             font-size: 14px;
             color: var(--gray);
-            font-weight: 400;
+            font-weight: 300;
+            letter-spacing: 0.5px;
         }
 
         .login-form {
-            margin-top: 30px;
+            margin-top: 40px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 28px;
+            text-align: left;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
+            margin-bottom: 10px;
+            font-size: 14px;
             font-weight: 500;
-            color: var(--dark);
-            text-transform: uppercase;
+            color: var(--light);
             letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 20px;
+            z-index: 1;
+            transition: var(--transition);
         }
 
         .form-control {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--gray-light);
-            border-radius: 8px;
-            font-size: 15px;
+            padding: 18px 20px 18px 55px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 14px;
+            font-size: 16px;
             font-family: 'Inter', sans-serif;
             transition: var(--transition);
-            background: var(--light);
+            color: var(--light);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-control::placeholder {
+            color: rgba(148, 163, 184, 0.6);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            background: white;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(42, 107, 255, 0.1);
         }
 
-        .form-control.error {
-            border-color: var(--danger);
+        .form-control:focus + i {
+            color: var(--primary);
         }
 
         .error-message {
             color: var(--danger);
-            font-size: 12px;
-            margin-top: 4px;
+            font-size: 13px;
+            margin-top: 8px;
             display: none;
+            font-weight: 500;
         }
 
         .login-btn {
             width: 100%;
-            padding: 14px;
-            background: var(--primary);
+            padding: 20px;
+            background: var(--gradient-primary);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 15px;
+            border-radius: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            font-family: 'Inter', sans-serif;
-            margin-top: 10px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
         }
 
         .login-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(42, 107, 255, 0.3);
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
         }
 
         .login-btn:active {
             transform: translateY(0);
         }
 
-        .security-note {
-            margin-top: 20px;
-            padding: 12px;
-            background: var(--primary-light);
-            border-radius: 8px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--primary-dark);
+        .login-footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .login-footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        .security-info {
+            background: linear-gradient(135deg, rgba(42, 107, 255, 0.1), rgba(108, 99, 255, 0.1));
+            padding: 20px;
+            border-radius: 14px;
+            margin-top: 30px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .security-info p {
+            font-size: 13px;
+            color: var(--gray-light);
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* Dashboard Container */
@@ -181,178 +323,362 @@
             display: none;
             max-width: 1600px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 25px;
+            position: relative;
         }
 
-        /* Compact Header */
+        /* Header */
         .app-header {
-            background: white;
-            padding: 16px 24px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(30, 37, 56, 0.9), rgba(18, 24, 38, 0.9));
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 24px;
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03));
+            pointer-events: none;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 25px;
+            z-index: 1;
         }
 
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 10px;
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient-primary);
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: white;
+            font-size: 32px;
+            box-shadow: 0 10px 25px rgba(42, 107, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-logo::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
         }
 
         .brand-text h1 {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--dark);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Poppins', sans-serif;
         }
 
         .brand-text p {
-            font-size: 12px;
+            font-size: 14px;
             color: var(--gray);
+            font-weight: 300;
+            letter-spacing: 0.5px;
         }
 
+        /* Connection Panel */
         .connection-panel {
             display: flex;
-            gap: 16px;
+            gap: 25px;
             align-items: center;
+            z-index: 1;
         }
 
         .connection-status {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--light);
-            border-radius: 8px;
-            font-size: 13px;
+            gap: 15px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            min-width: 200px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
         }
 
-        .status-dot.connected { background: var(--success); }
-        .status-dot.connecting { background: var(--warning); }
-        .status-dot.disconnected { background: var(--danger); }
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected { 
+            background: var(--success); 
+            box-shadow: 0 0 20px rgba(0, 201, 167, 0.5);
+        }
+        .status-dot.connected::after { border: 2px solid var(--success); }
+        .status-dot.connecting { 
+            background: var(--warning);
+            box-shadow: 0 0 20px rgba(255, 183, 77, 0.5);
+        }
+        .status-dot.connecting::after { border: 2px solid var(--warning); }
+        .status-dot.disconnected { 
+            background: var(--danger);
+            box-shadow: 0 0 20px rgba(255, 77, 124, 0.5);
+        }
+        .status-dot.disconnected::after { border: 2px solid var(--danger); }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--light);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
 
         .btn {
-            padding: 8px 16px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            font-size: 13px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--gradient-primary);
             color: white;
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(42, 107, 255, 0.3);
         }
 
-        .logout-btn {
-            background: var(--danger);
+        .btn-success {
+            background: var(--gradient-success);
             color: white;
         }
 
-        .logout-btn:hover {
-            background: #D32F2F;
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
         }
 
-        /* Dashboard Grid - Clean Layout */
+        .btn-warning {
+            background: var(--gradient-warning);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--gradient-info);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
+            gap: 30px;
+            margin-bottom: 30px;
         }
 
+        /* Card Styles */
         .card {
             background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 20px;
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .card-title {
-            font-size: 14px;
+            font-size: 20px;
             font-weight: 600;
-            color: var(--dark);
+            color: var(--light);
             display: flex;
             align-items: center;
-            gap: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            gap: 15px;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .card-title i {
-            color: var(--gray);
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
+
+        .card-icon.primary { background: var(--gradient-primary); }
+        .card-icon.success { background: var(--gradient-success); }
+        .card-icon.danger { background: var(--gradient-danger); }
+        .card-icon.warning { background: var(--gradient-warning); }
+        .card-icon.info { background: var(--gradient-info); }
 
         .card-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 600;
-            background: var(--light);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Sensor Cards - Compact */
+        /* Sensor Cards */
         .sensor-card {
             grid-column: span 3;
+            display: flex;
+            flex-direction: column;
         }
 
         .sensor-value-container {
             display: flex;
             align-items: baseline;
-            gap: 8px;
-            margin: 12px 0;
+            gap: 12px;
+            margin: 25px 0;
+            position: relative;
         }
 
         .sensor-value {
-            font-size: 32px;
+            font-size: 64px;
             font-weight: 700;
             line-height: 1;
-            font-family: 'Roboto Mono', monospace;
+            font-family: 'Poppins', sans-serif;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        .sensor-value::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
         }
 
         .sensor-unit {
-            font-size: 14px;
+            font-size: 28px;
             color: var(--gray);
             font-weight: 500;
         }
@@ -360,52 +686,61 @@
         .sensor-details {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 12px;
+            gap: 20px;
+            margin-top: auto;
         }
 
         .detail-item {
-            padding: 8px;
-            background: var(--light);
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+        }
+
+        .detail-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
         }
 
         .detail-label {
+            font-size: 12px;
             color: var(--gray);
-            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
 
         .detail-value {
+            font-size: 18px;
             font-weight: 600;
-            font-family: 'Roboto Mono', monospace;
+            color: var(--light);
+            font-family: 'Inter', monospace;
         }
 
-        /* Temperature Gauge - Clean */
+        /* Temperature Gauge */
         .gauge-container {
             position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 12px auto;
-        }
-
-        .gauge-circle {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
+            width: 220px;
+            height: 220px;
+            margin: 20px auto;
         }
 
         .gauge-background {
-            fill: none;
-            stroke: var(--gray-light);
-            stroke-width: 6;
-        }
-
-        .gauge-progress {
-            fill: none;
-            stroke-width: 6;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.3s ease;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--success) 0% 25%,
+                var(--info) 25% 50%,
+                var(--warning) 50% 75%,
+                var(--danger) 75% 100%
+            );
+            mask: radial-gradient(transparent 85px, black 86px);
+            -webkit-mask: radial-gradient(transparent 85px, black 86px);
+            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.3));
         }
 
         .gauge-value {
@@ -413,88 +748,135 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
+            font-size: 48px;
             font-weight: 700;
-            font-family: 'Roboto Mono', monospace;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Control Panel - Clean */
+        /* Control Panel */
         .control-panel {
             grid-column: span 6;
         }
 
         .mode-toggle {
             display: flex;
-            background: var(--light);
-            border-radius: 8px;
-            padding: 4px;
-            margin: 12px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 8px;
+            margin: 25px 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 8px;
         }
 
         .mode-btn {
             flex: 1;
-            padding: 10px;
+            padding: 18px;
             text-align: center;
             cursor: pointer;
-            border-radius: 6px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-weight: 600;
             transition: var(--transition);
             background: transparent;
             border: none;
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .mode-btn.active {
-            background: white;
-            box-shadow: var(--card-shadow);
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 8px 25px rgba(42, 107, 255, 0.3);
+        }
+
+        .mode-btn:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
         }
 
         .mode-warning {
-            background: var(--warning-light);
-            color: var(--warning);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 12px 0;
+            background: linear-gradient(135deg, rgba(255, 183, 77, 0.15), rgba(255, 183, 77, 0.25));
+            color: white;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 25px 0;
             display: none;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
+            gap: 15px;
+            animation: slideDown 0.3s ease;
+            border: 1px solid rgba(255, 183, 77, 0.3);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .control-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 16px 0;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
         }
 
         .control-btn {
-            height: 80px;
+            height: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            border: 2px solid var(--gray-light);
-            border-radius: 8px;
+            gap: 15px;
+            border: none;
+            border-radius: 16px;
             cursor: pointer;
             transition: var(--transition);
-            background: white;
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            font-size: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
         }
 
         .control-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         .control-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
+            background: var(--gradient-success);
             color: white;
+            box-shadow: 0 10px 30px rgba(0, 201, 167, 0.3);
+            border-color: transparent;
+        }
+
+        .control-btn.inactive {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--gray);
         }
 
         .control-btn.disabled {
@@ -502,22 +884,22 @@
             cursor: not-allowed;
         }
 
+        .control-btn.disabled:hover {
+            transform: none;
+        }
+
         .control-btn-icon {
-            font-size: 20px;
+            font-size: 36px;
         }
 
-        .quick-controls {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
+        .control-quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 25px;
         }
 
-        .quick-controls .btn {
-            flex: 1;
-            justify-content: center;
-        }
-
-        /* System Status Grid - Compact */
+        /* System Status */
         .status-grid {
             grid-column: span 3;
         }
@@ -525,332 +907,461 @@
         .status-grid-items {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 12px;
+            gap: 20px;
+            margin-top: 25px;
         }
 
         .status-item {
-            padding: 12px;
-            background: var(--light);
-            border-radius: 8px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 18px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-3px);
         }
 
         .status-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            background: white;
+            font-size: 22px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            flex-shrink: 0;
         }
 
         .status-content h4 {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 2px;
+            margin-bottom: 6px;
+            font-weight: 500;
         }
 
         .status-content p {
-            font-size: 14px;
+            font-size: 18px;
             font-weight: 600;
-            font-family: 'Roboto Mono', monospace;
+            color: var(--light);
+            font-family: 'Inter', sans-serif;
         }
 
-        /* Life Stage Controls - Clean */
+        /* Life Stage Controls */
         .stage-controls {
-            background: var(--light);
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .stage-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .stage-title {
-            font-size: 13px;
+            font-size: 18px;
             font-weight: 600;
-            color: var(--dark);
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stage-title i {
+            color: var(--info);
         }
 
         .stage-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
         }
 
         .stage-btn {
-            padding: 12px 8px;
-            border: 1px solid var(--gray-light);
-            border-radius: 8px;
+            padding: 20px 15px;
+            border: none;
+            border-radius: 14px;
             cursor: pointer;
             transition: var(--transition);
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
             text-align: center;
-            background: white;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            color: var(--light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .stage-btn:hover::before {
+            left: 100%;
         }
 
         .stage-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .stage-btn.active {
-            background: var(--primary);
             border-color: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, rgba(42, 107, 255, 0.2), rgba(42, 107, 255, 0.1));
+            color: var(--primary-light);
+        }
+
+        .stage-btn i {
+            font-size: 24px;
+            margin-bottom: 5px;
         }
 
         .age-control {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .age-label {
-            font-size: 13px;
+            font-size: 15px;
             color: var(--gray);
+            font-weight: 500;
         }
 
         .age-value {
-            font-size: 16px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--primary);
-            min-width: 30px;
+            min-width: 50px;
             text-align: center;
+            background: rgba(42, 107, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 12px;
         }
 
         .age-buttons {
             display: flex;
-            gap: 6px;
+            gap: 12px;
             margin-left: auto;
         }
 
         .age-btn {
-            width: 28px;
-            height: 28px;
+            width: 44px;
+            height: 44px;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 20px;
             font-weight: bold;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .age-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .age-btn:hover::before {
+            left: 100%;
         }
 
         .age-btn.decrease {
-            background: var(--danger);
+            background: var(--gradient-danger);
             color: white;
         }
 
         .age-btn.increase {
-            background: var(--success);
+            background: var(--gradient-success);
             color: white;
         }
 
-        .stage-info {
-            margin-top: 12px;
-            padding: 10px;
-            background: var(--info-light);
-            border-radius: 6px;
-            font-size: 11px;
-            color: var(--dark);
-            line-height: 1.4;
+        .age-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        /* Calibration Controls - Clean */
+        .stage-info {
+            margin-top: 20px;
+            padding: 18px;
+            background: rgba(42, 107, 255, 0.1);
+            border-radius: 14px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stage-info p {
+            font-size: 13px;
+            color: var(--light);
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stage-info strong {
+            color: var(--primary-light);
+        }
+
+        /* Calibration Panel */
         .calibration-controls {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 16px;
+            gap: 25px;
+            margin-top: 25px;
         }
 
         .calibration-item {
-            padding: 16px;
-            background: var(--light);
-            border-radius: 8px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .calibration-item h4 {
-            font-size: 12px;
+            font-size: 15px;
             color: var(--gray);
-            margin-bottom: 12px;
+            margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
         .calibration-control {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 20px;
         }
 
         .calibration-value {
-            font-size: 18px;
+            font-size: 32px;
             font-weight: 700;
-            font-family: 'Roboto Mono', monospace;
-            min-width: 60px;
+            font-family: 'Poppins', sans-serif;
+            min-width: 100px;
             text-align: center;
+            color: var(--light);
         }
 
         .btn-small {
-            padding: 8px 12px;
-            font-size: 11px;
-            border-radius: 6px;
+            padding: 14px 24px;
+            font-size: 14px;
+            border-radius: 12px;
         }
 
-        /* Alarm & Log Panel - Clean */
+        /* Alarm & Log Panel */
+        .alarm-log-panel {
+            grid-column: span 6;
+        }
+
         .alarm-container {
-            padding: 16px;
-            background: var(--danger);
+            padding: 25px;
+            background: var(--gradient-danger);
             color: white;
-            border-radius: 8px;
-            margin-bottom: 16px;
+            border-radius: 16px;
+            margin-bottom: 25px;
             display: none;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 77, 124, 0.3);
         }
 
         .alarm-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
         .alarm-content h3 {
-            font-size: 14px;
-            margin-bottom: 4px;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
         }
 
         .alarm-content p {
-            font-size: 12px;
+            font-size: 14px;
             opacity: 0.9;
         }
 
         .log-container {
-            height: 200px;
-            background: var(--dark);
-            border-radius: 8px;
-            padding: 16px;
+            height: 350px;
+            background: rgba(18, 24, 38, 0.8);
+            border-radius: 16px;
+            padding: 25px;
             overflow-y: auto;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 11px;
+            font-family: 'Inter', monospace;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .log-entry {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
-            gap: 12px;
+            gap: 20px;
+            align-items: flex-start;
+            transition: var(--transition);
+        }
+
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.03);
+            padding-left: 10px;
+            padding-right: 10px;
+            margin: 0 -10px;
+            border-radius: 8px;
         }
 
         .log-time {
-            color: var(--gray-light);
-            min-width: 50px;
-            font-size: 10px;
+            color: var(--gray);
+            min-width: 80px;
+            font-size: 13px;
+            font-family: 'Inter', monospace;
         }
 
         .log-message {
             flex: 1;
             word-break: break-word;
+            line-height: 1.5;
         }
 
-        .log-info { color: var(--success); }
-        .log-error { color: var(--danger); }
-        .log-warning { color: var(--warning); }
+        .log-info { color: var(--success-light); }
+        .log-error { color: var(--danger-light); }
+        .log-warning { color: var(--warning-light); }
+        .log-debug { color: var(--info-light); }
+        .log-success { color: var(--success-light); }
 
-        /* Connection Debug - Compact */
+        /* Connection Debug */
+        .connection-debug-panel {
+            grid-column: span 12;
+            margin-top: 30px;
+        }
+
         .debug-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
 
         .debug-card {
-            padding: 16px;
-            background: var(--light);
-            border-radius: 8px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
         }
 
-        .debug-card h4 {
-            font-size: 13px;
-            margin-bottom: 12px;
-            color: var(--dark);
+        .debug-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .debug-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .debug-info {
             display: grid;
-            gap: 8px;
-            font-size: 11px;
+            gap: 15px;
+            font-size: 14px;
         }
 
         .debug-info-row {
             display: flex;
             justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .debug-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        /* Footer - Minimal */
+        /* Footer */
         .app-footer {
             text-align: center;
-            padding: 16px;
+            padding: 30px;
             color: var(--gray);
-            font-size: 12px;
-            margin-top: 20px;
+            font-size: 14px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .footer-info {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-top: 8px;
-            font-size: 11px;
+            gap: 40px;
+            margin-top: 20px;
+            font-size: 13px;
+            flex-wrap: wrap;
         }
 
-        /* Notification - Clean */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
-            box-shadow: var(--card-shadow);
+        .footer-info span {
             display: flex;
             align-items: center;
             gap: 8px;
-            max-width: 300px;
-            font-size: 13px;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 20px 30px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 450px;
+            backdrop-filter: blur(20px);
+            background: rgba(18, 24, 38, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Poppins', sans-serif;
         }
 
         @keyframes slideInRight {
@@ -858,52 +1369,86 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .notification.success { background: var(--success); }
-        .notification.error { background: var(--danger); }
-        .notification.warning { background: var(--warning); }
-        .notification.info { background: var(--info); }
+        .notification.success { 
+            border-left: 4px solid var(--success);
+            background: rgba(18, 24, 38, 0.95);
+        }
+        .notification.error { 
+            border-left: 4px solid var(--danger);
+            background: rgba(18, 24, 38, 0.95);
+        }
+        .notification.warning { 
+            border-left: 4px solid var(--warning);
+            background: rgba(18, 24, 38, 0.95);
+        }
+        .notification.info { 
+            border-left: 4px solid var(--info);
+            background: rgba(18, 24, 38, 0.95);
+        }
 
-        /* Progress Bar - Clean */
+        /* Progress Bar */
         .progress-bar {
-            height: 4px;
-            background: var(--gray-light);
-            border-radius: 2px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 15px;
         }
 
         .progress-fill {
             height: 100%;
-            background: var(--primary);
-            border-radius: 2px;
+            background: var(--gradient-primary);
+            border-radius: 4px;
             transition: width 0.3s ease;
         }
 
-        /* Utility Classes */
-        .text-muted { color: var(--gray); }
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .text-warning { color: var(--warning); }
-        .text-info { color: var(--info); }
-        .text-primary { color: var(--primary); }
+        /* Logout Button */
+        .logout-btn {
+            background: var(--gradient-danger);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
 
-        .bg-success { background: var(--success-light); }
-        .bg-danger { background: var(--danger-light); }
-        .bg-warning { background: var(--warning-light); }
-        .bg-info { background: var(--info-light); }
-        .bg-primary { background: var(--primary-light); }
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
 
-        /* Responsive Design */
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 77, 124, 0.3);
+        }
+
+        /* Responsive */
         @media (max-width: 1400px) {
             .dashboard-grid {
                 grid-template-columns: repeat(6, 1fr);
             }
             
             .sensor-card,
-            .status-grid {
-                grid-column: span 3;
-            }
-            
+            .status-grid,
             .control-panel,
             .calibration-panel,
             .alarm-log-panel {
@@ -911,18 +1456,26 @@
             }
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .app-header {
                 flex-direction: column;
-                gap: 12px;
+                gap: 25px;
                 text-align: center;
+            }
+            
+            .brand {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
             }
             
             .connection-panel {
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
+        }
+
+        @media (max-width: 1024px) {
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -935,23 +1488,23 @@
                 grid-column: span 2;
             }
             
-            .debug-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .gauge-container {
+                width: 180px;
+                height: 180px;
             }
         }
 
         @media (max-width: 768px) {
-            .login-card {
-                padding: 30px 20px;
+            .app-container {
+                padding: 15px;
             }
             
-            .app-container {
-                padding: 12px;
+            .login-card {
+                padding: 40px 30px;
             }
             
             .dashboard-grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
             }
             
             .sensor-card,
@@ -960,6 +1513,14 @@
             .calibration-panel,
             .alarm-log-panel {
                 grid-column: span 1;
+            }
+            
+            .sensor-value {
+                font-size: 48px;
+            }
+            
+            .control-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .calibration-controls {
@@ -974,61 +1535,49 @@
                 grid-template-columns: 1fr;
             }
             
-            .control-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .card {
-                padding: 16px;
-            }
-            
-            .sensor-value {
-                font-size: 24px;
-            }
-            
-            .gauge-container {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .control-btn {
-                height: 70px;
+            .footer-info {
+                flex-direction: column;
+                gap: 15px;
+                align-items: center;
             }
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 12px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
+            background: var(--gradient-primary);
+            border-radius: 6px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
         /* Loading Spinner */
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,.3);
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,.2);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
@@ -1039,24 +1588,61 @@
         }
 
         /* Calibration sending indicator */
-        .calibration-btn.sending {
+        .calibration-sending {
             position: relative;
             opacity: 0.7;
+            pointer-events: none;
         }
 
-        .calibration-btn.sending::after {
+        .calibration-sending::after {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
             border-top-color: white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+
+        /* Glow effect for important elements */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(42, 107, 255, 0.5); }
+            to { box-shadow: 0 0 20px rgba(42, 107, 255, 0.8), 0 0 30px rgba(42, 107, 255, 0.4); }
+        }
+
+        /* Card entrance animation */
+        .card {
+            animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Stagger animations for cards */
+        .dashboard-grid > *:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-grid > *:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-grid > *:nth-child(3) { animation-delay: 0.3s; }
+        .dashboard-grid > *:nth-child(4) { animation-delay: 0.4s; }
+        .dashboard-grid > *:nth-child(5) { animation-delay: 0.5s; }
+        .dashboard-grid > *:nth-child(6) { animation-delay: 0.6s; }
+        .dashboard-grid > *:nth-child(7) { animation-delay: 0.7s; }
+        .dashboard-grid > *:nth-child(8) { animation-delay: 0.8s; }
     </style>
 </head>
 <body>
@@ -1064,23 +1650,31 @@
     <div class="login-container" id="loginContainer">
         <div class="login-card">
             <div class="login-logo">
-                <div class="login-logo-icon">
-                    <i class="fas fa-dove"></i>
+                <div class="logo-circle">
+                    <div class="logo-circle-inner">
+                        <i class="fas fa-dove"></i>
+                    </div>
                 </div>
-                <h1>VQuail Control</h1>
-                <p>Smart Farming Dashboard</p>
+                <h1>VQuail Pro</h1>
+                <p>Professional Monitoring & Control System</p>
             </div>
             
             <div class="login-form">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" class="form-control" placeholder="Enter username" autocomplete="username">
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
+                    <div class="input-group">
+                        <i class="fas fa-user-circle"></i>
+                        <input type="text" id="username" class="form-control" placeholder="Enter username" autocomplete="username">
+                    </div>
                     <div class="error-message" id="usernameError">Please enter a valid username</div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter password" autocomplete="current-password">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="password" class="form-control" placeholder="Enter password" autocomplete="current-password">
+                    </div>
                     <div class="error-message" id="passwordError">Please enter your password</div>
                 </div>
                 
@@ -1088,39 +1682,47 @@
                     <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
                 
-                <div class="security-note">
-                    <i class="fas fa-shield-alt"></i> Secure connection required
+                <div class="security-info">
+                    <p><i class="fas fa-shield-alt"></i> Secure TLS encrypted connection required</p>
                 </div>
+                
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Container -->
+    <!-- Dashboard Container (Initially Hidden) -->
     <div class="app-container" id="dashboardContainer">
-        <!-- Compact Header -->
+        <!-- Header -->
         <header class="app-header">
             <div class="brand">
-                <div class="brand-icon">
+                <div class="brand-logo">
                     <i class="fas fa-dove"></i>
                 </div>
                 <div class="brand-text">
-                    <h1>VQuail Control</h1>
-                    <p>Smart Farming System</p>
+                    <h1>VQuail Pro Control</h1>
+                    <p>Advanced Farming Automation Platform</p>
                 </div>
             </div>
             
             <div class="connection-panel">
                 <div class="connection-status">
-                    <div class="status-dot disconnected" id="mqttStatusDot"></div>
-                    <span id="mqttStatusText">MQTT: Disconnected</span>
+                    <div class="status-indicator">
+                        <div class="status-dot disconnected" id="mqttStatusDot"></div>
+                        <span class="status-text" id="mqttStatusText">Disconnected</span>
+                    </div>
                 </div>
                 
-                <button class="btn btn-primary" onclick="connectMQTT()">
-                    <i class="fas fa-plug"></i> Connect
-                </button>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="connectMQTT()">
+                        <i class="fas fa-plug"></i> Connect
+                    </button>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <button class="btn btn-outline" onclick="toggleTheme()">
+                        <i class="fas fa-palette"></i> Theme
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -1130,21 +1732,16 @@
             <div class="card sensor-card">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-thermometer-half"></i>
+                        <div class="card-icon primary">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
                         <span>Temperature</span>
                     </div>
-                    <div class="card-badge bg-info" id="tempStage">Optimal</div>
+                    <div class="card-badge" id="tempStage">Optimal</div>
                 </div>
                 
                 <div class="gauge-container">
-                    <svg class="gauge-circle" viewBox="0 0 120 120">
-                        <circle class="gauge-background" cx="60" cy="60" r="54"></circle>
-                        <circle class="gauge-progress" cx="60" cy="60" r="54" 
-                                stroke="#2E5BFF" 
-                                stroke-dasharray="339.292" 
-                                stroke-dashoffset="135.717"
-                                id="tempGauge"></circle>
-                    </svg>
+                    <div class="gauge-background"></div>
                     <div class="gauge-value" id="temperatureValue">--°C</div>
                 </div>
                 
@@ -1158,7 +1755,7 @@
                         <div class="detail-value" id="tempOffset">±0.0 °C</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Updated</div>
+                        <div class="detail-label">Last Update</div>
                         <div class="detail-value" id="tempUpdated">--:--</div>
                     </div>
                     <div class="detail-item">
@@ -1172,10 +1769,12 @@
             <div class="card sensor-card">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-tint"></i>
+                        <div class="card-icon success">
+                            <i class="fas fa-tint"></i>
+                        </div>
                         <span>Humidity</span>
                     </div>
-                    <div class="card-badge bg-info" id="humStage">Normal</div>
+                    <div class="card-badge" id="humStage">Normal</div>
                 </div>
                 
                 <div class="sensor-value-container">
@@ -1193,7 +1792,7 @@
                         <div class="detail-value" id="humOffset">±0.0 %</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Updated</div>
+                        <div class="detail-label">Last Update</div>
                         <div class="detail-value" id="humUpdated">--:--</div>
                     </div>
                     <div class="detail-item">
@@ -1207,26 +1806,31 @@
             <div class="card control-panel">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-sliders-h"></i>
+                        <div class="card-icon danger">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
                         <span>Device Control</span>
                     </div>
                     <div class="card-badge" id="controlChannel">AUTO</div>
                 </div>
 
+                <!-- Mode Warning -->
                 <div class="mode-warning" id="modeWarning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <div>Switch to MANUAL mode for direct control</div>
+                    <div>System is in AUTO mode. Switch to MANUAL mode for direct control.</div>
                 </div>
 
+                <!-- Mode Toggle -->
                 <div class="mode-toggle">
                     <button class="mode-btn active" id="autoModeBtn" onclick="setMode(true)">
-                        <i class="fas fa-robot"></i> AUTO
+                        <i class="fas fa-robot"></i> AUTO MODE
                     </button>
                     <button class="mode-btn" id="manualModeBtn" onclick="setMode(false)">
-                        <i class="fas fa-gamepad"></i> MANUAL
+                        <i class="fas fa-gamepad"></i> MANUAL MODE
                     </button>
                 </div>
 
+                <!-- Control Grid -->
                 <div class="control-grid" id="controlGrid">
                     <button class="control-btn" data-device="fan" data-state="on" onclick="controlDevice('fan', true)">
                         <i class="fas fa-fan control-btn-icon"></i>
@@ -1246,7 +1850,8 @@
                     </button>
                 </div>
 
-                <div class="quick-controls">
+                <!-- Quick Controls -->
+                <div class="control-quick-buttons">
                     <button class="btn btn-success" onclick="controlBoth(true)">
                         <i class="fas fa-bolt"></i> BOTH ON
                     </button>
@@ -1260,14 +1865,16 @@
             <div class="card status-grid">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-server"></i>
+                        <div class="card-icon info">
+                            <i class="fas fa-server"></i>
+                        </div>
                         <span>System Status</span>
                     </div>
                 </div>
 
                 <div class="status-grid-items">
                     <div class="status-item">
-                        <div class="status-icon bg-success">
+                        <div class="status-icon" style="background: var(--gradient-success);">
                             <i class="fas fa-feather-alt"></i>
                         </div>
                         <div class="status-content">
@@ -1276,7 +1883,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon bg-info">
+                        <div class="status-icon" style="background: var(--gradient-info);">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
                         <div class="status-content">
@@ -1285,7 +1892,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon bg-primary">
+                        <div class="status-icon" style="background: var(--gradient-primary);">
                             <i class="fas fa-wifi"></i>
                         </div>
                         <div class="status-content">
@@ -1294,7 +1901,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon bg-warning">
+                        <div class="status-icon" style="background: var(--gradient-warning);">
                             <i class="fas fa-clock"></i>
                         </div>
                         <div class="status-content">
@@ -1303,7 +1910,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon bg-success">
+                        <div class="status-icon" style="background: var(--gradient-success);">
                             <i class="fas fa-microchip"></i>
                         </div>
                         <div class="status-content">
@@ -1312,7 +1919,7 @@
                         </div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon bg-info">
+                        <div class="status-icon" style="background: var(--gradient-info);">
                             <i class="fas fa-sync-alt"></i>
                         </div>
                         <div class="status-content">
@@ -1322,8 +1929,8 @@
                     </div>
                 </div>
 
-                <div class="status-item" style="margin-top: 8px; grid-column: span 2;">
-                    <div class="status-icon bg-danger">
+                <div class="status-item" style="margin-top: 20px; grid-column: span 2;">
+                    <div class="status-icon" style="background: var(--gradient-danger);">
                         <i class="fas fa-satellite"></i>
                     </div>
                     <div class="status-content" style="flex: 1;">
@@ -1337,16 +1944,19 @@
             <div class="card calibration-panel">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-seedling"></i>
-                        <span>Life Stage Control</span>
+                        <div class="card-icon warning">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <span>Life Stage & Age Control</span>
                     </div>
-                    <div class="card-badge bg-warning" id="stageStatus">Active</div>
+                    <div class="card-badge" id="stageStatus">Active</div>
                 </div>
 
                 <div class="stage-controls">
                     <div class="stage-header">
                         <div class="stage-title">
-                            Select Life Stage
+                            <i class="fas fa-chart-line"></i>
+                            <span>Select Life Stage</span>
                         </div>
                         <div class="age-label">
                             Current: <span id="currentStageDisplay">--</span>
@@ -1354,30 +1964,30 @@
                     </div>
 
                     <div class="stage-grid">
-                        <button class="stage-btn" onclick="setLifeStage('BROODING_WEEK1')">
+                        <button class="stage-btn brood1" onclick="setLifeStage('BROODING_WEEK1')">
                             <i class="fas fa-baby"></i>
-                            <div>Brood W1</div>
+                            <div>Brood Week 1</div>
                             <small>0-7 days</small>
                         </button>
-                        <button class="stage-btn" onclick="setLifeStage('BROODING_WEEK2')">
+                        <button class="stage-btn brood2" onclick="setLifeStage('BROODING_WEEK2')">
                             <i class="fas fa-child"></i>
-                            <div>Brood W2</div>
+                            <div>Brood Week 2</div>
                             <small>8-14 days</small>
                         </button>
-                        <button class="stage-btn" onclick="setLifeStage('GROWER_WEEK3_6')">
+                        <button class="stage-btn grower" onclick="setLifeStage('GROWER_WEEK3_6')">
                             <i class="fas fa-chicken"></i>
                             <div>Grower</div>
                             <small>15-42 days</small>
                         </button>
-                        <button class="stage-btn" onclick="setLifeStage('ADULT_LAYER')">
+                        <button class="stage-btn adult" onclick="setLifeStage('ADULT_LAYER')">
                             <i class="fas fa-egg"></i>
-                            <div>Adult</div>
+                            <div>Adult Layer</div>
                             <small>43+ days</small>
                         </button>
                     </div>
 
                     <div class="age-control">
-                        <div class="age-label">Age:</div>
+                        <div class="age-label">Current Age:</div>
                         <div class="age-value" id="currentAgeDisplay">0</div>
                         <div class="age-buttons">
                             <button class="age-btn decrease" onclick="adjustAge(-1)">
@@ -1390,17 +2000,19 @@
                     </div>
 
                     <div class="stage-info">
-                        <i class="fas fa-info-circle"></i>
-                        Current: <strong id="currentStageInfo">--</strong>
+                        <p><i class="fas fa-info-circle"></i> Changing the life stage will automatically adjust temperature and humidity targets. Current stage: <strong id="currentStageInfo">--</strong></p>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 8px; margin-top: 16px;">
-                    <button class="btn btn-primary" style="flex: 1;" onclick="saveStageConfig()">
-                        <i class="fas fa-save"></i> Save
+                <div style="display: flex; gap: 20px; margin-top: 30px;">
+                    <button class="btn btn-outline" style="flex: 1;" onclick="resetToAutoStage()">
+                        <i class="fas fa-robot"></i> Auto Detect
                     </button>
-                    <button class="btn" style="flex: 1; background: var(--light);" onclick="resetToAutoStage()">
-                        <i class="fas fa-robot"></i> Auto
+                    <button class="btn btn-primary" style="flex: 1;" onclick="saveStageConfig()">
+                        <i class="fas fa-save"></i> Save Config
+                    </button>
+                    <button class="btn btn-warning" style="flex: 1;" onclick="getStageInfo()">
+                        <i class="fas fa-info-circle"></i> Stage Info
                     </button>
                 </div>
             </div>
@@ -1409,15 +2021,17 @@
             <div class="card calibration-panel">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-tools"></i>
+                        <div class="card-icon warning">
+                            <i class="fas fa-tools"></i>
+                        </div>
                         <span>Sensor Calibration</span>
                     </div>
-                    <div class="card-badge bg-warning" id="calibrationStatus">Active</div>
+                    <div class="card-badge" id="calibrationStatus">Active</div>
                 </div>
 
                 <div class="calibration-controls">
                     <div class="calibration-item">
-                        <h4>Temperature</h4>
+                        <h4>Temperature Calibration</h4>
                         <div class="calibration-control">
                             <button class="btn btn-danger btn-small calibration-btn" id="tempMinusBtn" onclick="startTempCalibration(-0.5)">
                                 <i class="fas fa-minus"></i> 0.5°C
@@ -1433,7 +2047,7 @@
                     </div>
                     
                     <div class="calibration-item">
-                        <h4>Humidity</h4>
+                        <h4>Humidity Calibration</h4>
                         <div class="calibration-control">
                             <button class="btn btn-danger btn-small calibration-btn" id="humMinusBtn" onclick="startHumCalibration(-0.5)">
                                 <i class="fas fa-minus"></i> 0.5%
@@ -1449,8 +2063,8 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 8px; margin-top: 16px;">
-                    <button class="btn" style="flex: 1; background: var(--light);" onclick="resetCalibration()">
+                <div style="display: flex; gap: 20px; margin-top: 30px;">
+                    <button class="btn btn-outline" style="flex: 1;" onclick="resetCalibration()">
                         <i class="fas fa-undo"></i> Reset
                     </button>
                     <button class="btn btn-primary" style="flex: 1;" onclick="saveCalibration()">
@@ -1466,20 +2080,22 @@
             <div class="card alarm-log-panel">
                 <div class="card-header">
                     <div class="card-title">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="card-icon danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
                         <span>Alarm & System Log</span>
                     </div>
-                    <div class="card-badge bg-danger" id="alarmCount">0 Alarms</div>
+                    <div class="card-badge" id="alarmCount">0 Alarms</div>
                 </div>
 
                 <div class="alarm-container" id="alarmContainer">
                     <div class="alarm-header">
-                        <i class="fas fa-exclamation-circle"></i>
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
                         <div class="alarm-content">
                             <h3 id="alarmTitle">No Active Alarms</h3>
                             <p id="alarmMessage">System operating normally</p>
                         </div>
-                        <button class="btn btn-danger" onclick="clearAlarm()" style="margin-left: auto; padding: 6px 12px; font-size: 11px;">
+                        <button class="btn btn-danger" onclick="clearAlarm()" style="margin-left: auto;">
                             <i class="fas fa-times"></i> Clear
                         </button>
                     </div>
@@ -1488,96 +2104,122 @@
                 <div class="log-container" id="logContainer">
                     <div class="log-entry">
                         <span class="log-time">--:--:--</span>
-                        <span class="log-info log-message">Dashboard initialized. Connect to start monitoring...</span>
+                        <span class="log-info log-message">VQuail Pro Dashboard initialized. Connect to start monitoring...</span>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Connection Diagnostics -->
-            <div class="card" style="grid-column: span 12;">
-                <div class="card-header">
-                    <div class="card-title">
+        <!-- Connection Debug Panel -->
+        <div class="card connection-debug-panel">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="card-icon info">
                         <i class="fas fa-network-wired"></i>
-                        <span>Connection Diagnostics</span>
                     </div>
-                    <div class="card-badge" id="connectionQuality">--</div>
+                    <span>Connection Diagnostics</span>
+                </div>
+                <div class="card-badge" id="connectionQuality">--</div>
+            </div>
+
+            <div class="debug-grid">
+                <div class="debug-card">
+                    <h4 style="margin-bottom: 20px; color: var(--light); font-family: 'Poppins', sans-serif;">
+                        <i class="fas fa-cloud"></i> MQTT Connection
+                    </h4>
+                    <div class="debug-info">
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Status:</span>
+                            <span id="mqttConnectionStatus" style="color: var(--danger); font-weight: 600;">Disconnected</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Broker:</span>
+                            <span style="font-family: monospace; color: var(--primary-light);">514ee1c5407448169298c78647ad26b9.s1.eu.hivemq.cloud:8884</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Protocol:</span>
+                            <span>WebSocket (WSS)</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Client ID:</span>
+                            <span id="clientId" style="font-family: monospace; color: var(--light);">--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="debug-buttons">
+                        <button class="btn btn-success btn-small" onclick="connectMQTT()">
+                            <i class="fas fa-wifi"></i> Connect
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="testConnection()">
+                            <i class="fas fa-bolt"></i> Test
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="disconnectMQTT()">
+                            <i class="fas fa-power-off"></i> Disconnect
+                        </button>
+                    </div>
                 </div>
 
-                <div class="debug-grid">
-                    <div class="debug-card">
-                        <h4>MQTT Connection</h4>
-                        <div class="debug-info">
-                            <div class="debug-info-row">
-                                <span>Status:</span>
-                                <span id="mqttConnectionStatus" style="color: var(--danger);">Disconnected</span>
-                            </div>
-                            <div class="debug-info-row">
-                                <span>Broker:</span>
-                                <span style="font-family: 'Roboto Mono'; color: var(--primary);">hivemq.cloud</span>
-                            </div>
-                            <div class="debug-info-row">
-                                <span>Client ID:</span>
-                                <span id="clientId" style="font-family: 'Roboto Mono';">--</span>
-                            </div>
+                <div class="debug-card">
+                    <h4 style="margin-bottom: 20px; color: var(--light); font-family: 'Poppins', sans-serif;">
+                        <i class="fas fa-broadcast-tower"></i> System Commands
+                    </h4>
+                    <div class="debug-info">
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Last Command:</span>
+                            <span id="lastCommand" style="color: var(--light);">--</span>
                         </div>
-                        
-                        <div class="debug-buttons">
-                            <button class="btn btn-success btn-small" onclick="connectMQTT()">
-                                <i class="fas fa-wifi"></i> Connect
-                            </button>
-                            <button class="btn btn-danger btn-small" onclick="disconnectMQTT()">
-                                <i class="fas fa-power-off"></i> Disconnect
-                            </button>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Last Response:</span>
+                            <span id="lastResponse" style="color: var(--light);">--</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Message Rate:</span>
+                            <span id="messageRate" style="color: var(--light);">0/min</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Reconnect Count:</span>
+                            <span id="reconnectCount" style="color: var(--light);">0</span>
                         </div>
                     </div>
+                    
+                    <div class="debug-buttons">
+                        <button class="btn btn-primary btn-small" onclick="publishStatus()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="sendReboot()">
+                            <i class="fas fa-redo"></i> Reboot
+                        </button>
+                        <button class="btn btn-info btn-small" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> Clear Logs
+                        </button>
+                    </div>
+                </div>
 
-                    <div class="debug-card">
-                        <h4>System Commands</h4>
-                        <div class="debug-info">
-                            <div class="debug-info-row">
-                                <span>Last Command:</span>
-                                <span id="lastCommand">--</span>
-                            </div>
-                            <div class="debug-info-row">
-                                <span>Last Response:</span>
-                                <span id="lastResponse">--</span>
-                            </div>
-                            <div class="debug-info-row">
-                                <span>Message Rate:</span>
-                                <span id="messageRate">0/min</span>
-                            </div>
+                <div class="debug-card">
+                    <h4 style="margin-bottom: 20px; color: var(--light); font-family: 'Poppins', sans-serif;">
+                        <i class="fas fa-chart-line"></i> Performance
+                    </h4>
+                    <div class="debug-info">
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Uptime:</span>
+                            <span id="performanceUptime" style="color: var(--light);">--</span>
                         </div>
-                        
-                        <div class="debug-buttons">
-                            <button class="btn btn-primary btn-small" onclick="publishStatus()">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                            <button class="btn btn-warning btn-small" onclick="sendReboot()">
-                                <i class="fas fa-redo"></i> Reboot
-                            </button>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Messages Sent:</span>
+                            <span id="messagesSent" style="color: var(--light);">0</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Messages Received:</span>
+                            <span id="messagesReceived" style="color: var(--light);">0</span>
+                        </div>
+                        <div class="debug-info-row">
+                            <span style="color: var(--gray);">Latency:</span>
+                            <span id="mqttLatency" style="color: var(--light);">-- ms</span>
                         </div>
                     </div>
-
-                    <div class="debug-card">
-                        <h4>Performance</h4>
-                        <div class="debug-info">
-                            <div class="debug-info-row">
-                                <span>Messages Sent:</span>
-                                <span id="messagesSent">0</span>
-                            </div>
-                            <div class="debug-info-row">
-                                <span>Messages Received:</span>
-                                <span id="messagesReceived">0</span>
-                            </div>
-                            <div class="debug-info-row">
-                                <span>Reconnects:</span>
-                                <span id="reconnectCount">0</span>
-                            </div>
-                        </div>
-                        
-                        <div class="progress-bar" style="margin-top: 12px;">
-                            <div class="progress-fill" id="performanceBar" style="width: 0%;"></div>
-                        </div>
+                    
+                    <div class="progress-bar" style="margin-top: 20px;">
+                        <div class="progress-fill" id="performanceBar" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
@@ -1585,11 +2227,12 @@
 
         <!-- Footer -->
         <footer class="app-footer">
-            <p>VQuail Smart Control System v2.3.0</p>
+            <p>VQuail Pro Control System | Advanced Farming Automation Platform</p>
             <div class="footer-info">
-                <span><i class="fas fa-shield-alt"></i> Secured</span>
-                <span><i class="fas fa-sync-alt"></i> Real-time</span>
-                <span><i class="fas fa-mobile-alt"></i> Responsive</span>
+                <span><i class="fas fa-shield-alt"></i> Secured TLS Connection</span>
+                <span><i class="fas fa-sync-alt"></i> Real-time Monitoring</span>
+                <span><i class="fas fa-mobile-alt"></i> Responsive Interface</span>
+                <span><i class="fas fa-history"></i> Version 3.0.0</span>
             </div>
         </footer>
     </div>
@@ -1699,18 +2342,22 @@
             if (username === VALID_CREDENTIALS.username && password === VALID_CREDENTIALS.password) {
                 // Successful login
                 isAuthenticated = true;
-                showNotification('Login successful! Redirecting...', 'success');
+                showLoginNotification('success', 'Login successful! Redirecting to dashboard...');
                 
-                // Store login state
+                // Store login state with expiration (8 hours)
                 const loginData = {
                     authenticated: true,
                     username: username,
                     timestamp: Date.now(),
-                    expires: Date.now() + (8 * 60 * 60 * 1000)
+                    expires: Date.now() + (8 * 60 * 60 * 1000) // 8 hours
                 };
                 localStorage.setItem('vquail_session', JSON.stringify(loginData));
                 
-                // Switch to dashboard
+                // Add login event to log
+                const loginTime = new Date().toLocaleTimeString();
+                console.log(`User ${username} logged in at ${loginTime}`);
+                
+                // Switch to dashboard after delay
                 setTimeout(() => {
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('dashboardContainer').style.display = 'block';
@@ -1718,43 +2365,79 @@
                     
                     // Initialize dashboard
                     initializeDashboard();
-                }, 1000);
+                }, 1500);
                 
             } else {
                 // Failed login
-                showNotification('Invalid username or password', 'error');
+                showLoginNotification('error', 'Invalid username or password');
                 document.getElementById('username').classList.add('error');
                 document.getElementById('password').classList.add('error');
+                
+                // Clear password field
                 document.getElementById('password').value = '';
+                
+                // Shake animation for error
+                const loginCard = document.querySelector('.login-card');
+                loginCard.style.animation = 'none';
+                setTimeout(() => {
+                    loginCard.style.animation = 'shake 0.5s';
+                }, 10);
             }
+        }
+
+        function showLoginNotification(type, message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Add to login container
+            document.querySelector('.login-container').appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                // Disconnect MQTT
+                // Disconnect MQTT if connected
                 if (mqttClient && mqttClient.connected) {
                     disconnectMQTT();
                 }
                 
-                // Clear session
+                // Clear session storage
                 localStorage.removeItem('vquail_session');
+                
+                // Reset authentication state
                 isAuthenticated = false;
                 
+                // Clear any session timeout
                 if (sessionTimeout) {
                     clearTimeout(sessionTimeout);
+                    sessionTimeout = null;
                 }
                 
-                // Switch to login page
+                // Switch back to login page
                 document.getElementById('dashboardContainer').style.display = 'none';
                 document.getElementById('loginContainer').style.display = 'flex';
                 
-                // Clear form
+                // Clear login form
                 document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
+                
+                // Clear any errors
                 document.getElementById('usernameError').style.display = 'none';
                 document.getElementById('passwordError').style.display = 'none';
+                document.getElementById('username').classList.remove('error');
+                document.getElementById('password').classList.remove('error');
                 
-                showNotification('You have been logged out', 'info');
+                // Show logout message
+                showLoginNotification('info', 'You have been logged out successfully.');
             }
         }
 
@@ -1765,15 +2448,20 @@
                     const session = JSON.parse(sessionData);
                     const now = Date.now();
                     
+                    // Check if session is still valid
                     if (session.authenticated && session.expires > now) {
                         isAuthenticated = true;
+                        
+                        // User is already logged in, show dashboard
                         document.getElementById('loginContainer').style.display = 'none';
                         document.getElementById('dashboardContainer').style.display = 'block';
                         
+                        // Auto-connect to MQTT
                         setTimeout(() => {
                             initializeDashboard();
                         }, 500);
                         
+                        // Set auto-logout timer (8 hours from login)
                         const timeLeft = session.expires - now;
                         if (timeLeft > 0) {
                             sessionTimeout = setTimeout(() => {
@@ -1784,14 +2472,27 @@
                         
                         return true;
                     } else {
+                        // Session expired, clear it
                         localStorage.removeItem('vquail_session');
                     }
                 }
             } catch (error) {
+                console.error('Error checking session:', error);
                 localStorage.removeItem('vquail_session');
             }
             return false;
         }
+
+        // Add shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
 
         // ================= DASHBOARD CONFIGURATION =================
         const HIVEMQ_CONFIG = {
@@ -1816,26 +2517,42 @@
         };
         
         let systemState = {
+            // Sensor Data
             temp: 0,
             hum: 0,
             rawTemp: 0,
             rawHum: 0,
             tempOffset: 0,
             humOffset: 0,
+            
+            // Device States
             fan: false,
             heat: false,
             autoMode: true,
+            override: false,
+            
+            // System Info
             stage: '--',
             stageIndex: 0,
             age: 0,
             controlChannel: '--',
             lastSource: '--',
+            
+            // Network
+            wifi: false,
+            mqtt: false,
             wifiRSSI: 0,
+            
+            // Alarms
             alarm: false,
             alarmMessage: '',
             alarmSource: '',
+            
+            // Performance
             uptime: 0,
             freeHeap: 0,
+            
+            // Timestamps
             lastUpdate: null,
             lastSync: '--:--'
         };
@@ -1851,7 +2568,8 @@
             hum: false
         };
         
-        const CALIBRATION_DELAY = 2000;
+        const CALIBRATION_DELAY = 2000; // 2 seconds delay before sending
+        const CALIBRATION_COOLDOWN = 1000; // 1 second cooldown between sends
 
         function startTempCalibration(adjustment) {
             handleCalibration('temp', adjustment);
@@ -1862,27 +2580,41 @@
         }
 
         function handleCalibration(type, adjustment) {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
             
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+            
+            // If already calibrating, just update the value but don't send new command
             if (isCalibrating[type]) {
                 updateCalibrationUI(type, adjustment);
                 return;
             }
             
+            // Update UI immediately
             updateCalibrationUI(type, adjustment);
             
+            // Clear any existing timer
             if (calibrationTimers[type]) {
                 clearTimeout(calibrationTimers[type]);
             }
             
+            // Show sending indicator
             setCalibrationButtonState(type, 'sending');
             
+            // Set a timer to send the calibration after delay
             calibrationTimers[type] = setTimeout(() => {
                 sendCalibrationCommand(type);
             }, CALIBRATION_DELAY);
         }
 
         function updateCalibrationUI(type, adjustment) {
+            // Update the offset value
             if (type === 'temp') {
                 systemState.tempOffset += adjustment;
                 systemState.tempOffset = parseFloat(systemState.tempOffset.toFixed(1));
@@ -1916,14 +2648,14 @@
             
             if (state === 'sending') {
                 isCalibrating[type] = true;
-                btnSet.plus.classList.add('sending');
-                btnSet.minus.classList.add('sending');
+                btnSet.plus.classList.add('calibration-sending');
+                btnSet.minus.classList.add('calibration-sending');
                 btnSet.plus.disabled = true;
                 btnSet.minus.disabled = true;
             } else if (state === 'ready') {
                 isCalibrating[type] = false;
-                btnSet.plus.classList.remove('sending');
-                btnSet.minus.classList.remove('sending');
+                btnSet.plus.classList.remove('calibration-sending');
+                btnSet.minus.classList.remove('calibration-sending');
                 btnSet.plus.disabled = false;
                 btnSet.minus.disabled = false;
             }
@@ -1938,39 +2670,54 @@
                 source: 'web'
             };
             
-            publishCommand('vquail/calibration', command);
-            showNotification(`${type === 'temp' ? 'Temperature' : 'Humidity'} calibration updated`, 'success');
+            console.log(`Sending ${type} calibration:`, command);
             
+            publishCommand('vquail/calibration', command);
+            
+            showNotification(`${type === 'temp' ? 'Temperature' : 'Humidity'} calibration updated to ${command[`set_${type}_offset`].toFixed(1)}${type === 'temp' ? '°C' : '%'}`, 'success');
+            logMessage(`${type.toUpperCase()} calibration sent: ${command[`set_${type}_offset`].toFixed(1)}${type === 'temp' ? '°C' : '%'}`, 'info');
+            
+            // Reset button state after cooldown
             setTimeout(() => {
                 setCalibrationButtonState(type, 'ready');
-            }, 1000);
+            }, CALIBRATION_COOLDOWN);
         }
 
         // ================= DASHBOARD INITIALIZATION =================
         function initializeDashboard() {
-            console.log('Dashboard initialized');
-            logMessage('Dashboard initialized', 'info');
+            console.log('VQuail Professional Dashboard initialized');
+            logMessage('Professional Dashboard initialized', 'info');
+            logMessage(`MQTT Broker: ${HIVEMQ_CONFIG.host}:${HIVEMQ_CONFIG.port}`, 'info');
             
+            // Set client ID display
             document.getElementById('clientId').textContent = HIVEMQ_CONFIG.clientId;
+            
+            // Initialize stage display
             updateStageDisplay();
             
+            // Auto-connect after 1.5 seconds
             setTimeout(() => {
                 connectMQTT();
             }, 1500);
             
+            // Update performance bar every second
             setInterval(() => {
                 const uptime = systemState.uptime || 0;
-                const performance = Math.min(uptime / 100, 100);
+                const performance = Math.min(uptime / 100, 100); // Scale for display
                 document.getElementById('performanceBar').style.width = performance + '%';
+                document.getElementById('performanceUptime').textContent = formatUptime(uptime);
             }, 1000);
         }
 
         // ================= CONNECTION MANAGEMENT =================
         function connectMQTT() {
-            if (!isAuthenticated) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
             
             if (mqttClient && mqttClient.connected) {
-                showNotification('Already connected', 'info');
+                showNotification('Already connected to MQTT broker', 'info');
                 return;
             }
             
@@ -1983,15 +2730,21 @@
                 clean: true,
                 reconnectPeriod: 3000,
                 connectTimeout: 8000,
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
+                protocolVersion: 5,
+                keepalive: 30
             };
             
-            logMessage(`Connecting to ${HIVEMQ_CONFIG.host}...`, 'info');
+            logMessage(`Connecting to ${HIVEMQ_CONFIG.host}:${HIVEMQ_CONFIG.port}...`, 'info');
             
             try {
+                console.log('Connecting with options:', { ...options, password: '***' });
                 mqttClient = mqtt.connect(WS_URL, options);
+                
                 setupMQTTListeners();
+                
             } catch (error) {
+                console.error('Connection error:', error);
                 logMessage(`Connection failed: ${error.message}`, 'error');
                 updateConnectionStatus('disconnected');
                 showNotification(`Connection error: ${error.message}`, 'error');
@@ -2000,13 +2753,18 @@
 
         function setupMQTTListeners() {
             mqttClient.on('connect', () => {
-                console.log('MQTT Connected');
+                console.log('MQTT Connected successfully!');
                 isConnected = true;
                 connectionStats.lastPing = Date.now();
                 updateConnectionStatus('connected');
-                logMessage('✓ Connected to MQTT broker', 'success');
+                
+                logMessage('✓ Connected to HiveMQ Cloud via WebSocket', 'success');
                 showNotification('Connected to MQTT broker', 'success');
+                
+                // Subscribe to all relevant topics
                 subscribeToTopics();
+                
+                // Request initial status
                 setTimeout(() => requestFullStatus(), 1000);
             });
             
@@ -2014,15 +2772,19 @@
                 const msg = message.toString();
                 connectionStats.messagesReceived++;
                 document.getElementById('messagesReceived').textContent = connectionStats.messagesReceived;
+                
+                console.log(`[${topic}]`, msg);
                 handleMQTTMessage(topic, msg);
             });
             
             mqttClient.on('error', (error) => {
+                console.error('MQTT Error:', error);
                 logMessage(`Connection error: ${error.message}`, 'error');
                 updateConnectionStatus('disconnected');
             });
             
             mqttClient.on('close', () => {
+                console.log('MQTT Connection closed');
                 isConnected = false;
                 updateConnectionStatus('disconnected');
                 logMessage('Disconnected from broker', 'warning');
@@ -2033,6 +2795,11 @@
                 document.getElementById('reconnectCount').textContent = connectionStats.reconnects;
                 logMessage('Reconnecting...', 'info');
                 updateConnectionStatus('connecting');
+            });
+            
+            mqttClient.on('offline', () => {
+                console.log('MQTT Client offline');
+                updateConnectionStatus('disconnected');
             });
         }
 
@@ -2049,8 +2816,10 @@
             topics.forEach(topic => {
                 mqttClient.subscribe(topic, { qos: 1 }, (err) => {
                     if (err) {
+                        console.error(`Failed to subscribe to ${topic}:`, err);
                         logMessage(`Failed to subscribe to ${topic}`, 'error');
                     } else {
+                        console.log(`Subscribed to ${topic}`);
                         logMessage(`Subscribed to ${topic}`, 'success');
                     }
                 });
@@ -2073,9 +2842,11 @@
                 const data = JSON.parse(message);
                 const now = new Date();
                 
+                // Update last sync time
                 systemState.lastSync = now.toLocaleTimeString();
                 document.getElementById('lastSync').textContent = systemState.lastSync;
                 
+                // Update system state based on topic
                 if (topic.includes('status/device') || topic.includes('status/sensors')) {
                     updateSystemStateFromData(data);
                     updateUI();
@@ -2087,23 +2858,28 @@
                     updateSystemStatus(data);
                 }
                 
+                // Update last response
                 document.getElementById('lastResponse').textContent = 
                     `${topic.split('/').pop()} @ ${now.toLocaleTimeString()}`;
                 
             } catch (error) {
+                console.error('Error processing message:', error);
                 logMessage(`Error parsing message from ${topic}: ${error.message}`, 'error');
             }
         }
 
         function updateSystemStateFromData(data) {
+            // Update all available fields
             Object.keys(data).forEach(key => {
                 if (systemState[key] !== undefined && data[key] !== undefined) {
                     systemState[key] = data[key];
                 }
             });
             
+            // Update timestamps
             systemState.lastUpdate = new Date();
             
+            // Update stage and age if available
             if (data.stage_index !== undefined) {
                 updateCurrentStageFromIndex(data.stage_index);
             }
@@ -2112,12 +2888,13 @@
                 currentAge = data.age;
             }
             
+            // Update UI immediately
             updateSensorDisplays();
             updateDeviceStates();
             updateAlarmDisplay();
             updateStageDisplay();
             
-            logMessage('System state updated', 'success');
+            logMessage('System state updated from device', 'success');
         }
 
         function updateCalibrationFromDevice(data) {
@@ -2137,16 +2914,31 @@
 
         // ================= LIFE STAGE FUNCTIONS =================
         function setLifeStage(stage) {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
             
-            if (!LIFE_STAGES[stage]) return;
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+            
+            if (!LIFE_STAGES[stage]) {
+                showNotification('Invalid life stage selected', 'error');
+                return;
+            }
             
             currentStage = stage;
             const stageConfig = LIFE_STAGES[stage];
+            
+            // Reset age to minimum age for the stage
             currentAge = stageConfig.minAge;
             
+            // Update UI
             updateStageDisplay();
             
+            // Send stage change command
             const command = {
                 set_stage: stage,
                 age: currentAge,
@@ -2155,23 +2947,41 @@
             };
             
             publishCommand('vquail/control', command);
+            
+            // Show notification
             showNotification(`Life stage set to ${stageConfig.name}`, 'success');
+            logMessage(`Life stage changed to ${stageConfig.name} (Age: ${currentAge} days)`, 'info');
+            
+            // Update stage info
+            updateStageInfo(stageConfig);
         }
 
         function adjustAge(change) {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             const stageConfig = LIFE_STAGES[currentStage];
             const newAge = currentAge + change;
             
+            // Validate age range
             if (newAge < stageConfig.minAge || newAge > stageConfig.maxAge) {
-                showNotification(`Age must be between ${stageConfig.minAge} and ${stageConfig.maxAge} days`, 'warning');
+                showNotification(`Age must be between ${stageConfig.minAge} and ${stageConfig.maxAge} days for ${stageConfig.name}`, 'warning');
                 return;
             }
             
             currentAge = newAge;
+            
+            // Update UI
             updateStageDisplay();
             
+            // Send age update command
             const command = {
                 set_age: currentAge,
                 stage: currentStage,
@@ -2180,10 +2990,14 @@
             };
             
             publishCommand('vquail/control', command);
+            
+            // Show notification
             showNotification(`Age updated to ${currentAge} days`, 'success');
+            logMessage(`Age updated to ${currentAge} days for ${stageConfig.name}`, 'info');
         }
 
         function updateCurrentStageFromIndex(index) {
+            // Map index to stage
             const stages = ['BROODING_WEEK1', 'BROODING_WEEK2', 'GROWER_WEEK3_6', 'ADULT_LAYER'];
             if (index >= 0 && index < stages.length) {
                 currentStage = stages[index];
@@ -2193,8 +3007,10 @@
 
         function updateStageDisplay() {
             const stageConfig = LIFE_STAGES[currentStage];
+            
             if (!stageConfig) return;
             
+            // Update stage buttons
             document.querySelectorAll('.stage-btn').forEach(btn => {
                 btn.classList.remove('active');
                 const onclick = btn.getAttribute('onclick');
@@ -2206,11 +3022,16 @@
                 }
             });
             
+            // Update age display
             document.getElementById('currentAgeDisplay').textContent = currentAge;
             document.getElementById('currentStageDisplay').textContent = stageConfig.shortName;
             document.getElementById('currentStageInfo').textContent = stageConfig.name;
+            
+            // Update main display
             document.getElementById('lifeStage').textContent = stageConfig.name;
             document.getElementById('quailAge').textContent = currentAge + ' days';
+            
+            // Update temperature and humidity stage badges
             updateStageBadges(stageConfig);
         }
 
@@ -2220,33 +3041,48 @@
             
             if (!stageConfig) return;
             
+            // Temperature badge
             const currentTemp = systemState.temp || 0;
             if (currentTemp < stageConfig.tempMin) {
                 tempBadge.textContent = 'Too Cold';
-                tempBadge.className = 'card-badge bg-info';
+                tempBadge.style.color = 'var(--info)';
             } else if (currentTemp > stageConfig.tempMax) {
                 tempBadge.textContent = 'Too Hot';
-                tempBadge.className = 'card-badge bg-danger';
+                tempBadge.style.color = 'var(--danger)';
             } else {
                 tempBadge.textContent = 'Optimal';
-                tempBadge.className = 'card-badge bg-success';
+                tempBadge.style.color = 'var(--success)';
             }
             
+            // Humidity badge
             const currentHum = systemState.hum || 0;
             if (currentHum < stageConfig.humMin) {
                 humBadge.textContent = 'Too Dry';
-                humBadge.className = 'card-badge bg-warning';
+                humBadge.style.color = 'var(--warning)';
             } else if (currentHum > stageConfig.humMax) {
                 humBadge.textContent = 'Too Humid';
-                humBadge.className = 'card-badge bg-danger';
+                humBadge.style.color = 'var(--danger)';
             } else {
                 humBadge.textContent = 'Normal';
-                humBadge.className = 'card-badge bg-success';
+                humBadge.style.color = 'var(--success)';
             }
         }
 
+        function updateStageInfo(stageConfig) {
+            const infoText = `${stageConfig.name}: Temp ${stageConfig.tempMin}-${stageConfig.tempMax}°C, Humidity ${stageConfig.humMin}-${stageConfig.humMax}%`;
+            document.getElementById('currentStageInfo').textContent = infoText;
+        }
+
         function saveStageConfig() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             const command = {
                 save_config: true,
@@ -2257,13 +3093,22 @@
             };
             
             publishCommand('vquail/control', command);
-            showNotification('Stage configuration saved', 'success');
+            showNotification('Stage configuration saved to device', 'success');
+            logMessage(`Saved stage config: ${LIFE_STAGES[currentStage].name}, Age: ${currentAge} days`, 'info');
         }
 
         function resetToAutoStage() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
             
-            if (confirm('Reset to auto-detected life stage?')) {
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+            
+            if (confirm('Reset to auto-detected life stage based on system uptime?')) {
                 const command = {
                     auto_stage: true,
                     timestamp: Date.now(),
@@ -2272,7 +3117,25 @@
                 
                 publishCommand('vquail/control', command);
                 showNotification('Auto-stage detection activated', 'info');
+                logMessage('Requested auto-stage detection', 'info');
             }
+        }
+
+        function getStageInfo() {
+            const stageConfig = LIFE_STAGES[currentStage];
+            if (!stageConfig) return;
+            
+            const info = `
+                <strong>${stageConfig.name}</strong><br>
+                Age Range: ${stageConfig.minAge}-${stageConfig.maxAge} days<br>
+                Temperature: ${stageConfig.tempMin}-${stageConfig.tempMax}°C<br>
+                Humidity: ${stageConfig.humMin}-${stageConfig.humMax}%<br>
+                Current Age: ${currentAge} days<br>
+                Current Temp: ${systemState.temp || 0}°C<br>
+                Current Hum: ${systemState.hum || 0}%
+            `;
+            
+            showNotification(info, 'info');
         }
 
         // ================= UI UPDATES =================
@@ -2286,37 +3149,35 @@
         }
 
         function updateSensorDisplays() {
-            // Update temperature
-            const temp = systemState.temp || 0;
+            // Temperature
             const tempElement = document.getElementById('temperatureValue');
-            tempElement.textContent = temp.toFixed(1) + '°C';
+            tempElement.textContent = systemState.temp.toFixed(1) + '°C';
             
-            // Update gauge
-            const tempProgress = ((temp - 15) / 25) * 100;
-            const gauge = document.getElementById('tempGauge');
-            const dashoffset = 339.292 * (1 - Math.min(Math.max(tempProgress, 0), 100) / 100);
-            gauge.style.strokeDashoffset = dashoffset;
+            // Update gauge value
+            const temp = systemState.temp;
+            const tempProgress = ((temp - 15) / 25) * 100; // Assuming range 15-40°C
+            document.getElementById('tempProgress').style.width = Math.min(Math.max(tempProgress, 0), 100) + '%';
             
             // Update temperature details
             document.getElementById('rawTemp').textContent = systemState.rawTemp.toFixed(1) + '°C';
             document.getElementById('tempOffset').textContent = 
                 (systemState.tempOffset > 0 ? '+' : '') + systemState.tempOffset.toFixed(1) + '°C';
             document.getElementById('tempUpdated').textContent = systemState.lastUpdate ? 
-                systemState.lastUpdate.toLocaleTimeString().substring(0, 5) : '--:--';
+                systemState.lastUpdate.toLocaleTimeString() : '--:--';
             
-            // Update humidity
-            const hum = systemState.hum || 0;
-            document.getElementById('humidityValue').textContent = hum.toFixed(1);
+            // Humidity
+            document.getElementById('humidityValue').textContent = systemState.hum.toFixed(1);
             document.getElementById('rawHum').textContent = systemState.rawHum.toFixed(1) + '%';
             document.getElementById('humOffset').textContent = 
                 (systemState.humOffset > 0 ? '+' : '') + systemState.humOffset.toFixed(1) + '%';
             document.getElementById('humUpdated').textContent = systemState.lastUpdate ? 
-                systemState.lastUpdate.toLocaleTimeString().substring(0, 5) : '--:--';
+                systemState.lastUpdate.toLocaleTimeString() : '--:--';
             
             // Update progress bars
-            document.getElementById('tempProgress').style.width = Math.min(Math.max(tempProgress, 0), 100) + '%';
-            document.getElementById('humProgress').style.width = Math.min(Math.max(hum, 0), 100) + '%';
+            document.getElementById('humProgress').style.width = 
+                Math.min(Math.max(systemState.hum, 0), 100) + '%';
             
+            // Update stage badges based on current sensor readings
             updateStageBadges(LIFE_STAGES[currentStage]);
         }
 
@@ -2326,6 +3187,8 @@
             fanButtons.forEach(btn => {
                 const state = btn.dataset.state === 'on';
                 btn.classList.toggle('active', state && systemState.fan);
+                btn.classList.toggle('inactive', !state && !systemState.fan);
+                // Disable buttons in auto mode
                 btn.disabled = systemState.autoMode;
                 btn.classList.toggle('disabled', systemState.autoMode);
             });
@@ -2335,6 +3198,8 @@
             heatButtons.forEach(btn => {
                 const state = btn.dataset.state === 'on';
                 btn.classList.toggle('active', state && systemState.heat);
+                btn.classList.toggle('inactive', !state && !systemState.heat);
+                // Disable buttons in auto mode
                 btn.disabled = systemState.autoMode;
                 btn.classList.toggle('disabled', systemState.autoMode);
             });
@@ -2356,9 +3221,10 @@
             document.getElementById('controlSource').textContent = 
                 `${systemState.controlChannel} (Last: ${systemState.lastSource})`;
             
+            // Update connection quality
             const quality = calculateConnectionQuality(systemState.wifiRSSI);
             document.getElementById('connectionQuality').textContent = quality.text;
-            document.getElementById('connectionQuality').className = 'card-badge ' + quality.class;
+            document.getElementById('connectionQuality').style.color = quality.color;
         }
 
         function updateAlarmDisplay() {
@@ -2372,22 +3238,26 @@
                 alarmTitle.textContent = `ALARM: ${systemState.alarmSource}`;
                 alarmMessage.textContent = systemState.alarmMessage;
                 alarmCount.textContent = '1 Active';
+                alarmCount.style.color = 'var(--danger)';
             } else {
                 alarmContainer.style.display = 'none';
                 alarmTitle.textContent = 'No Active Alarms';
                 alarmMessage.textContent = 'System operating normally';
                 alarmCount.textContent = '0 Alarms';
+                alarmCount.style.color = 'var(--success)';
             }
         }
 
         function updateControlUI() {
             document.getElementById('controlChannel').textContent = systemState.controlChannel;
+            
+            // Update control channel color
             const channelElement = document.getElementById('controlChannel');
             switch(systemState.controlChannel) {
-                case 'WEB': channelElement.className = 'card-badge bg-warning'; break;
-                case 'TFT': channelElement.className = 'card-badge bg-success'; break;
-                case 'AUTO': channelElement.className = 'card-badge bg-info'; break;
-                default: channelElement.className = 'card-badge';
+                case 'WEB': channelElement.style.color = 'var(--warning)'; break;
+                case 'TFT': channelElement.style.color = 'var(--success)'; break;
+                case 'AUTO': channelElement.style.color = 'var(--info)'; break;
+                default: channelElement.style.color = 'var(--gray)';
             }
         }
 
@@ -2400,17 +3270,17 @@
             
             switch(status) {
                 case 'connected':
-                    text.textContent = 'MQTT: Connected';
+                    text.textContent = 'Connected';
                     statusElement.textContent = 'Connected ✓';
                     statusElement.style.color = 'var(--success)';
                     break;
                 case 'connecting':
-                    text.textContent = 'MQTT: Connecting...';
+                    text.textContent = 'Connecting...';
                     statusElement.textContent = 'Connecting...';
                     statusElement.style.color = 'var(--warning)';
                     break;
                 case 'disconnected':
-                    text.textContent = 'MQTT: Disconnected';
+                    text.textContent = 'Disconnected';
                     statusElement.textContent = 'Disconnected ✗';
                     statusElement.style.color = 'var(--danger)';
                     break;
@@ -2419,10 +3289,18 @@
 
         // ================= CONTROL FUNCTIONS =================
         function controlDevice(device, state) {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             if (systemState.autoMode) {
-                showNotification('Switch to MANUAL mode first', 'warning');
+                showNotification('System is in AUTO mode. Switch to MANUAL mode first.', 'warning');
                 return;
             }
             
@@ -2433,9 +3311,13 @@
             };
             
             publishCommand('vquail/web/control', command);
+            
+            // Update local state immediately for better UX
             systemState[device] = state;
             updateDeviceStates();
+            
             showNotification(`${device.toUpperCase()} turned ${state ? 'ON' : 'OFF'}`, 'success');
+            logMessage(`${device.toUpperCase()} → ${state ? 'ON' : 'OFF'}`, 'info');
         }
 
         function controlBoth(state) {
@@ -2444,7 +3326,15 @@
         }
 
         function setMode(auto) {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             const command = {
                 auto: auto,
@@ -2453,13 +3343,25 @@
             };
             
             publishCommand('vquail/web/control', command);
+            
+            // Update local state
             systemState.autoMode = auto;
             updateDeviceStates();
+            
             showNotification(`${auto ? 'AUTO' : 'MANUAL'} mode activated`, 'success');
+            logMessage(`Mode: ${auto ? 'AUTO' : 'MANUAL'}`, 'info');
         }
 
         function resetCalibration() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             if (confirm('Reset all calibration to factory defaults?')) {
                 const command = {
@@ -2469,12 +3371,20 @@
                 };
                 
                 publishCommand('vquail/calibration', command);
-                showNotification('Calibration reset', 'success');
+                showNotification('Calibration reset to factory defaults', 'success');
             }
         }
 
         function saveCalibration() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             const command = {
                 temp_offset: systemState.tempOffset,
@@ -2484,13 +3394,24 @@
             };
             
             publishCommand('vquail/calibration', command);
-            showNotification('Calibration saved', 'success');
+            showNotification('Calibration saved to device', 'success');
         }
 
         function autoCalibrate() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             showNotification('Auto-calibration started...', 'info');
+            logMessage('Starting auto-calibration process', 'info');
+            
+            // Send calibration command
             const command = {
                 auto_calibrate: true,
                 timestamp: Date.now(),
@@ -2502,7 +3423,15 @@
 
         // ================= SYSTEM COMMANDS =================
         function publishStatus() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
             
             const command = {
                 request: "full",
@@ -2519,9 +3448,17 @@
         }
 
         function sendReboot() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
             
-            if (confirm('Are you sure you want to reboot the system?')) {
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to reboot the VQuail system?')) {
                 const command = {
                     reboot: true,
                     timestamp: Date.now(),
@@ -2530,11 +3467,44 @@
                 
                 publishCommand('vquail/web/control', command);
                 showNotification('Reboot command sent', 'warning');
+                logMessage('System reboot requested', 'warning');
             }
         }
 
+        function testConnection() {
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected', 'error');
+                return;
+            }
+            
+            const testMsg = {
+                test: true,
+                timestamp: Date.now(),
+                message: "Connection test from professional dashboard",
+                source: 'web-debug'
+            };
+            
+            publishMessage('vquail/test', testMsg);
+            showNotification('Test message sent', 'success');
+        }
+
         function clearAlarm() {
-            if (!isAuthenticated || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!isConnected) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+            
+            // Send a test command to trigger status update
             publishStatus();
             showNotification('Alarm clear requested', 'info');
         }
@@ -2542,39 +3512,61 @@
         // ================= UTILITY FUNCTIONS =================
         function publishCommand(topic, command) {
             publishMessage(topic, command);
+            
+            // Update stats
             connectionStats.messagesSent++;
             document.getElementById('messagesSent').textContent = connectionStats.messagesSent;
             document.getElementById('lastCommand').textContent = 
-                `${Object.keys(command)[0]} @ ${new Date().toLocaleTimeString().substring(0, 5)}`;
+                `${Object.keys(command)[0]} @ ${new Date().toLocaleTimeString()}`;
             
+            // Calculate message rate
             const rate = Math.round(connectionStats.messagesSent / ((Date.now() - connectionStats.lastPing) / 60000));
             document.getElementById('messageRate').textContent = `${rate}/min`;
         }
 
         function publishMessage(topic, message) {
-            if (!isAuthenticated || !mqttClient || !isConnected) return;
+            if (!isAuthenticated) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!mqttClient || !isConnected) {
+                showNotification('MQTT not connected', 'error');
+                return;
+            }
             
             const payload = JSON.stringify(message);
             
             mqttClient.publish(topic, payload, { qos: 1, retain: false }, (error) => {
                 if (error) {
+                    console.error('Publish error:', error);
                     logMessage(`Failed to publish: ${error.message}`, 'error');
+                    showNotification('Command failed to send', 'error');
                 }
             });
         }
 
+        function getTemperatureColor(temp) {
+            if (temp < 20) return 'var(--info)';
+            if (temp < 28) return 'var(--success)';
+            if (temp < 35) return 'var(--warning)';
+            return 'var(--danger)';
+        }
+
         function calculateConnectionQuality(rssi) {
-            if (rssi >= -50) return { text: 'Excellent', class: 'bg-success' };
-            if (rssi >= -60) return { text: 'Good', class: 'bg-info' };
-            if (rssi >= -70) return { text: 'Fair', class: 'bg-warning' };
-            return { text: 'Poor', class: 'bg-danger' };
+            if (rssi >= -50) return { text: 'Excellent', color: 'var(--success)' };
+            if (rssi >= -60) return { text: 'Good', color: 'var(--info)' };
+            if (rssi >= -70) return { text: 'Fair', color: 'var(--warning)' };
+            return { text: 'Poor', color: 'var(--danger)' };
         }
 
         function formatUptime(seconds) {
             if (!seconds || isNaN(seconds)) return '--';
+            
             const days = Math.floor(seconds / 86400);
             const hours = Math.floor((seconds % 86400) / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
+            
             if (days > 0) return `${days}d ${hours}h`;
             if (hours > 0) return `${hours}h ${minutes}m`;
             return `${minutes}m`;
@@ -2583,7 +3575,7 @@
         function logMessage(message, type = 'info') {
             const container = document.getElementById('logContainer');
             const now = new Date();
-            const time = now.toLocaleTimeString().substring(0, 8);
+            const time = now.toLocaleTimeString();
             
             const entry = document.createElement('div');
             entry.className = 'log-entry';
@@ -2595,6 +3587,7 @@
             container.appendChild(entry);
             container.scrollTop = container.scrollHeight;
             
+            // Keep only last 100 entries
             const entries = container.getElementsByClassName('log-entry');
             if (entries.length > 100) {
                 container.removeChild(entries[0]);
@@ -2611,7 +3604,31 @@
             
             setTimeout(() => {
                 notification.style.display = 'none';
-            }, 3000);
+            }, 4000);
+        }
+
+        function clearLogs() {
+            const container = document.getElementById('logContainer');
+            container.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-time">${new Date().toLocaleTimeString()}</span>
+                    <span class="log-info log-message">Logs cleared</span>
+                </div>
+            `;
+            showNotification('Logs cleared', 'info');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                body.removeAttribute('data-theme');
+                showNotification('Switched to dark theme', 'info');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                showNotification('Switched to light theme', 'info');
+            }
         }
 
         function updateControlSource(data) {
@@ -2627,37 +3644,57 @@
 
         // ================= EVENT LISTENERS =================
         document.addEventListener('DOMContentLoaded', () => {
+            // Check for saved session on page load
             if (!checkSession()) {
+                // No valid session found, show login page
                 document.getElementById('loginContainer').style.display = 'flex';
                 document.getElementById('dashboardContainer').style.display = 'none';
             }
             
+            // Allow pressing Enter to login
             document.getElementById('password').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') login();
+                if (e.key === 'Enter') {
+                    login();
+                }
             });
             
             document.getElementById('username').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') login();
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+            
+            // Add focus styles to form inputs
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.parentElement.style.transform = 'translateY(-2px)';
+                });
+                input.addEventListener('blur', () => {
+                    input.parentElement.style.transform = 'translateY(0)';
+                });
             });
         });
 
-        // Auto-reconnect
+        // Auto-reconnect if disconnected
         setInterval(() => {
             if (isAuthenticated && !isConnected && mqttClient && mqttClient.disconnected) {
+                logMessage('Attempting auto-reconnect...', 'info');
                 connectMQTT();
             }
-        }, 30000);
+        }, 30000); // Every 30 seconds
 
-        // Auto status update
+        // Request status every 60 seconds when connected
         setInterval(() => {
             if (isAuthenticated && isConnected) {
                 publishStatus();
             }
         }, 60000);
         
-        // Activity monitoring
+        // Activity monitoring to keep session alive
         document.addEventListener('mousemove', () => {
             if (isAuthenticated) {
+                // Update session timestamp on activity
                 const sessionData = localStorage.getItem('vquail_session');
                 if (sessionData) {
                     const session = JSON.parse(sessionData);
