@@ -1279,7 +1279,6 @@
                 </button>
                 <div class="login-footer">
                     <p><i class="fas fa-cloud"></i> Poultry IoT System</p>
-                    <p style="margin-top: 10px; font-size: 12px;"><i class="fas fa-info-circle"></i> Sensors require 3 stable readings before display</p>
                 </div>
             </div>
         </div>
@@ -1293,7 +1292,7 @@
                 <h1>VQuail Dashboard</h1>
                 <p id="connectionInfo">
                     <i class="fas fa-clock"></i>
-                    <span>Sensor update: 30 minutes</span>
+                    <span>Sensor interval: 30 minutes</span>
                     <span id="nextUpdateBadge" class="interval-badge"></span>
                     <span id="sensorValidationStatus" class="validation-indicator validating" style="display: none;">
                         <i class="fas fa-microchip"></i> Validating...
@@ -1579,7 +1578,7 @@
                         <i class="fas fa-seedling" style="color: var(--success); font-size: 28px;"></i>
                         <div>
                             <h3>Life Stage Control</h3>
-                            <p>Manage quail growth stages</p>
+                            <p>Growth Stages Selection</p>
                         </div>
                     </div>
                 </div>
@@ -1629,15 +1628,15 @@
                     <div class="card-title">
                         <i class="fas fa-tools" style="color: var(--warning); font-size: 28px;"></i>
                         <div>
-                            <h3>Calibration & System Controls</h3>
-                            <p>Fine-tune sensors and manage system</p>
+                            <h3>Calibration</h3>
+                            <p>Adjust the sensor offset</p>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="calibration-controls">
                         <div class="calibration-item">
-                            <h4 class="text-center">Temperature Calibration</h4>
+                            <h4 class="text-center">Temperature Offset</h4>
                             <div class="calibration-value" id="tempCalValue">0.0°C</div>
                             <div class="calibration-buttons">
                                 <button class="calibration-btn secondary" onclick="adjustCalibration('temp', -0.5)">
@@ -1656,7 +1655,7 @@
                         </div>
                         
                         <div class="calibration-item">
-                            <h4 class="text-center">Humidity Calibration</h4>
+                            <h4 class="text-center">Humidity Offset</h4>
                             <div class="calibration-value" id="humCalValue">0.0%</div>
                             <div class="calibration-buttons">
                                 <button class="calibration-btn secondary" onclick="adjustCalibration('hum', -0.5)">
