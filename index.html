@@ -1123,7 +1123,7 @@
                 username: 'vquail',
                 password: 'Vquail12345'
             },
-            sensorInterval: 1800000
+            sensorInterval: 1800000 // 30 minutes
         };
 
         // State
@@ -1250,7 +1250,8 @@
                     document.getElementById('connectBtn').disabled = false;
                     
                     // Subscribe to topics
-                    mqttClient.subscribe('vquail/status/#', { qos: 1 });
+                    mqttClient.subscribe('vquail/status/device', { qos: 1 });
+                    mqttClient.subscribe('vquail/status/system', { qos: 1 });
                     mqttClient.subscribe('vquail/sensors', { qos: 1 });
                     mqttClient.subscribe('vquail/calibration/current', { qos: 1 });
                     
@@ -1292,26 +1293,44 @@
                 const data = JSON.parse(message);
                 console.log(`[${topic}]`, data);
                 
-                // Update system state
-                Object.assign(systemState, data);
+                // Update system state based on topic
+                if (topic === 'vquail/status/device') {
+                    Object.assign(systemState, data);
+                    
+                    // Update stage from index
+                    if (data.stage_index !== undefined) {
+                        const stages = ['BROODING_WEEK1', 'BROODING_WEEK2', 'GROWER_WEEK3_6', 'ADULT_LAYER'];
+                        if (data.stage_index >= 0 && data.stage_index < stages.length) {
+                            currentStage = stages[data.stage_index];
+                        }
+                    }
+                    
+                    // Update age
+                    if (data.age !== undefined) {
+                        currentAge = data.age;
+                    }
+                    
+                } else if (topic === 'vquail/sensors') {
+                    // Update sensor data
+                    systemState.temp = data.temp || systemState.temp;
+                    systemState.hum = data.hum || systemState.hum;
+                    systemState.rawTemp = data.raw_temp || systemState.rawTemp;
+                    systemState.rawHum = data.raw_hum || systemState.rawHum;
+                    
+                } else if (topic === 'vquail/calibration/current') {
+                    // Update calibration data
+                    systemState.tempOffset = data.temp_offset || systemState.tempOffset;
+                    systemState.humOffset = data.hum_offset || systemState.humOffset;
+                    
+                } else if (topic === 'vquail/status/system') {
+                    // Update system status
+                    systemState.freeHeap = data.free_heap || systemState.freeHeap;
+                }
                 
                 // Update timestamp
                 systemState.lastUpdate = new Date();
                 lastSensorUpdate = Date.now();
                 nextSensorUpdate = lastSensorUpdate + CONFIG.sensorInterval;
-                
-                // Update stage from index
-                if (data.stage_index !== undefined) {
-                    const stages = ['BROODING_WEEK1', 'BROODING_WEEK2', 'GROWER_WEEK3_6', 'ADULT_LAYER'];
-                    if (data.stage_index >= 0 && data.stage_index < stages.length) {
-                        currentStage = stages[data.stage_index];
-                    }
-                }
-                
-                // Update age
-                if (data.age !== undefined) {
-                    currentAge = data.age;
-                }
                 
                 // Update UI
                 updateUI();
