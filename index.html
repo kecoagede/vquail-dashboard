@@ -1765,10 +1765,10 @@
             statusUpdateInterval: 30000 // 30 seconds for status updates
         };
 
-        // Default credentials (only for initial setup - should be changed)
+        // Default credentials
         const DEFAULT_CREDENTIALS = {
             username: 'vquail',
-            password: 'Vquail12345'
+            password: 'vquail123'
         };
 
         // State
@@ -1968,7 +1968,7 @@
                     setTimeout(() => {
                         document.getElementById('loginContainer').style.display = 'none';
                         document.getElementById('dashboardContainer').style.display = 'block';
-                        showNotification('Login successful! Please change default credentials for security.', 'success');
+                        showNotification('Login successful!', 'success');
                         
                         // Clear password field for security
                         document.getElementById('password').value = '';
